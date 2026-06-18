@@ -1,0 +1,1027 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+@theme {
+  /* ════════════════════════════════════════════════════════════
+     COLOR PALETTE — Raw design tokens
+     ════════════════════════════════════════════════════════════ */
+
+  /* ─── Base ─── */
+  --color-white: #ffffff;
+  --color-black: #161616;
+
+  /* ─── Primary ─── */
+  --color-primary-25: #f7fdf9;
+  --color-primary-50: #f3fcf6;
+  --color-primary-100: #dff6e7;
+  --color-primary-200: #b8eacb;
+  --color-primary-300: #88d8ad;
+  --color-primary-400: #54c08a;
+  --color-primary-500: #25935f;
+  --color-primary-600: #1b8354;
+  --color-primary-700: #166a45;
+  --color-primary-800: #14573a;
+  --color-primary-900: #104631;
+  --color-primary-950: #092a1e;
+
+  /* ─── Secondary (Gold) ─── */
+  --color-secondary-25: #fffef7;
+  --color-secondary-50: #fffef2;
+  --color-secondary-100: #fffce6;
+  --color-secondary-200: #fcf3bd;
+  --color-secondary-300: #fae996;
+  --color-secondary-400: #f7d54d;
+  --color-secondary-500: #f5bd02;
+  --color-secondary-600: #dba102;
+  --color-secondary-700: #b87b02;
+  --color-secondary-800: #945c01;
+  --color-secondary-900: #6e3c00;
+  --color-secondary-950: #472400;
+
+  /* ─── Tertiary (Lavender) ─── */
+  --color-tertiary-25: #fefcff;
+  --color-tertiary-50: #f9f5fa;
+  --color-tertiary-100: #f2e9f5;
+  --color-tertiary-200: #e1cce8;
+  --color-tertiary-300: #ccadd9;
+  --color-tertiary-400: #a57bba;
+  --color-tertiary-500: #80519f;
+  --color-tertiary-600: #6d428f;
+  --color-tertiary-700: #532d75;
+  --color-tertiary-800: #3d1d5e;
+  --color-tertiary-900: #281047;
+  --color-tertiary-950: #16072e;
+
+  /* ─── Neutral ─── */
+  --color-neutral-25: #fcfcfd;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d2d6db;
+  --color-neutral-400: #9da4ae;
+  --color-neutral-500: #6c737f;
+  --color-neutral-600: #4d5761;
+  --color-neutral-700: #384250;
+  --color-neutral-800: #1f2a37;
+  --color-neutral-900: #111927;
+  --color-neutral-950: #0d121c;
+
+  /* ─── Red ─── */
+  --color-red-25: #fffbfa;
+  --color-red-50: #fef3f2;
+  --color-red-100: #fee4e2;
+  --color-red-200: #fecdca;
+  --color-red-300: #fda29b;
+  --color-red-400: #f97066;
+  --color-red-500: #f04438;
+  --color-red-600: #d92d20;
+  --color-red-700: #b42318;
+  --color-red-800: #912018;
+  --color-red-900: #7a271a;
+  --color-red-950: #55160c;
+
+  /* ─── Blue ─── */
+  --color-blue-25: #f5faff;
+  --color-blue-50: #eff8ff;
+  --color-blue-100: #d1e9ff;
+  --color-blue-200: #b2ddff;
+  --color-blue-300: #84caff;
+  --color-blue-400: #53b1fd;
+  --color-blue-500: #2e90fa;
+  --color-blue-600: #1570ef;
+  --color-blue-700: #175cd3;
+  --color-blue-800: #1849a9;
+  --color-blue-900: #194185;
+  --color-blue-950: #102a56;
+
+  /* ─── Green (Status) ─── */
+  --color-green-25: #f6fef9;
+  --color-green-50: #ecfdf3;
+  --color-green-100: #dcfae6;
+  --color-green-200: #abefc6;
+  --color-green-300: #75e0a7;
+  --color-green-400: #47cd89;
+  --color-green-500: #17b26a;
+  --color-green-600: #079455;
+  --color-green-700: #067647;
+  --color-green-800: #085d3a;
+  --color-green-900: #074d31;
+  --color-green-950: #053321;
+
+  /* ─── Yellow ─── */
+  --color-yellow-25: #fffcf5;
+  --color-yellow-50: #fffaeb;
+  --color-yellow-100: #fef0c7;
+  --color-yellow-200: #fedf89;
+  --color-yellow-300: #fec84b;
+  --color-yellow-400: #fdb022;
+  --color-yellow-500: #f79009;
+  --color-yellow-600: #dc6803;
+  --color-yellow-700: #b54708;
+  --color-yellow-800: #93370d;
+  --color-yellow-900: #7a2e0e;
+  --color-yellow-950: #4e1d09;
+
+  /* ─── Alpha / Transparency ─── */
+  /* White with alpha */
+  --color-alpha-white-0: #ffffff00;
+  --color-alpha-white-10: #ffffff1a;
+  --color-alpha-white-20: #ffffff33;
+  --color-alpha-white-30: #ffffff4d;
+  --color-alpha-white-40: #ffffff66;
+  --color-alpha-white-50: #ffffff80;
+  --color-alpha-white-60: #ffffff99;
+  --color-alpha-white-70: #ffffffb2;
+  --color-alpha-white-80: #ffffffcc;
+  --color-alpha-white-90: #ffffffe5;
+  --color-alpha-white-100: #ffffff;
+
+  /* Black with alpha */
+  --color-alpha-black-0: #16161600;
+  --color-alpha-black-10: #1616161a;
+  --color-alpha-black-20: #16161633;
+  --color-alpha-black-30: #1616164d;
+  --color-alpha-black-40: #16161666;
+  --color-alpha-black-50: #16161680;
+  --color-alpha-black-60: #16161699;
+  --color-alpha-black-70: #161616b2;
+  --color-alpha-black-80: #161616cc;
+  --color-alpha-black-90: #161616e5;
+  --color-alpha-black-100: #161616;
+
+  /* Primary with alpha */
+  --color-alpha-primary-10: #1b83541a;
+  --color-alpha-primary-20: #1b835433;
+  --color-alpha-primary-30: #1b83544d;
+  --color-alpha-primary-40: #1b835466;
+  --color-alpha-primary-50: #1b835480;
+  --color-alpha-primary-60: #1b835499;
+  --color-alpha-primary-70: #1b8354b2;
+  --color-alpha-primary-80: #1b8354cc;
+  --color-alpha-primary-90: #1b8354e5;
+
+  /* Status with alpha */
+  --color-alpha-red-10: #d92d201a;
+  --color-alpha-red-20: #d92d2033;
+  --color-alpha-blue-10: #1570ef1a;
+  --color-alpha-blue-20: #1570ef33;
+  --color-alpha-green-10: #0794551a;
+  --color-alpha-green-20: #07945533;
+  --color-alpha-yellow-10: #dc68031a;
+  --color-alpha-yellow-20: #dc680333;
+
+  /* ════════════════════════════════════════════════════════════b          
+     SEMANTIC TOKENS — Light Theme (default)
+     ════════════════════════════════════════════════════ ════════ */
+
+  /* ─── Core / Application Surface ─── */
+  --color-background: var(--color-neutral-50);
+  --color-foreground: var(--color-black);
+  --color-card: var(--color-white);
+  --color-card-foreground: var(--color-black);
+  --color-popover: var(--color-white);
+  --color-popover-foreground: var(--color-black);
+  --color-surface: var(--color-white);
+  --color-surface-oncolor: var(--color-white);
+
+  /* ─── Primary */
+  --color-primary: var(--color-primary-600);
+  --color-primary-foreground: var(--color-white);
+
+  /* ─── Secondary */
+  --color-secondary: var(--color-secondary-600);
+  --color-secondary-foreground: var(--color-white);
+
+  /* ─── Tertiary / Accent */
+  --color-accent: var(--color-tertiary-500);
+  --color-accent-foreground: var(--color-white);
+
+  /* ─── Muted */
+  --color-muted: var(--color-neutral-100);
+  --color-muted-foreground: var(--color-neutral-500);
+
+  /* ─── Destructive */
+  --color-destructive: var(--color-red-600);
+  --color-destructive-foreground: var(--color-white);
+
+  /* ─── Ring (focus outline) */
+  --color-ring: var(--color-primary-600);
+
+  /* ─── Border ─── */
+  --color-border: var(--color-neutral-300);
+  --color-input: var(--color-neutral-400);
+
+  /* ─── Status ─── */
+  --color-success: var(--color-green-600);
+  --color-warning: var(--color-yellow-600);
+  --color-info: var(--color-blue-600);
+  --color-error: var(--color-red-600);
+
+  /* ─── Alpha / Canvas (resolved semantic alphas) ─── */
+  --color-alpha-error-10: #d92d201a;
+  --color-alpha-error-20: #d92d2033;
+  --color-alpha-info-10: #1570ef1a;
+  --color-alpha-info-20: #1570ef33;
+  --color-alpha-primary-10: #1b83541a;
+  --color-alpha-primary-20: #1b835433;
+  --color-alpha-primary-50: #1b835480;
+  --color-alpha-success-10: #0794551a;
+  --color-alpha-success-20: #07945533;
+  --color-alpha-warning-10: #dc68031a;
+  --color-alpha-warning-20: #dc680333;
+
+  /* ─── bg Variants ─── */
+  --color-bg-body: var(--color-neutral-50);
+  --color-bg-card: var(--color-white);
+  --color-bg-menu: var(--color-white);
+  --color-bg-nav-header: var(--color-primary-800);
+  --color-bg-notification-white: var(--color-white);
+  --color-bg-black: var(--color-black);
+  --color-bg-white: var(--color-white);
+  --color-bg-primary: var(--color-primary-600);
+  --color-bg-primary-25: var(--color-primary-25);
+  --color-bg-primary-50: var(--color-primary-50);
+  --color-bg-primary-200: var(--color-primary-200);
+  --color-bg-primary-400: var(--color-primary-400);
+  --color-bg-secondary: var(--color-secondary-600);
+  --color-bg-secondary-25: var(--color-secondary-25);
+  --color-bg-secondary-50: var(--color-secondary-50);
+  --color-bg-tertiary: var(--color-tertiary-600);
+  --color-bg-tertiary-25: var(--color-tertiary-25);
+  --color-bg-tertiary-50: var(--color-tertiary-50);
+  --color-bg-success: var(--color-green-600);
+  --color-bg-success-25: var(--color-green-25);
+  --color-bg-success-50: var(--color-green-50);
+  --color-bg-warning: var(--color-yellow-600);
+  --color-bg-warning-25: var(--color-yellow-25);
+  --color-bg-warning-50: var(--color-yellow-50);
+  --color-bg-error: var(--color-red-600);
+  --color-bg-error-25: var(--color-red-25);
+  --color-bg-error-50: var(--color-red-50);
+  --color-bg-info: var(--color-blue-600);
+  --color-bg-info-25: var(--color-blue-25);
+  --color-bg-info-50: var(--color-blue-50);
+  --color-bg-sa-flag: var(--color-green-900);
+  --color-bg-sa-flag-25: var(--color-green-25);
+  --color-bg-sa-flag-50: var(--color-green-50);
+  --color-bg-neutral-25: var(--color-neutral-25);
+  --color-bg-neutral-50: var(--color-neutral-50);
+  --color-bg-neutral-100: var(--color-neutral-100);
+  --color-bg-neutral-200: var(--color-neutral-200);
+  --color-bg-neutral-300: var(--color-neutral-300);
+  --color-bg-neutral-400: var(--color-neutral-400);
+  --color-bg-neutral-800: var(--color-neutral-800);
+
+  /* ─── Text Variants ─── */
+  --color-text-default: var(--color-black);
+  --color-text-display: var(--color-neutral-800);
+  --color-text-primary: var(--color-primary-600);
+  --color-text-primary-light: var(--color-primary-300);
+  --color-text-primary-paragraph: var(--color-neutral-700);
+  --color-text-primary-sa-flag: var(--color-primary-800);
+  --color-text-secondary: var(--color-secondary-600);
+  --color-text-secondary-light: var(--color-secondary-300);
+  --color-text-secondary-paragraph: var(--color-neutral-500);
+  --color-text-tertiary: var(--color-tertiary-500);
+  --color-text-tertiary-light: var(--color-tertiary-300);
+  --color-text-success: var(--color-green-700);
+  --color-text-warning: var(--color-yellow-700);
+  --color-text-error: var(--color-red-700);
+  --color-text-info: var(--color-blue-700);
+  --color-text-oncolor-primary: var(--color-white);
+  --color-text-oncolor-secondary: #ffffffcc;
+  --color-text-oncolor-tertiary: #ffffffb2;
+
+  /* ─── Border Variants ─── */
+  --color-border-default: var(--color-neutral-300);
+  --color-border-primary: var(--color-primary-600);
+  --color-border-primary-light: var(--color-primary-200);
+  --color-border-secondary: var(--color-secondary-600);
+  --color-border-secondary-light: var(--color-secondary-200);
+  --color-border-tertiary: var(--color-tertiary-500);
+  --color-border-tertiary-light: var(--color-tertiary-200);
+  --color-border-success: var(--color-green-700);
+  --color-border-success-light: var(--color-green-200);
+  --color-border-warning: var(--color-yellow-700);
+  --color-border-warning-light: var(--color-yellow-200);
+  --color-border-error: var(--color-red-700);
+  --color-border-error-light: var(--color-red-200);
+  --color-border-info: var(--color-blue-700);
+  --color-border-info-light: var(--color-blue-200);
+  --color-border-neutral-primary: var(--color-neutral-300);
+  --color-border-neutral-secondary: var(--color-neutral-200);
+  --color-border-neutral-tertiary: var(--color-neutral-100);
+  --color-border-black: var(--color-black);
+  --color-border-white: var(--color-white);
+  --color-border-white-40: #ffffff66;
+  --color-border-disabled: var(--color-neutral-300);
+  --color-border-bg-neutral: var(--color-neutral-300);
+  --color-border-bg-white: var(--color-neutral-100);
+  --color-border-oncolor-transparent-30: #ffffff4d;
+  --color-border-transparent-10: #ffffff1a;
+
+  /* ─── Icon Variants ─── */
+  --color-icon-default: var(--color-black);
+  --color-icon-default-400: var(--color-neutral-400);
+  --color-icon-default-500: var(--color-neutral-500);
+  --color-icon-oncolor: var(--color-white);
+  --color-icon-primary: var(--color-primary-600);
+  --color-icon-primary-400: var(--color-primary-400);
+  --color-icon-primary-light: var(--color-primary-50);
+  --color-icon-secondary: var(--color-secondary-600);
+  --color-icon-secondary-light: var(--color-secondary-50);
+  --color-icon-tertiary: var(--color-tertiary-500);
+  --color-icon-tertiary-light: var(--color-tertiary-50);
+  --color-icon-success: var(--color-green-700);
+  --color-icon-success-light: var(--color-green-50);
+  --color-icon-warning: var(--color-yellow-700);
+  --color-icon-warning-light: var(--color-yellow-50);
+  --color-icon-error: var(--color-red-700);
+  --color-icon-error-light: var(--color-red-50);
+  --color-icon-info: var(--color-blue-700);
+  --color-icon-info-light: var(--color-blue-50);
+  --color-icon-neutral: var(--color-neutral-700);
+  --color-icon-neutral-light: var(--color-neutral-50);
+  --color-icon-brand-light: var(--color-primary-50);
+  --color-icon-unselected-tab: var(--color-neutral-700);
+
+  /* ─── btn Variants ─── */
+  --color-btn-bg-primary: var(--color-primary-600);
+  --color-btn-bg-primary-hovered: var(--color-primary-700);
+  --color-btn-bg-primary-pressed: var(--color-primary-900);
+  --color-btn-bg-primary-focused: var(--color-primary-600);
+  --color-btn-bg-primary-selected: var(--color-primary-800);
+  --color-btn-bg-secondary-danger: var(--color-red-600);
+  --color-btn-bg-secondary-danger-hovered: var(--color-red-700);
+  --color-btn-bg-secondary-danger-pressed: var(--color-red-900);
+  --color-btn-bg-secondary-danger-focused: var(--color-red-600);
+  --color-btn-bg-secondary-danger-selected: var(--color-red-800);
+  --color-btn-bg-danger-secondary: var(--color-red-50);
+  --color-btn-bg-danger-secondary-hovered: var(--color-red-100);
+  --color-btn-bg-danger-secondary-pressed: var(--color-red-200);
+  --color-btn-bg-danger-secondary-focused: var(--color-red-50);
+  --color-btn-bg-danger-secondary-selected: var(--color-red-50);
+  --color-btn-bg-neutral: var(--color-neutral-100);
+  --color-btn-bg-neutral-hovered: var(--color-neutral-100);
+  --color-btn-bg-neutral-pressed: var(--color-neutral-200);
+  --color-btn-bg-neutral-focused: var(--color-neutral-100);
+  --color-btn-bg-neutral-selected: var(--color-neutral-200);
+  --color-btn-bg-oncolor: var(--color-white);
+  --color-btn-bg-oncolor-hovered: #ffffffcc;
+  --color-btn-bg-oncolor-pressed: #ffffff99;
+  --color-btn-bg-oncolor-focused: var(--color-white);
+  --color-btn-bg-oncolor-selected: #ffffffb2;
+  --color-btn-bg-black: var(--color-neutral-950);
+  --color-btn-bg-black-hovered: var(--color-neutral-800);
+  --color-btn-bg-black-pressed: var(--color-neutral-600);
+  --color-btn-bg-black-focused: var(--color-neutral-950);
+  --color-btn-bg-black-selected: var(--color-neutral-700);
+  --color-btn-bg-transparent: #ffffff00;
+  --color-btn-bg-transparent-hovered: #ffffff33;
+  --color-btn-bg-transparent-pressed: #ffffff66;
+  --color-btn-bg-transparent-focused: #ffffff00;
+  --color-btn-bg-transparent-selected: #ffffff4d;
+  --color-btn-bg-disabled-oncolor: #ffffff33;
+  --color-btn-icon-transparent-hovered-oncolor: var(--color-primary-400);
+  --color-btn-icon-transparent-pressed-oncolor: var(--color-primary-300);
+  --color-btn-icon-transparent-selected-oncolor: var(--color-primary-400);
+  --color-btn-label-danger-primary-default-oncolor: var(--color-red-200);
+  --color-btn-label-danger-primary-hovered-oncolor: var(--color-red-300);
+  --color-btn-label-danger-primary-pressed-oncolor: var(--color-red-400);
+  --color-btn-label-transparent-hovered-oncolor: var(--color-primary-400);
+  --color-btn-label-transparent-pressed-oncolor: var(--color-primary-300);
+  --color-btn-label-transparent-selected-oncolor: var(--color-primary-400);
+
+  /* ─── Form / Input Variants ─── */
+  --color-form-field-bg: var(--color-white);
+  --color-form-field-bg-darker: var(--color-neutral-100);
+  --color-form-field-bg-lighter: var(--color-neutral-25);
+  --color-form-field-bg-pressed: var(--color-neutral-100);
+  --color-form-field-border: var(--color-neutral-400);
+  --color-form-field-border-hovered: var(--color-neutral-700);
+  --color-form-field-border-pressed: var(--color-neutral-950);
+  --color-form-field-border-error: var(--color-red-700);
+  --color-form-field-text-filled: var(--color-black);
+  --color-form-field-text-focused: var(--color-neutral-700);
+  --color-form-field-text-helper: var(--color-neutral-500);
+  --color-form-field-text-hovered: var(--color-black);
+  --color-form-field-text-label: var(--color-black);
+  --color-form-field-text-placeholder: var(--color-neutral-500);
+  --color-form-field-text-pressed: var(--color-neutral-700);
+  --color-form-field-text-readonly: var(--color-black);
+  --color-form-text-paragraph: var(--color-neutral-500);
+  --color-form-text-title: var(--color-black);
+  --color-form-datecell-bg: var(--color-primary-600);
+  --color-form-datecell-bg-100: var(--color-primary-100);
+  --color-form-datecell-bg-200: var(--color-primary-200);
+  --color-form-datecell-bg-300: var(--color-primary-300);
+  --color-form-datecell-bg-600: var(--color-primary-600);
+  --color-form-datecell-bg-disabled: var(--color-white);
+  --color-form-datecell-bg-focused: var(--color-primary-600);
+  --color-form-datecell-bg-hovered: var(--color-primary-700);
+  --color-form-datecell-bg-pressed: var(--color-primary-900);
+  --color-form-datecell-today-bg: #ffffff00;
+  --color-form-datecell-today-bg-focused: #ffffff00;
+  --color-form-datecell-today-bg-hovered: var(--color-neutral-200);
+  --color-form-datecell-today-bg-pressed: var(--color-neutral-300);
+  --color-form-textarea-scrollbar-bar: var(--color-neutral-300);
+  --color-form-option-bg-hover: var(--color-neutral-100);
+  --color-form-option-bg-pressed: var(--color-neutral-200);
+
+  /* ─── Control / Checkbox / Radio Variants ─── */
+  --color-control-border: var(--color-neutral-500);
+  --color-control-disabled: var(--color-neutral-300);
+  --color-control-pressed: var(--color-neutral-300);
+  --color-control-boarder-disabled: var(--color-neutral-400);
+  --color-control-icon-disabled: var(--color-white);
+  --color-control-icon-hovered: var(--color-white);
+  --color-control-icon-pressed: var(--color-white);
+  --color-control-primary: #ffffff00;
+  --color-control-primary-readonly: #ffffff00;
+  --color-control-primary-checked: var(--color-primary-600);
+  --color-control-primary-focused: var(--color-primary-600);
+  --color-control-primary-hovered: var(--color-primary-800);
+  --color-control-primary-pressed: var(--color-primary-900);
+  --color-control-neutral-checked: var(--color-neutral-950);
+  --color-control-neutral-focused: var(--color-neutral-950);
+  --color-control-neutral-hovered: var(--color-neutral-600);
+  --color-control-neutral-pressed: var(--color-neutral-500);
+  --color-control-ripple-effect: var(--color-neutral-100);
+
+  /* ─── Link Variants ─── */
+  --color-link-primary: var(--color-primary-600);
+  --color-link-primary-hovered: var(--color-primary-400);
+  --color-link-primary-pressed: var(--color-primary-300);
+  --color-link-primary-focused: var(--color-primary-600);
+  --color-link-primary-visited: var(--color-primary-800);
+  --color-link-secondary: var(--color-secondary-600);
+  --color-link-secondary-hovered: var(--color-secondary-400);
+  --color-link-secondary-pressed: var(--color-secondary-300);
+  --color-link-secondary-focused: var(--color-secondary-600);
+  --color-link-secondary-visited: var(--color-secondary-900);
+  --color-link-tertiary: var(--color-tertiary-500);
+  --color-link-tertiary-hovered: var(--color-tertiary-400);
+  --color-link-tertiary-pressed: var(--color-tertiary-300);
+  --color-link-tertiary-focused: var(--color-tertiary-500);
+  --color-link-tertiary-visited: var(--color-tertiary-800);
+  --color-link-neutral: var(--color-neutral-700);
+  --color-link-neutral-hovered: var(--color-neutral-500);
+  --color-link-neutral-pressed: var(--color-neutral-400);
+  --color-link-neutral-focused: var(--color-neutral-700);
+  --color-link-neutral-visited: var(--color-neutral-600);
+  --color-link-danger: var(--color-red-600);
+  --color-link-danger-hovered: var(--color-red-700);
+  --color-link-danger-pressed: var(--color-red-900);
+  --color-link-danger-focused: var(--color-red-600);
+  --color-link-danger-visited: var(--color-red-800);
+  --color-link-oncolor: var(--color-white);
+  --color-link-oncolor-hovered: #ffffffcc;
+  --color-link-oncolor-pressed: #ffffff99;
+  --color-link-oncolor-focused: var(--color-white);
+  --color-link-oncolor-disabled: #ffffff4d;
+  --color-link-oncolor-visited: #ffffffe5;
+  --color-link-icon-primary-focused: var(--color-primary-600);
+  --color-link-icon-primary-hovered: var(--color-primary-400);
+  --color-link-icon-primary-pressed: var(--color-primary-300);
+  --color-link-icon-primary-visited: var(--color-primary-800);
+  --color-link-icon-neutral-focused: var(--color-neutral-700);
+  --color-link-icon-neutral-hovered: var(--color-neutral-500);
+  --color-link-icon-neutral-pressed: var(--color-neutral-400);
+  --color-link-icon-neutral-visited: var(--color-neutral-600);
+  --color-link-icon-danger-focused: var(--color-red-600);
+  --color-link-icon-danger-hovered: var(--color-red-700);
+  --color-link-icon-danger-pressed: var(--color-red-900);
+  --color-link-icon-danger-visited: var(--color-red-800);
+  --color-link-icon-oncolor-disabled: #ffffff4d;
+  --color-link-icon-oncolor-hovered: #ffffffcc;
+  --color-link-icon-oncolor-pressed: #ffffff99;
+  --color-link-icon-oncolor-visited: #ffffffe5;
+  --color-link-link-oncolor-focused: var(--color-white);
+
+  /* ─── Stepper Variants ─── */
+  --color-stepper-btn-bg: var(--color-white);
+  --color-stepper-btn-completed: var(--color-primary-600);
+  --color-stepper-btn-completed-hovered: var(--color-primary-700);
+  --color-stepper-btn-current: var(--color-primary-600);
+  --color-stepper-btn-current-hovered: var(--color-primary-700);
+  --color-stepper-btn-upcomming: var(--color-neutral-300);
+  --color-stepper-btn-upcomming-hovered: var(--color-neutral-400);
+  --color-stepper-line-completed: var(--color-primary-600);
+  --color-stepper-line-completed-hovered: var(--color-primary-700);
+  --color-stepper-line-current: var(--color-neutral-300);
+  --color-stepper-line-upcomming: var(--color-neutral-300);
+  --color-stepper-line-upcomming-hovered: var(--color-neutral-400);
+  --color-stepper-text-primary: var(--color-neutral-800);
+  --color-stepper-text-secondary: var(--color-neutral-700);
+  --color-stepper-text-tertiary: var(--color-neutral-500);
+
+  /* ─── Table Variants ─── */
+  --color-table-bg-header: var(--color-neutral-100);
+  --color-table-bg-row: var(--color-neutral-50);
+  --color-table-bg-row-alt: var(--color-neutral-50);
+  --color-table-bg-row-hovered: var(--color-neutral-100);
+  --color-table-bg-row-select: var(--color-primary-50);
+  --color-table-bg-row-selected-hovered: var(--color-primary-50);
+  --color-table-bg-hover-selected: var(--color-neutral-50);
+  --color-table-bg-disabled: var(--color-neutral-200);
+  --color-table-cell-border: var(--color-neutral-300);
+  --color-table-cell-border-inverse: var(--color-black);
+  --color-table-boarder-row-selected-hovered: var(--color-neutral-100);
+  --color-table-text-body: var(--color-black);
+  --color-table-text-head: var(--color-neutral-700);
+
+  /* ─── Tag / Badge Variants ─── */
+  --color-tag-bg-primary: var(--color-primary-600);
+  --color-tag-bg-primary-light: var(--color-primary-50);
+  --color-tag-bg-success: var(--color-green-700);
+  --color-tag-bg-success-light: var(--color-green-50);
+  --color-tag-bg-warning: var(--color-yellow-700);
+  --color-tag-bg-warning-light: var(--color-yellow-50);
+  --color-tag-bg-error: var(--color-red-600);
+  --color-tag-bg-error-light: var(--color-red-50);
+  --color-tag-bg-info: var(--color-blue-600);
+  --color-tag-bg-info-light: var(--color-blue-50);
+  --color-tag-bg-neutral: var(--color-neutral-600);
+  --color-tag-bg-neutral-light: var(--color-neutral-50);
+  --color-tag-bg-oncolor: #ffffff33;
+  --color-tag-border-primary: var(--color-primary-600);
+  --color-tag-border-primary-light: var(--color-primary-200);
+  --color-tag-border-success: var(--color-green-700);
+  --color-tag-border-success-light: var(--color-green-200);
+  --color-tag-border-warning: var(--color-yellow-700);
+  --color-tag-border-warning-light: var(--color-yellow-200);
+  --color-tag-border-error: var(--color-red-700);
+  --color-tag-border-error-light: var(--color-red-200);
+  --color-tag-border-info: var(--color-blue-700);
+  --color-tag-border-info-light: var(--color-blue-200);
+  --color-tag-border-neutral: var(--color-neutral-600);
+  --color-tag-border-neutral-light: var(--color-neutral-50);
+  --color-tag-border-oncolor: #ffffff99;
+  --color-tag-text-primary: var(--color-primary-800);
+  --color-tag-text-success: var(--color-green-800);
+  --color-tag-text-warning: var(--color-yellow-800);
+  --color-tag-text-error: var(--color-red-800);
+  --color-tag-text-info: var(--color-blue-800);
+  --color-tag-text-neutral: var(--color-neutral-800);
+  --color-tag-icon-primary: var(--color-primary-800);
+  --color-tag-icon-success: var(--color-green-800);
+  --color-tag-icon-warning: var(--color-yellow-800);
+  --color-tag-icon-error: var(--color-red-800);
+  --color-tag-icon-info: var(--color-blue-800);
+  --color-tag-icon-neutral: var(--color-neutral-800);
+  --color-tag-dot: #ffffff99;
+
+  /* ─── Tooltip Variants ─── */
+  --color-tooltip-bg-dark: var(--color-neutral-800);
+  --color-tooltip-bg-light: var(--color-white);
+  --color-tooltip-text-heading-dark: var(--color-neutral-50);
+  --color-tooltip-text-heading-light: var(--color-neutral-800);
+  --color-tooltip-text-paragraph-dark: var(--color-neutral-100);
+  --color-tooltip-text-paragraph-light: var(--color-neutral-700);
+
+  /* ─── Global / Disabled States ─── */
+  --color-global-bg-disabled: var(--color-neutral-200);
+  --color-global-bg-disabled-primary: var(--color-primary-200);
+  --color-global-bg-inverse-disabled: var(--color-neutral-100);
+  --color-global-border-disabled: var(--color-neutral-400);
+  --color-global-control-disabled: var(--color-neutral-400);
+  --color-global-icon-default-disabled: var(--color-neutral-400);
+  --color-global-icon-default-oncolor-disabled: #ffffff66;
+  --color-global-text-default-disabled: var(--color-neutral-400);
+  --color-global-text-default-oncolor-disabled: #ffffff66;
+}
+
+/* ════════════════════════════════════════════════════════════
+   DARK THEME — Overrides
+   ════════════════════════════════════════════════════════════ */
+.dark {
+  /* ─── Alpha / Canvas ─── */
+  --color-alpha-error-10: #b423181a;
+  --color-alpha-error-20: #b4231833;
+  --color-alpha-info-10: #175cd31a;
+  --color-alpha-info-20: #175cd333;
+  --color-alpha-primary-10: #166a451a;
+  --color-alpha-primary-20: #166a4533;
+  --color-alpha-primary-50: #166a4580;
+  --color-alpha-success-10: #0676471a;
+  --color-alpha-success-20: #06764733;
+  --color-alpha-warning-10: #b547081a;
+  --color-alpha-warning-20: #b5470833;
+
+  /* Swap black/white alpha in dark mode */
+  --color-alpha-black-0: #ffffff1a;
+  --color-alpha-black-10: #ffffff1a;
+  --color-alpha-black-20: #ffffff33;
+  --color-alpha-black-30: #ffffff4d;
+  --color-alpha-black-40: #ffffff66;
+  --color-alpha-black-50: #ffffff80;
+  --color-alpha-black-60: #ffffff99;
+  --color-alpha-black-70: #ffffffb2;
+  --color-alpha-black-80: #ffffffcc;
+  --color-alpha-black-90: #ffffffe5;
+  --color-alpha-black-100: #ffffff;
+
+  --color-alpha-white-0: #1616161a;
+  --color-alpha-white-10: #1616161a;
+  --color-alpha-white-20: #16161633;
+  --color-alpha-white-30: #1616164d;
+  --color-alpha-white-40: #16161666;
+  --color-alpha-white-50: #16161680;
+  --color-alpha-white-60: #16161699;
+  --color-alpha-white-70: #161616b2;
+  --color-alpha-white-80: #161616cc;
+  --color-alpha-white-90: #161616e5;
+  --color-alpha-white-100: #161616;
+
+  /* ─── Core / Application Surface ─── */
+  --color-background: #111927;
+  --color-foreground: #ffffff;
+  --color-card: #1f2a37;
+  --color-card-foreground: #ffffff;
+  --color-popover: #1f2a37;
+  --color-popover-foreground: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-oncolor: #ffffff;
+
+  --color-primary: #1b8354;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #dba102;
+  --color-secondary-foreground: #ffffff;
+  --color-accent: #6d428f;
+  --color-accent-foreground: #ffffff;
+  --color-muted: #4d5761;
+  --color-muted-foreground: #9da4ae;
+  --color-destructive: #d92d20;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: #1b8354;
+  --color-border: #6c737f;
+  --color-input: #9da4ae;
+
+  --color-success: #079455;
+  --color-warning: #dc6803;
+  --color-info: #1570ef;
+  --color-error: #d92d20;
+
+  /* ─── bg Variants ─── */
+  --color-bg-body: #111927;
+  --color-bg-card: #1f2a37;
+  --color-bg-menu: #1f2a37;
+  --color-bg-nav-header: #14573a;
+  --color-bg-notification-white: #111927;
+  --color-bg-black: #ffffff;
+  --color-bg-white: #0d121c;
+  --color-bg-primary: #1b8354;
+  --color-bg-primary-25: #092a1e;
+  --color-bg-primary-50: #1b83541a;
+  --color-bg-primary-200: #384250;
+  --color-bg-primary-400: #54c08a;
+  --color-bg-secondary: #dba102;
+  --color-bg-secondary-25: #111927;
+  --color-bg-secondary-50: #1f2a37;
+  --color-bg-tertiary: #6d428f;
+  --color-bg-tertiary-25: #111927;
+  --color-bg-tertiary-50: #1f2a37;
+  --color-bg-success: #079455;
+  --color-bg-success-25: #0676471a;
+  --color-bg-success-50: #06764733;
+  --color-bg-warning: #dc6803;
+  --color-bg-warning-25: #b547081a;
+  --color-bg-warning-50: #b5470833;
+  --color-bg-error: #d92d20;
+  --color-bg-error-25: #b423181a;
+  --color-bg-error-50: #b4231833;
+  --color-bg-info: #1570ef;
+  --color-bg-info-25: #175cd31a;
+  --color-bg-info-50: #175cd333;
+  --color-bg-sa-flag: #1b8354;
+  --color-bg-sa-flag-25: #111927;
+  --color-bg-sa-flag-50: #1f2a37;
+  --color-bg-neutral-25: #0d121c;
+  --color-bg-neutral-50: #111927;
+  --color-bg-neutral-100: #1f2a37;
+  --color-bg-neutral-200: #4d5761;
+  --color-bg-neutral-300: #6c737f;
+  --color-bg-neutral-400: #9da4ae;
+  --color-bg-neutral-800: #4d5761;
+
+  /* ─── Text Variants ─── */
+  --color-text-default: #ffffff;
+  --color-text-display: #f9fafb;
+  --color-text-primary: #54c08a;
+  --color-text-primary-light: #54c08a;
+  --color-text-primary-paragraph: #f3f4f6;
+  --color-text-primary-sa-flag: #dff6e7;
+  --color-text-secondary: #f7d54d;
+  --color-text-secondary-light: #f7d54d;
+  --color-text-secondary-paragraph: #e5e7eb;
+  --color-text-tertiary: #a57bba;
+  --color-text-tertiary-light: #a57bba;
+  --color-text-success: #47cd89;
+  --color-text-warning: #fdb022;
+  --color-text-error: #f97066;
+  --color-text-info: #53b1fd;
+  --color-text-oncolor-primary: #ffffff;
+  --color-text-oncolor-secondary: #ffffffcc;
+  --color-text-oncolor-tertiary: #ffffffb2;
+
+  /* ─── Border Variants ─── */
+  --color-border-default: #6c737f;
+  --color-border-primary: #1b8354;
+  --color-border-primary-light: #abefc6;
+  --color-border-secondary: #dba102;
+  --color-border-secondary-light: #fcf3bd;
+  --color-border-tertiary: #80519f;
+  --color-border-tertiary-light: #e1cce8;
+  --color-border-success: #17b26a;
+  --color-border-success-light: #abefc6;
+  --color-border-warning: #b54708;
+  --color-border-warning-light: #fedf89;
+  --color-border-error: #b42318;
+  --color-border-error-light: #fecdca;
+  --color-border-info: #175cd3;
+  --color-border-info-light: #b2ddff;
+  --color-border-neutral-primary: #6c737f;
+  --color-border-neutral-secondary: #384250;
+  --color-border-neutral-tertiary: #1f2a37;
+  --color-border-black: #ffffff;
+  --color-border-white: #161616;
+  --color-border-white-40: #ffffff66;
+  --color-border-disabled: #6c737f;
+  --color-border-bg-neutral: #4d5761;
+  --color-border-bg-white: #4d5761;
+  --color-border-oncolor-transparent-30: #ffffff4d;
+  --color-border-transparent-10: #ffffff1a;
+
+  /* ─── Icon Variants ─── */
+  --color-icon-default: #ffffff;
+  --color-icon-default-400: #6c737f;
+  --color-icon-default-500: #e5e7eb;
+  --color-icon-oncolor: #ffffff;
+  --color-icon-primary: #54c08a;
+  --color-icon-primary-400: #b8eacb;
+  --color-icon-primary-light: #f3fcf6;
+  --color-icon-secondary: #f7d54d;
+  --color-icon-secondary-light: #fffef2;
+  --color-icon-tertiary: #a57bba;
+  --color-icon-tertiary-light: #f9f5fa;
+  --color-icon-success: #47cd89;
+  --color-icon-success-light: #ecfdf3;
+  --color-icon-warning: #fdb022;
+  --color-icon-warning-light: #fffaeb;
+  --color-icon-error: #f97066;
+  --color-icon-error-light: #fef3f2;
+  --color-icon-info: #53b1fd;
+  --color-icon-info-light: #eff8ff;
+  --color-icon-neutral: #9da4ae;
+  --color-icon-neutral-light: #0d121c;
+  --color-icon-brand-light: #166a451a;
+  --color-icon-unselected-tab: #f3f4f6;
+
+  /* ─── btn Variants ─── */
+  --color-btn-bg-primary: #1b8354;
+  --color-btn-bg-primary-hovered: #166a45;
+  --color-btn-bg-primary-pressed: #104631;
+  --color-btn-bg-primary-focused: #1b8354;
+  --color-btn-bg-primary-selected: #14573a;
+  --color-btn-bg-secondary-danger: #d92d20;
+  --color-btn-bg-secondary-danger-hovered: #b42318;
+  --color-btn-bg-secondary-danger-pressed: #7a271a;
+  --color-btn-bg-secondary-danger-focused: #d92d20;
+  --color-btn-bg-secondary-danger-selected: #912018;
+  --color-btn-bg-danger-secondary: #fef3f2;
+  --color-btn-bg-danger-secondary-hovered: #fee4e2;
+  --color-btn-bg-danger-secondary-pressed: #fecdca;
+  --color-btn-bg-danger-secondary-focused: #fef3f2;
+  --color-btn-bg-danger-secondary-selected: #fef3f2;
+  --color-btn-bg-neutral: #1f2a37;
+  --color-btn-bg-neutral-hovered: #384250;
+  --color-btn-bg-neutral-pressed: #4d5761;
+  --color-btn-bg-neutral-focused: #1f2a37;
+  --color-btn-bg-neutral-selected: #384250;
+  --color-btn-bg-oncolor: #161616;
+  --color-btn-bg-oncolor-hovered: #ffffffcc;
+  --color-btn-bg-oncolor-pressed: #ffffff99;
+  --color-btn-bg-oncolor-focused: #ffffff;
+  --color-btn-bg-oncolor-selected: #ffffffb2;
+  --color-btn-bg-black: #0d121c;
+  --color-btn-bg-black-hovered: #1f2a37;
+  --color-btn-bg-black-pressed: #4d5761;
+  --color-btn-bg-black-focused: #0d121c;
+  --color-btn-bg-black-selected: #384250;
+  --color-btn-bg-transparent: #ffffff00;
+  --color-btn-bg-transparent-hovered: #ffffff33;
+  --color-btn-bg-transparent-pressed: #ffffff66;
+  --color-btn-bg-transparent-focused: #ffffff00;
+  --color-btn-bg-transparent-selected: #ffffff4d;
+  --color-btn-bg-disabled-oncolor: #ffffff33;
+  --color-btn-icon-transparent-hovered-oncolor: #54c08a;
+  --color-btn-icon-transparent-pressed-oncolor: #88d8ad;
+  --color-btn-icon-transparent-selected-oncolor: #54c08a;
+  --color-btn-label-danger-primary-default-oncolor: #fecdca;
+  --color-btn-label-danger-primary-hovered-oncolor: #fda29b;
+  --color-btn-label-danger-primary-pressed-oncolor: #f97066;
+  --color-btn-label-transparent-hovered-oncolor: #54c08a;
+  --color-btn-label-transparent-pressed-oncolor: #88d8ad;
+  --color-btn-label-transparent-selected-oncolor: #54c08a;
+
+  /* ─── Form / Input Variants ─── */
+  --color-form-field-bg: #1f2a37;
+  --color-form-field-bg-darker: #1f2a37;
+  --color-form-field-bg-lighter: #4d5761;
+  --color-form-field-bg-pressed: #4d5761;
+  --color-form-field-border: #6c737f;
+  --color-form-field-border-hovered: #e5e7eb;
+  --color-form-field-border-pressed: #fcfcfd;
+  --color-form-field-border-error: #b42318;
+  --color-form-field-text-filled: #ffffff;
+  --color-form-field-text-focused: #f3f4f6;
+  --color-form-field-text-helper: #e5e7eb;
+  --color-form-field-text-hovered: #ffffff;
+  --color-form-field-text-label: #ffffff;
+  --color-form-field-text-placeholder: #e5e7eb;
+  --color-form-field-text-pressed: #f3f4f6;
+  --color-form-field-text-readonly: #ffffff;
+  --color-form-text-paragraph: #e5e7eb;
+  --color-form-text-title: #ffffff;
+  --color-form-datecell-bg: #1b8354;
+  --color-form-datecell-bg-100: #88d8ad;
+  --color-form-datecell-bg-200: #54c08a;
+  --color-form-datecell-bg-300: #88d8ad;
+  --color-form-datecell-bg-600: #1b8354;
+  --color-form-datecell-bg-disabled: #ffffff;
+  --color-form-datecell-bg-focused: #1b8354;
+  --color-form-datecell-bg-hovered: #166a45;
+  --color-form-datecell-bg-pressed: #104631;
+  --color-form-datecell-today-bg: #ffffff00;
+  --color-form-datecell-today-bg-focused: #ffffff00;
+  --color-form-datecell-today-bg-hovered: #384250;
+  --color-form-datecell-today-bg-pressed: #4d5761;
+  --color-form-textarea-scrollbar-bar: #4d5761;
+  --color-form-option-bg-hover: #6c737f;
+  --color-form-option-bg-pressed: #384250;
+
+  /* ─── Control / Checkbox / Radio Variants ─── */
+  --color-control-border: #9da4ae;
+  --color-control-disabled: #d2d6db;
+  --color-control-pressed: #4d5761;
+  --color-control-boarder-disabled: #ffffff4d;
+  --color-control-icon-disabled: #9da4ae;
+  --color-control-icon-hovered: #14573a;
+  --color-control-icon-pressed: #14573a;
+  --color-control-primary: #ffffff00;
+  --color-control-primary-readonly: #ffffff00;
+  --color-control-primary-checked: #1b8354;
+  --color-control-primary-focused: #1b8354;
+  --color-control-primary-hovered: #88d8ad;
+  --color-control-primary-pressed: #54c08a;
+  --color-control-neutral-checked: #4d5761;
+  --color-control-neutral-focused: #4d5761;
+  --color-control-neutral-hovered: #9da4ae;
+  --color-control-neutral-pressed: #9da4ae;
+  --color-control-ripple-effect: #111927;
+
+  /* ─── Link Variants ─── */
+  --color-link-primary: #1b8354;
+  --color-link-primary-hovered: #54c08a;
+  --color-link-primary-pressed: #88d8ad;
+  --color-link-primary-focused: #1b8354;
+  --color-link-primary-visited: #14573a;
+  --color-link-secondary: #dba102;
+  --color-link-secondary-hovered: #f7d54d;
+  --color-link-secondary-pressed: #fae996;
+  --color-link-secondary-focused: #dba102;
+  --color-link-secondary-visited: #6e3c00;
+  --color-link-tertiary: #80519f;
+  --color-link-tertiary-hovered: #a57bba;
+  --color-link-tertiary-pressed: #ccadd9;
+  --color-link-tertiary-focused: #80519f;
+  --color-link-tertiary-visited: #3d1d5e;
+  --color-link-neutral: #e5e7eb;
+  --color-link-neutral-hovered: #9da4ae;
+  --color-link-neutral-pressed: #6c737f;
+  --color-link-neutral-focused: #e5e7eb;
+  --color-link-neutral-visited: #d2d6db;
+  --color-link-danger: #d92d20;
+  --color-link-danger-hovered: #b42318;
+  --color-link-danger-pressed: #7a271a;
+  --color-link-danger-focused: #d92d20;
+  --color-link-danger-visited: #912018;
+  --color-link-oncolor: #ffffff;
+  --color-link-oncolor-hovered: #ffffffcc;
+  --color-link-oncolor-pressed: #ffffff99;
+  --color-link-oncolor-focused: #ffffff;
+  --color-link-oncolor-disabled: #ffffff4d;
+  --color-link-oncolor-visited: #ffffffe5;
+  --color-link-icon-primary-focused: #1b8354;
+  --color-link-icon-primary-hovered: #54c08a;
+  --color-link-icon-primary-pressed: #88d8ad;
+  --color-link-icon-primary-visited: #14573a;
+  --color-link-icon-neutral-focused: #e5e7eb;
+  --color-link-icon-neutral-hovered: #9da4ae;
+  --color-link-icon-neutral-pressed: #6c737f;
+  --color-link-icon-neutral-visited: #d2d6db;
+  --color-link-icon-danger-focused: #d92d20;
+  --color-link-icon-danger-hovered: #b42318;
+  --color-link-icon-danger-pressed: #7a271a;
+  --color-link-icon-danger-visited: #912018;
+  --color-link-icon-oncolor-disabled: #ffffff4d;
+  --color-link-icon-oncolor-hovered: #ffffffcc;
+  --color-link-icon-oncolor-pressed: #ffffff99;
+  --color-link-icon-oncolor-visited: #ffffffe5;
+  --color-link-link-oncolor-focused: #ffffff;
+
+  /* ─── Stepper Variants ─── */
+  --color-stepper-btn-bg: #ffffff;
+  --color-stepper-btn-completed: #079455;
+  --color-stepper-btn-completed-hovered: #166a45;
+  --color-stepper-btn-current: #079455;
+  --color-stepper-btn-current-hovered: #166a45;
+  --color-stepper-btn-upcomming: #4d5761;
+  --color-stepper-btn-upcomming-hovered: #4d5761;
+  --color-stepper-line-completed: #1b8354;
+  --color-stepper-line-completed-hovered: #166a45;
+  --color-stepper-line-current: #384250;
+  --color-stepper-line-upcomming: #384250;
+  --color-stepper-line-upcomming-hovered: #384250;
+  --color-stepper-text-primary: #ffffff;
+  --color-stepper-text-secondary: #f3f4f6;
+  --color-stepper-text-tertiary: #e5e7eb;
+
+  /* ─── Table Variants ─── */
+  --color-table-bg-header: #111927;
+  --color-table-bg-row: #111927;
+  --color-table-bg-row-alt: #ffffff;
+  --color-table-bg-row-hovered: #f3f4f6;
+  --color-table-bg-row-select: #f3fcf6;
+  --color-table-bg-row-selected-hovered: #f3fcf6;
+  --color-table-bg-hover-selected: #111927;
+  --color-table-bg-disabled: #1f2a37;
+  --color-table-cell-border: #4d5761;
+  --color-table-cell-border-inverse: #ffffff;
+  --color-table-boarder-row-selected-hovered: #f3f4f6;
+  --color-table-text-body: #ffffff;
+  --color-table-text-head: #d2d6db;
+
+  /* ─── Tag / Badge Variants ─── */
+  --color-tag-bg-primary: #1b8354;
+  --color-tag-bg-primary-light: #1f2a37;
+  --color-tag-bg-success: #067647;
+  --color-tag-bg-success-light: #ecfdf3;
+  --color-tag-bg-warning: #b54708;
+  --color-tag-bg-warning-light: #fffaeb;
+  --color-tag-bg-error: #d92d20;
+  --color-tag-bg-error-light: #fef3f2;
+  --color-tag-bg-info: #1570ef;
+  --color-tag-bg-info-light: #eff8ff;
+  --color-tag-bg-neutral: #1b8354;
+  --color-tag-bg-neutral-light: #1f2a37;
+  --color-tag-bg-oncolor: #ffffff33;
+  --color-tag-border-primary: #1b8354;
+  --color-tag-border-primary-light: #abefc6;
+  --color-tag-border-success: #067647;
+  --color-tag-border-success-light: #abefc6;
+  --color-tag-border-warning: #b54708;
+  --color-tag-border-warning-light: #fedf89;
+  --color-tag-border-error: #b42318;
+  --color-tag-border-error-light: #fecdca;
+  --color-tag-border-info: #175cd3;
+  --color-tag-border-info-light: #b2ddff;
+  --color-tag-border-neutral: #d2d6db;
+  --color-tag-border-neutral-light: #1f2a37;
+  --color-tag-border-oncolor: #ffffff99;
+  --color-tag-text-primary: #1f2a37;
+  --color-tag-text-success: #085d3a;
+  --color-tag-text-warning: #93370d;
+  --color-tag-text-error: #912018;
+  --color-tag-text-info: #1849a9;
+  --color-tag-text-neutral: #f3f4f6;
+  --color-tag-icon-primary: #1f2a37;
+  --color-tag-icon-success: #085d3a;
+  --color-tag-icon-warning: #93370d;
+  --color-tag-icon-error: #912018;
+  --color-tag-icon-info: #1849a9;
+  --color-tag-icon-neutral: #f3f4f6;
+  --color-tag-dot: #ffffff99;
+
+  /* ─── Tooltip Variants ─── */
+  --color-tooltip-bg-dark: #ffffff;
+  --color-tooltip-bg-light: #1f2a37;
+  --color-tooltip-text-heading-dark: #1f2a37;
+  --color-tooltip-text-heading-light: #ffffff;
+  --color-tooltip-text-paragraph-dark: #384250;
+  --color-tooltip-text-paragraph-light: #f3f4f6;
+
+  /* ─── Global / Disabled States ─── */
+  --color-global-bg-disabled: #384250;
+  --color-global-bg-disabled-primary: #166a45;
+  --color-global-bg-inverse-disabled: #384250;
+  --color-global-border-disabled: #9da4ae;
+  --color-global-control-disabled: #ffffff4d;
+  --color-global-icon-default-disabled: #ffffff;
+  --color-global-icon-default-oncolor-disabled: #ffffff;
+  --color-global-text-default-disabled: #9da4ae;
+  --color-global-text-default-oncolor-disabled: #16161666;
+}
