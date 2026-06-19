@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "مصروفي",
+    "loading": "ثواني...",
+    "error": "حدث خطأ ما",
+    "retry": "حاول مرة أخرى",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "recordYourExpenses": "سجل مصروفاتك بصوتك"
+  },
+  "home": {
+    "title": "مرحباً بعودتك, {{name}}!",
+    "subtitle": "إليك ما هو جديد اليوم"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "notifications": "الإشعارات",
+    "languageChanged": "تم تغيير اللغة إلى {{language}}"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "followers_one": "{{count}} متابع",
+    "followers_other": "{{count}} متابعين",
+    "posts_one": "{{count}} منشور",
+    "posts_other": "{{count}} منشورات"
+  }
+}

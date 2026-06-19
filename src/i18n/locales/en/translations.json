@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "Masroofi",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "recordYourExpenses": "Record Your Expenses with Your Voice"
+  },
+  "home": {
+    "title": "Welcome back, {{name}}!",
+    "subtitle": "Here is what is new today"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "languageChanged": "Language changed to {{language}}"
+  },
+  "profile": {
+    "title": "Profile",
+    "followers_one": "{{count}} follower",
+    "followers_other": "{{count}} followers",
+    "posts_one": "{{count}} post",
+    "posts_other": "{{count}} posts"
+  }
+}

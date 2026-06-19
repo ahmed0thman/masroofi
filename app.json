@@ -4,7 +4,7 @@
     "slug": "masroofi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "masroofi",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,8 +13,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#004c3f",
+        "foregroundImage": "./assets/images/Icon.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
@@ -30,11 +30,33 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#004c3f",
           "android": {
-            "image": "./assets/images/splash-icon.png",
+            "image": "./assets/images/logo.png",
             "imageWidth": 76
           }
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/cairo/Cairo-ExtraLight.ttf",
+            "./assets/fonts/cairo/Cairo-Regular.ttf",
+            "./assets/fonts/cairo/Cairo-Light.ttf",
+            "./assets/fonts/cairo/Cairo-Medium.ttf",
+            "./assets/fonts/cairo/Cairo-SemiBold.ttf",
+            "./assets/fonts/cairo/Cairo-Bold.ttf",
+            "./assets/fonts/cairo/Cairo-ExtraBold.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "playback": true,
+          "recording": true
         }
       ]
     ],

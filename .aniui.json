@@ -1,0 +1,30 @@
+{
+  "componentsDir": "src/components/ui",
+  "utilPath": "src/lib/utils.ts",
+  "theme": "green",
+  "style": "nativewind",
+  "tsx": true,
+  "sdkGeneration": "v5",
+  "installed": {
+    "button": {
+      "version": "0.3.0",
+      "hash": "a3a06625",
+      "addedAt": "2026-06-18T08:34:07.530Z"
+    },
+    "text": {
+      "version": "0.3.0",
+      "hash": "9a3434aa",
+      "addedAt": "2026-06-18T08:34:07.531Z"
+    },
+    "direction-provider": {
+      "version": "0.3.0",
+      "hash": "10c52a72",
+      "addedAt": "2026-06-18T08:35:05.028Z"
+    },
+    "avatar": {
+      "version": "0.3.0",
+      "hash": "28e28da3",
+      "addedAt": "2026-06-18T11:23:55.342Z"
+    }
+  }
+}
