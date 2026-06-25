@@ -52,9 +52,21 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## UI components (`src/components/ui/`)
 
-Built with `class-variance-authority` (cva) + NativeWind. All use the `cn()` utility and token classes from `global.css`. Import directly: `import { Button } from '@/components/ui/button'`.
+**aniUI** (https://www.aniui.dev/docs) is the primary component provider. All components come from aniUI — they are copied as source files (not npm dependencies) and fully owned by the project.
 
-### Available components
+### Critical rule
+
+Before building any UI component, **always check if it's available in aniUI first** at https://www.aniui.dev/docs. aniUI has 90+ components including Button, Text, Input, Card, Dialog, Bottom Sheet, Charts, Form fields, Navigation, and more.
+
+### Installation
+
+```bash
+npx @aniui/cli add <component-name>
+```
+
+Components are copied into `src/components/ui/` as editable source files.
+
+### Currently installed components
 
 | Component | Variants | Sizes | Notes |
 |---|---|---|---|
@@ -69,8 +81,6 @@ Built with `class-variance-authority` (cva) + NativeWind. All use the `cn()` uti
 |---|---|---|
 | **SafeAreaView** | `src/components/layout/SafeAreaView.tsx` | Styled safe area with `bg-background flex-1 p-5` defaults |
 | **Container** | `src/components/layout/container.tsx` | Wraps the `.container` utility class (`flex-1 bg-background pt-16 px-4`)
-
-> **This is an extensible component library.** New components should be added to `src/components/ui/` following the same patterns: `cva()` for variants, `cn()` for class merging, and token classes from `global.css` for all colors.
 
 ---
 
@@ -186,3 +196,103 @@ No test runner or typecheck script configured. TypeScript validation via `tsc` (
 - iOS/Android native builds require native project directories (`ios/`, `android/`) which are gitignored; generated via `npx expo prebuild` if needed
 - `.expo/`, `dist/`, `web-build/`, `expo-env.d.ts` are gitignored build artifacts
 - `.env*.local` files are gitignored; no `.env` loading is configured in this template
+
+---
+
+# Project status (current)
+
+> **Last scanned:** 25 June 2026 — Full project audit.
+
+## What's built
+
+| Area | Status | Details |
+|---|---|---|
+| **SQLite (DB layer)** | ✅ Complete | `src/db/` — 3 tables: `profiles`, `expenses`, `recordings`. `openDatabaseAsync()` pattern, WAL mode, prepared statements for bulk inserts, FK constraints |
+| **Routing** | ✅ Complete | `src/app/` — Stack root → index (onboarding gate) → `(tabs)` group (home/history/settings) |
+| **Onboarding** | ✅ Complete | 4-slide carousel: language select, voice intro, privacy, mic+notif setup. Reminder scheduling via `expo-notifications` daily trigger. AsyncStorage persistence. |
+| **Voice recording** | ✅ Working | Mic toggle on home screen → records via `expo-audio` → saves to documents dir → transcribes via Groq Whisper API |
+| **Transcription** | ✅ Working | `src/services/transcription.ts` — sends to Groq `whisper-large-v3-turbo` with `verbose_json` format |
+| **Theme system** | ✅ Complete | Material Design 3 tokens in `global.css` + `src/styles/global.ts` (light/dark, `useThemeColors()` hook) |
+| **i18n** | ✅ Complete | Arabic (primary) + English. Full type inference from Arabic schema. AsyncStorage + device locale detection. |
+| **Fonts** | ✅ Complete | Cairo family (7 weights). Loaded in root `_layout.tsx`. |
+| **Custom tab bar** | ✅ Complete | Custom `Tabs` bar with Ionicons, active/inactive states, i18n labels |
+| **Settings screen** | ✅ Complete | List rows (language, reminders, about) with chevrons |
+| **History screen** | ✅ Complete | Empty state placeholder |
+| **Gemini service** | ⚠️ Stub | `src/services/gemini.ts` — skeleton, not wired to anything. Uses invalid model name `gemini-3.5-flash`. |
+| **Whisper test page** | ❌ Missing tab | `(tabs)/_layout.tsx` references a `whisper` screen but `whisper.tsx` does not exist → would crash navigation |
+| **DB layer** | ❌ Empty | `src/db/` directory exists but is empty |
+| **Config** | ❌ Empty | `src/config/` directory exists but is empty |
+| **Providers** | ❌ Empty | `src/providers/` directory exists but is empty |
+| **Utils** | ❌ Empty | `src/utils/` directory exists but is empty |
+
+## File tree (src/)
+
+```
+src/
+├── app/
+│   ├── _layout.tsx          # Root: fonts, DirectionProvider, DarkTheme Stack
+│   ├── index.tsx            # Onboarding gate → (tabs) or OnboardingScreen
+│   ├── global.css           # Tailwind v4 theme + MD3 tokens + component classes
+│   └── (tabs)/
+│       ├── _layout.tsx      # Custom tab bar (home, history, whisper, settings)
+│       ├── index.tsx        # Home: mic button, transcription display, recordings list
+│       ├── history.tsx      # Empty state
+│       └── settings.tsx     # Settings rows with icons
+├── components/
+│   ├── ui/                  # aniUI components: button, text, avatar, direction-provider
+│   ├── layout/              # SafeAreaView, Container
+│   ├── cards/
+│   │   └── RecordingCard.tsx # Playback + delete card
+│   ├── Header.tsx           # Avatar + greeting
+│   └── languagePicker.tsx   # Legacy component (uses StyleSheet, hardcoded colors)
+├── screens/
+│   ├── splash.tsx           # Splash screen component
+│   └── onBoarding/          # Full onboarding flow (6 files)
+├── services/
+│   ├── transcription.ts     # Groq Whisper API client
+│   └── gemini.ts            # Gemini API stub (broken model name)
+├── hooks/
+│   └── useRecorings.ts      # Recording lifecycle + transcription dispatch
+├── styles/
+│   └── global.ts            # useThemeColors() — light/dark color objects
+├── i18n/
+│   ├── index.ts             # i18next init with AsyncStorage detector
+│   ├── types.ts             # Type-safe translations from Arabic schema
+│   ├── locales/
+│   │   ├── index.ts         # Resource bundle
+│   │   ├── ar/translations.json  # Arabic strings
+│   │   └── en/translations.json  # English strings
+├── constants/
+│   └── index.ts             # Zod schema stub
+├── lib/
+│   ├── utils.ts             # cn() helper
+│   └── i18n.ts              # RTL direction change (conflicts with i18n/index.ts)
+├── types/
+│   └── index.d.ts           # IRecording interface
+├── config/                  # (empty)
+├── db/                      # (empty)
+├── providers/               # (empty)
+└── utils/                   # (empty)
+```
+
+## Known issues & inconsistencies
+
+1. **Missing whisper tab** — `(tabs)/_layout.tsx` registers `whisper` screen but no `whisper.tsx` exists
+2. **Broken Gemini model** — `src/services/gemini.ts` uses `gemini-3.5-flash` (doesn't exist); should be `gemini-2.0-flash` or `gemini-1.5-flash`
+3. **RTL direction conflict** — `src/i18n/index.ts` forces RTL always; `src/lib/i18n.ts` tries to dynamically switch and `Updates.reloadAsync()`. Only one approach should win.
+4. **Typo in filename** — `src/hooks/useRecorings.ts` should be `useRecordings.ts`
+5. **Legacy component** — `src/components/languagePicker.tsx` uses `StyleSheet.create` with hardcoded hex colors, violating project conventions
+6. **Theme label confusion** — `global.css` `:root` is labeled "dark scheme" but uses light values; `.dark` is labeled "light scheme" but uses dark values
+7. **i18n key mismatch** — `home.recordings.noRecordings` is nested under `home.` in English but under `recordings.` in Arabic (both are valid). Also, the `recordings.noTranscription` and `recordings.transcribing` keys are referenced in the home tab but not defined in translations.
+8. **Env file committed** — `.env` is tracked in git (not in `.gitignore`)
+9. **BRDs + System Design** — Full BRD (1005 lines) and System Design doc (1932 lines) exist at `/BRDs/BRD-main.md` and `/system-design/SD-main.md`; serve as product & architecture references
+10. **Learning Roadmap** — `/LEARNING_ROADMAP.md` (3777 lines) exists as a textbook-style guide
+
+## Git history
+
+```
+* 97b2380 added whisper test
+* 2c13f08 added nativeiwnd
+* 418d7a4 init
+* eb489be Initial commit
+```

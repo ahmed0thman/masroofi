@@ -7,17 +7,17 @@ import { resources } from './locales';
 import { I18nManager } from 'react-native';
 import * as Updates from 'expo-updates';
 
-// i18n.on('languageChanged', (lang: string) => {
-//   const isRTL = lang === 'ar';
-const isRTL = true; // Force RTL for testing purposes
+const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur'];
 
-//   if (I18nManager.isRTL === isRTL) {
-I18nManager.allowRTL(isRTL);
-I18nManager.forceRTL(isRTL);
-// Restart the app to apply the layout direction change
-// Updates.reloadAsync();
-//   }
-// });
+i18n.on('languageChanged', (lang: string) => {
+  const isRTL = RTL_LANGUAGES.includes(lang);
+
+  if (I18nManager.isRTL !== isRTL) {
+    I18nManager.allowRTL(isRTL);
+    I18nManager.forceRTL(isRTL);
+    Updates.reloadAsync();
+  }
+});
 
 const LANGUAGE_STORAGE_KEY = 'app.language';
 
@@ -36,8 +36,7 @@ const lnaguageDetector = {
       // sliently fail and fallback to device language
     }
 
-    // const deviceLanguage = getLocales()[0]?.languageCode ?? 'ar';
-    const deviceLanguage = 'ar';
+    const deviceLanguage = getLocales()[0]?.languageCode ?? 'ar';
     callback(deviceLanguage);
   },
   cacheUserLanguage: async (lang: string) => {

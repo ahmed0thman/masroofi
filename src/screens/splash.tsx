@@ -5,7 +5,7 @@ import { Image, Text, View } from 'react-native';
 const SplashScreen = () => {
   const { t } = useTranslation();
   return (
-    <SafeAreaView className="bg-[#1b1c1a] flex-center font-cairo">
+    <SafeAreaView className="bg-background flex-center font-cairo">
       <View className="flex-col gap-4 items-center">
         <View
           className="bg-primary-container rounded-full w-24 h-24 flex-center"

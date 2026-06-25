@@ -4,6 +4,7 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "retry": "Try Again",
+    "loadMore": "Load More",
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
@@ -11,20 +12,262 @@
   },
   "home": {
     "title": "Welcome back, {{name}}!",
-    "subtitle": "Here is what is new today"
+    "subtitle": "Here is what is new today",
+    "tapToRecord": "Tap to record",
+    "recording": "Recording...",
+    "recentExpenses": "Recent Expenses",
+    "extractingExpense": "Extracting expense...",
+    "viewAll": "View all",
+    "monthTotal": "Month Total",
+    "todayTotal": "Today's Expenses",
+    "vsLastMonth": "vs last month",
+    "vsYesterday": "vs yesterday",
+    "history": {
+      "emptyTitle": "No expenses yet",
+      "emptyDescription": "Your recordings will appear here"
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "reminders": "Reminders",
+      "about": "About"
+    }
+  },
+  "recordings": {
+    "noRecordings": "No recordings yet",
+    "noTranscription": "Tap the microphone to record",
+    "transcribing": "Transcribing...",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} hr ago",
+    "daysAgo": "{{count}} day ago",
+    "deleteConfirm": "Are you sure you want to delete this recording?",
+    "deleteSuccess": "Recording deleted",
+    "tips": {
+      "title": "Voice Recording Tips",
+      "itemAndPrice": "Say the item, price, and store name clearly",
+      "mentionCategory": "Mention the category if possible (Food, Transport, ..)",
+      "mentionContext": "Mention where the expense is for (home, car, gym, ..)",
+      "example": "Example: 'Vegetables for 50 EGP from Carrefour for the home'",
+      "avoidNoise": "Avoid background noise for best results"
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "record": "Record",
+    "history": "History",
+    "archive": "Archive",
+    "analytics": "Analytics",
+    "settings": "Settings"
   },
   "settings": {
     "title": "Settings",
     "language": "Language",
     "theme": "Theme",
+    "theme.light": "Light",
+    "theme.dark": "Dark",
+    "theme.system": "System",
     "notifications": "Notifications",
-    "languageChanged": "Language changed to {{language}}"
+    "notifications.enabled": "Enabled",
+    "notifications.disabled": "Disabled",
+    "languageChanged": "Language changed to {{language}}",
+    "about": "About",
+    "about.version": "Version {{version}}",
+    "about.privacy": "Privacy Policy",
+    "about.contact": "Contact Us",
+    "about.madeIn": "Made in Egypt 🇪🇬",
+    "profile": "Profile",
+    "reminders": "Reminders",
+    "reminders.add": "Add Reminder",
+    "reminders.time": "Time",
+    "reminders.meridiem": "Period",
+    "reminders.am": "AM",
+    "reminders.pm": "PM",
+    "reminders.noReminders": "No reminders",
+    "reminders.deleteConfirm": "Delete reminder?",
+    "reminders.added": "Reminder added",
+    "reminders.deleted": "Reminder deleted",
+    "reminders.updated": "Reminder updated"
   },
   "profile": {
     "title": "Profile",
+    "enterName": "Enter your name",
+    "namePlaceholder": "Your name (e.g. Ahmed)",
+    "updated": "Profile updated",
     "followers_one": "{{count}} follower",
     "followers_other": "{{count}} followers",
     "posts_one": "{{count}} post",
-    "posts_other": "{{count}} posts"
+    "posts_other": "{{count}} posts",
+    "gender": "Gender",
+    "gender.male": "Male",
+    "gender.female": "Female",
+    "location": "Location",
+    "age": "Age",
+    "edit": "Edit",
+    "saveSuccess": "Profile saved",
+    "avatar": {
+      "changePhoto": "Change Profile Photo",
+      "takePhoto": "Take Photo",
+      "chooseFromGallery": "Choose from Gallery",
+      "permissionDenied": "Permission denied. Please enable it in Settings.",
+      "photoSaved": "Photo saved"
+    }
+  },
+  "whisper": {
+    "demo": {
+      "title": "Whisper Demo",
+      "subtitle": "Minimal transcription playground for whisper.rn models."
+    },
+    "status": {
+      "title": "Status",
+      "model": "Model",
+      "live": "Live",
+      "file": "File",
+      "downloading": "Downloading {{model}} · {{percent}}%",
+      "initializing": "Initializing…",
+      "ready": "Ready · {{model}}",
+      "notInitialized": "Not initialized",
+      "listening": "Listening",
+      "idle": "Idle",
+      "processing": "Processing sample…"
+    },
+    "live": {
+      "title": "Live transcription",
+      "badge": "Live",
+      "placeholder": "Start a live session to see the transcript populate here in real time.",
+      "latestTitle": "Latest live transcript",
+      "clear": "Clear"
+    },
+    "file": {
+      "title": "File transcription",
+      "noResult": "No transcription result"
+    },
+    "actions": {
+      "title": "Quick actions",
+      "transcribeSample": "Transcribe sample",
+      "transcribing": "Transcribing…",
+      "startLive": "Start live session",
+      "stopLive": "Stop live session"
+    },
+    "models": {
+      "title": "Models",
+      "stored": "Stored models",
+      "remove": "Remove",
+      "deleting": "Deleting…",
+      "active": "active",
+      "model": "Model",
+      "size": "Size {{size}}"
+    },
+    "errors": {
+      "title": "Something went wrong",
+      "notInitialized": "Whisper not initialized",
+      "micPermission": "Real-time transcription requires microphone access.",
+      "micPermissionTitle": "Microphone Permission",
+      "micDeniedAndroid": "Please enable microphone access in Android Settings to use real-time transcription.",
+      "micDeniedIOS": "Please enable microphone access in iOS Settings to use real-time transcription.",
+      "micRequest": "Microphone permission is required for real-time transcription.",
+      "micVerifyFailed": "Unable to verify microphone permission. Please try again.",
+      "unsupportedPlatform": "Real-time transcription is not available on the web.",
+      "deleteBusy": "Please stop any active transcription before deleting models.",
+      "deleteConfirmTitle": "Delete Model",
+      "deleteConfirmMessage": "Remove {{model}} from this device? You can download it again later.",
+      "deleteFailed": "Failed to delete model: {{error}}",
+      "transcriptionFailedTitle": "Transcription Error",
+      "realtimeFailedTitle": "Real-time Error",
+      "initFailed": "Failed to initialize model: {{error}}"
+    },
+    "footer": "whisper.rn demo — download a model, try a sample file, or speak live."
+  },
+  "archive": {
+    "search": "Search...",
+    "filters": "Filters",
+    "apply": "Apply",
+    "reset": "Reset",
+    "showing": "Showing {{count}} of {{total}}",
+    "noResults": "No expenses found",
+    "viewRecordings": "View Recordings",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "priceMin": "Min",
+    "priceMax": "Max",
+    "allCategories": "All",
+    "subCategory": "Sub-category"
+  },
+  "review": {
+    "title": "Review Expenses",
+    "item": "Item",
+    "price": "Price",
+    "currency": "Currency",
+    "category": "Category",
+    "subCategory": "Sub-category",
+    "merchant": "Merchant",
+    "description": "Description",
+    "delete": "Delete",
+    "saveAll": "Save All",
+    "noExpenses": "No expenses to save",
+    "goBack": "Go Back",
+    "saved": "Expenses saved successfully",
+    "categoryPicker": "Choose Category",
+    "expenseNumber": "Expense {{number}}"
+  },
+  "analytics": {
+    "comingSoon": "Coming Soon"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "slide0": {
+      "title": "Choose your language",
+      "description": "Select your preferred language",
+      "iconLabel": "Language"
+    },
+    "slide1": {
+      "title": "Record Expenses with Your Voice",
+      "description": "Speak naturally — Arabic, English, or mixed. The app understands and saves in under 10 seconds.",
+      "iconLabel": "Microphone icon, record expenses with your voice"
+    },
+    "slide2": {
+      "title": "Your Data Stays Private",
+      "description": "Everything stays on your device. No uploads to servers. No internet needed to record. Privacy isn't a setting — it's the foundation.",
+      "iconLabel": "Shield icon, your data stays private"
+    },
+    "slide3": {
+      "title": "Almost There!",
+      "description": "Let's set up the microphone so you can record, and notifications so you never forget.",
+      "iconLabel": "Settings icon, almost there"
+    },
+    "slideName": {
+      "title": "What's your name?",
+      "description": "We'd like to know your name so we can address you",
+      "iconLabel": "Person icon, user name"
+    },
+    "language": {
+      "ar": "Arabic",
+      "en": "English"
+    },
+    "reminder": {
+      "title": "Set Reminders",
+      "description": "Choose when you'd like to be reminded to log your expenses",
+      "add": "Add reminder",
+      "remove": "Remove reminder",
+      "maxReached": "Maximum 3 reminders",
+      "notifDenied": "Notifications are disabled. Enable them in Settings.",
+      "notifPermission": "Allow notifications to set reminders",
+      "notificationBody": "Time to log your expenses!"
+    },
+    "mic": {
+      "explanation": "Masroof needs mic access so you can record expenses with your voice. No audio is ever uploaded.",
+      "deniedBanner": "Enable microphone in Settings to use voice recording"
+    },
+    "notif": {
+      "explanation": "Masroof can remind you to log expenses so you never lose track. You choose when and how often."
+    },
+    "completed": {
+      "tooltip": "Tap the mic to record your first expense"
+    },
+    "skipped": {
+      "banner": "Tap the mic to record expenses with your voice"
+    }
   }
 }

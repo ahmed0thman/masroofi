@@ -1,8 +1,8 @@
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css";
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
 
-@import "nativewind/theme";
+@import 'nativewind/theme';
 
 @theme {
   --font-cairo-extralight: 'Cairo-ExtraLight';
@@ -83,7 +83,7 @@
 
   /* ─── Semantic Aliases (for shadcn/ui-style compatibility) ─── */
   --color-foreground: var(--color-on-surface);
-  --color-card: var(--color-surface-container-low);
+  --color-card: var(--color-surface-container-lowest);
   --color-card-foreground: var(--color-on-surface);
   --color-popover: var(--color-surface-container);
   --color-popover-foreground: var(--color-on-surface);
@@ -102,7 +102,6 @@
 }
 
 :root {
-
   /* /* ════════════════════════════════════════════════════════════
      MATERIAL DESIGN 3 — Light Theme (color scheme "dark")
      ════════════════════════════════════════════════════════════ */
@@ -174,7 +173,7 @@
 
   /* ─── Semantic Aliases (for shadcn/ui-style compatibility) ─── */
   --color-foreground: var(--color-on-surface);
-  --color-card: var(--color-surface-container-low);
+  --color-card: var(--color-surface-container-lowest);
   --color-card-foreground: var(--color-on-surface);
   --color-popover: var(--color-surface-container);
   --color-popover-foreground: var(--color-on-surface);
@@ -219,8 +218,8 @@
   --color-outline-variant: #3f4945;
 
   /* ─── Primary (Teal/Green) ─── */
-  --color-primary: #89d5c0;
-  --color-on-primary: #00382d;
+  --color-primary: #00382d;
+  --color-on-primary: #fff;
   --color-primary-container: #0e6655;
   --color-on-primary-container: #94e1cb;
   --color-inverse-primary: #166a59;
@@ -286,11 +285,15 @@
   .flex-center {
     @apply items-center justify-center;
   }
+
+  .auto-dir {
+    @apply rtl:scale-x-[-1];
+  }
 }
 
 @layer components {
   .container {
-    @apply flex-1 bg-background pt-16 px-4;
+    @apply bg-background px-4 ps-6 items-start;
   }
 
   .title {
@@ -298,7 +301,7 @@
   }
 
   .section-title {
-    @apply text-lg font-semibold text-secondary mt-7.5 mb-4;
+    @apply text-lg font-semibold text-foreground mt-7.5 mb-4;
   }
 
   .empty {

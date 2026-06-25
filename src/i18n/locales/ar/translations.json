@@ -1,9 +1,10 @@
 {
   "common": {
     "appName": "مصروفي",
-    "loading": "ثواني...",
+    "loading": "جاري التحميل...",
     "error": "حدث خطأ ما",
     "retry": "حاول مرة أخرى",
+    "loadMore": "عرض المزيد",
     "cancel": "إلغاء",
     "save": "حفظ",
     "delete": "حذف",
@@ -11,20 +12,262 @@
   },
   "home": {
     "title": "مرحباً بعودتك, {{name}}!",
-    "subtitle": "إليك ما هو جديد اليوم"
+    "subtitle": "إليك ما هو جديد اليوم",
+    "tapToRecord": "اضغط للتسجيل",
+    "recording": "جاري التسجيل...",
+    "recentExpenses": "آخر المصروفات",
+    "extractingExpense": "جاري تحليل المصروف...",
+    "viewAll": "عرض الكل",
+    "monthTotal": "إجمالي الشهر",
+    "todayTotal": "مصروفات اليوم",
+    "vsLastMonth": "عن الشهر الماضي",
+    "vsYesterday": "عن أمس",
+    "history": {
+      "emptyTitle": "لا توجد مصروفات بعد",
+      "emptyDescription": "هتظهر المصروفات اللي تسجلها هنا"
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "language": "اللغة",
+      "reminders": "التذكيرات",
+      "about": "عن التطبيق"
+    }
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "record": "تسجيل",
+    "history": "السجل",
+    "archive": "الأرشيف",
+    "analytics": "تحليلات",
+    "settings": "الإعدادات"
+  },
+  "recordings": {
+    "noRecordings": "لا توجد تسجيلات بعد",
+    "noTranscription": "اضغط على الميكروفون للتسجيل",
+    "transcribing": "جاري نسخ الصوت...",
+    "justNow": "الآن",
+    "minutesAgo": "منذ {{count}} دقيقة",
+    "hoursAgo": "منذ {{count}} ساعة",
+    "daysAgo": "منذ {{count}} يوم",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا التسجيل؟",
+    "deleteSuccess": "تم حذف التسجيل",
+    "tips": {
+      "title": "نصائح للتسجيل الصوتي",
+      "itemAndPrice": "قل اسم الصنف وسعره واسم المحل بوضوح",
+      "mentionCategory": "اذكر الفئة إن أمكن (أكل، مواصلات، ..)",
+      "mentionContext": "حدد مكان المصروف (البيت، العربية، الجيم، ..)",
+      "example": "مثال: 'خضار ب ٥٠ جنيه من كارفور للبيت'",
+      "avoidNoise": "حاول تجنب الضوضاء للحصول على أفضل نتيجة"
+    }
   },
   "settings": {
     "title": "الإعدادات",
     "language": "اللغة",
     "theme": "المظهر",
+    "theme.light": "فاتح",
+    "theme.dark": "داكن",
+    "theme.system": "تلقائي",
     "notifications": "الإشعارات",
-    "languageChanged": "تم تغيير اللغة إلى {{language}}"
+    "notifications.enabled": "مفعلة",
+    "notifications.disabled": "معطلة",
+    "languageChanged": "تم تغيير اللغة إلى {{language}}",
+    "about": "عن التطبيق",
+    "about.version": "الإصدار {{version}}",
+    "about.privacy": "سياسة الخصوصية",
+    "about.contact": "تواصل معنا",
+    "about.madeIn": "صنع في مصر 🇪🇬",
+    "profile": "الملف الشخصي",
+    "reminders": "التذكيرات",
+    "reminders.add": "إضافة تذكير",
+    "reminders.time": "الوقت",
+    "reminders.meridiem": "الفترة",
+    "reminders.am": "صباحاً",
+    "reminders.pm": "مساءً",
+    "reminders.noReminders": "لا توجد تذكيرات",
+    "reminders.deleteConfirm": "حذف التذكير؟",
+    "reminders.added": "تم إضافة التذكير",
+    "reminders.deleted": "تم حذف التذكير",
+    "reminders.updated": "تم تحديث التذكير"
   },
   "profile": {
     "title": "الملف الشخصي",
+    "enterName": "أدخل اسمك",
+    "namePlaceholder": "اسمك (مثال: أحمد)",
+    "updated": "تم تحديث الملف الشخصي",
     "followers_one": "{{count}} متابع",
     "followers_other": "{{count}} متابعين",
     "posts_one": "{{count}} منشور",
-    "posts_other": "{{count}} منشورات"
+    "posts_other": "{{count}} منشورات",
+    "gender": "الجنس",
+    "gender.male": "ذكر",
+    "gender.female": "أنثى",
+    "location": "الموقع",
+    "age": "العمر",
+    "edit": "تعديل",
+    "saveSuccess": "تم حفظ الملف الشخصي",
+    "avatar": {
+      "changePhoto": "تغيير الصورة الشخصية",
+      "takePhoto": "التقاط صورة",
+      "chooseFromGallery": "اختيار من المعرض",
+      "permissionDenied": "تم رفض الإذن. يرجى تفعيل الصلاحية من الإعدادات.",
+      "photoSaved": "تم حفظ الصورة"
+    }
+  },
+  "whisper": {
+    "demo": {
+      "title": "تجربة Whisper",
+      "subtitle": "بيئة اختبار بسيطة لنماذج whisper.rn."
+    },
+    "status": {
+      "title": "الحالة",
+      "model": "النموذج",
+      "live": "مباشر",
+      "file": "ملف",
+      "downloading": "جاري تنزيل {{model}} · {{percent}}%",
+      "initializing": "جاري التهيئة…",
+      "ready": "جاهز · {{model}}",
+      "notInitialized": "لم تتم التهيئة",
+      "listening": "يستمع",
+      "idle": "خامل",
+      "processing": "جاري معالجة العينة…"
+    },
+    "live": {
+      "title": "النسخ المباشر",
+      "badge": "مباشر",
+      "placeholder": "ابدأ جلسة مباشرة لمشاهدة النص هنا فوراً.",
+      "latestTitle": "آخر نسخ مباشر",
+      "clear": "مسح"
+    },
+    "file": {
+      "title": "نسخ الملف",
+      "noResult": "لا توجد نتيجة نسخ"
+    },
+    "actions": {
+      "title": "إجراءات سريعة",
+      "transcribeSample": "نسخ عينة",
+      "transcribing": "جاري النسخ…",
+      "startLive": "بدء الجلسة المباشرة",
+      "stopLive": "إيقاف الجلسة المباشرة"
+    },
+    "models": {
+      "title": "النماذج",
+      "stored": "النماذج المخزنة",
+      "remove": "إزالة",
+      "deleting": "جاري الحذف…",
+      "active": "نشط",
+      "model": "نموذج",
+      "size": "الحجم {{size}}"
+    },
+    "errors": {
+      "title": "حدث خطأ ما",
+      "notInitialized": "لم يتم تهيئة Whisper",
+      "micPermission": "النسخ المباشر يتطلب إذن الميكروفون.",
+      "micPermissionTitle": "إذن الميكروفون",
+      "micDeniedAndroid": "يرجى تفعيل الميكروفون من إعدادات أندرويد لاستخدام النسخ المباشر.",
+      "micDeniedIOS": "يرجى تفعيل الميكروفون من إعدادات iOS لاستخدام النسخ المباشر.",
+      "micRequest": "إذن الميكروفون مطلوب للنسخ المباشر.",
+      "micVerifyFailed": "تعذر التحقق من إذن الميكروفون. حاول مرة أخرى.",
+      "unsupportedPlatform": "النسخ المباشر غير متاح على الويب.",
+      "deleteBusy": "يرجى إيقاف أي نسخ نشط قبل حذف النماذج.",
+      "deleteConfirmTitle": "حذف النموذج",
+      "deleteConfirmMessage": "هل تريد إزالة {{model}} من هذا الجهاز؟ يمكنك تنزيله مرة أخرى لاحقاً.",
+      "deleteFailed": "فشل حذف النموذج: {{error}}",
+      "transcriptionFailedTitle": "خطأ في النسخ",
+      "realtimeFailedTitle": "خطأ في النسخ المباشر",
+      "initFailed": "فشلت تهيئة النموذج: {{error}}"
+    },
+    "footer": "whisper.rn — نزّل نموذجاً، جرّب ملف عينة، أو تحدث مباشرةً."
+  },
+  "archive": {
+    "search": "بحث...",
+    "filters": "تصفية",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين",
+    "showing": "عرض {{count}} من {{total}}",
+    "noResults": "لم يتم العثور على مصروفات",
+    "viewRecordings": "عرض التسجيلات",
+    "dateFrom": "من",
+    "dateTo": "إلى",
+    "priceMin": "أقل",
+    "priceMax": "أقصى",
+    "allCategories": "الكل",
+    "subCategory": "فئة فرعية"
+  },
+  "review": {
+    "title": "مراجعة المصروفات",
+    "item": "الصنف",
+    "price": "السعر",
+    "currency": "العملة",
+    "category": "الفئة",
+    "subCategory": "فئة فرعية",
+    "merchant": "المتجر",
+    "description": "الوصف",
+    "delete": "حذف",
+    "saveAll": "حفظ الكل",
+    "noExpenses": "لا توجد مصروفات للحفظ",
+    "goBack": "عودة",
+    "saved": "تم حفظ المصروفات بنجاح",
+    "categoryPicker": "اختر الفئة",
+    "expenseNumber": "مصروف {{number}}"
+  },
+  "analytics": {
+    "comingSoon": "قريباً"
+  },
+  "onboarding": {
+    "skip": "تخطي",
+    "next": "التالي",
+    "getStarted": "هيا بنا",
+    "slide0": {
+      "title": "اختر لغتك",
+      "description": "اختر اللغة اللي تفضل تستخدمها",
+      "iconLabel": "اللغة"
+    },
+    "slide1": {
+      "title": "سجل مصروفاتك بصوتك",
+      "description": "تكلم طبيعي — مصري أو إنجليزي أو الاتنين مع بعض. التطبيق بيفهمك ويسجل في أقل من ١٠ ثواني.",
+      "iconLabel": "أيقونة الميكروفون، سجل مصروفاتك بصوتك"
+    },
+    "slide2": {
+      "title": "بياناتك في أمان",
+      "description": "كل حاجة على جهازك — مش بنرفع حاجة على سيرفر. مش محتاج نت عشان تسجل. الخصوصية مش إعداد، دي أساس التطبيق.",
+      "iconLabel": "أيقونة الدرع، بياناتك في أمان"
+    },
+    "slide3": {
+      "title": "جهز كل حاجة",
+      "description": "خلينا نضبط الميكروفون عشان نقدر نسجل، والإشعارات عشان متنساش.",
+      "iconLabel": "أيقونة الإعدادات، جهز كل حاجة"
+    },
+    "slideName": {
+      "title": "ما اسمك؟",
+      "description": "عايزين نعرف اسمك عشان نخاطبك",
+      "iconLabel": "أيقونة الشخص، اسم المستخدم"
+    },
+    "language": {
+      "ar": "العربية",
+      "en": "English"
+    },
+    "reminder": {
+      "title": "ضبط التذكيرات",
+      "description": "اختر الأوقات اللي عايز تتذكر فيها تسجيل مصروفاتك",
+      "add": "إضافة تذكير",
+      "remove": "إزالة التذكير",
+      "maxReached": "أقصى ٣ تذكيرات",
+      "notifDenied": "الإشعارات مقفولة. فعلها من الإعدادات.",
+      "notifPermission": "اسمح بالإشعارات عشان تضبط التذكيرات",
+      "notificationBody": "وقت تسجيل مصروفاتك!"
+    },
+    "mic": {
+      "explanation": "مصروفي محتاج الميكروفون عشان تسجل مصروفاتك بصوتك. مفيش تسجيل بينرفع لسيرفر.",
+      "deniedBanner": "فعل الميكروفون من الإعدادات عشان تقدر تسجل بصوتك"
+    },
+    "notif": {
+      "explanation": "مصروفي يقدر يذكرك عشان متنساش تسجل. انت اللي تختار الوقت والعدد."
+    },
+    "completed": {
+      "tooltip": "اضغط على الميكروفون عشان تسجل أول مصروف"
+    },
+    "skipped": {
+      "banner": "اضغط على الميكروفون عشان تسجل مصروفاتك بصوتك"
+    }
   }
 }

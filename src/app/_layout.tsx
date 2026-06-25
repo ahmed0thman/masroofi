@@ -1,17 +1,32 @@
 import { DirectionProvider } from '@/components/ui/direction-provider';
 import '@/i18n';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import Stack from 'expo-router/stack';
+import { DarkTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { Platform, Text, View } from 'react-native';
+import {
+  setNotificationChannelAsync,
+  setNotificationHandler,
+  AndroidImportance,
+} from 'expo-notifications';
 import './global.css';
+
+setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [isMounted, setIsMounted] = useState(false);
   const [fontsLoaded, error] = useFonts({
     'cairo-extralight': require('../../assets/fonts/cairo/Cairo-ExtraLight.ttf'),
     'cairo-light': require('../../assets/fonts/cairo/Cairo-Light.ttf'),
@@ -23,14 +38,24 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    SplashScreen.hideAsync();
-    if (!fontsLoaded || error) return;
+    if (fontsLoaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, error]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      setNotificationChannelAsync('default', {
+        name: 'Masroofi Reminders',
+        importance: AndroidImportance.HIGH,
+      });
+    }
   }, []);
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#1b1c1a]">
-        <Text className="text-white">Error loading fonts</Text>
+      <View className="flex-1 justify-center items-center bg-background">
+        <Text className="text-foreground">Error loading fonts</Text>
       </View>
     );
   }
@@ -38,9 +63,14 @@ export default function RootLayout() {
   return (
     <DirectionProvider defaultDirection="rtl">
       <StatusBar style="light" />
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-      </Stack>
+      <ThemeProvider value={DarkTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="about" options={{ headerShown: false }} />
+          <Stack.Screen name="review" options={{ headerShown: false, presentation: 'modal' }} />
+        </Stack>
+      </ThemeProvider>
     </DirectionProvider>
   );
 }

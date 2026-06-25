@@ -1,33 +1,50 @@
-import Header from '@/components/Header';
-import { LanguagePicker } from '@/components/languagePicker';
-import SafeAreaView from '@/components/layout/SafeAreaView';
-import { Avatar } from '@/components/ui/avatar';
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+
 import OnboardingScreen from '@/screens/onBoarding';
-import SplashScreen from '@/screens/splash';
-import WhipserScreen from '@/screens/whipser';
-import { useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import { ONBOARDING_COMPLETED_KEY } from '@/screens/onBoarding/constants';
+import { getDb } from '@/db';
+import { getProfile } from '@/db/profile-repo';
 
-const HomeScreen = () => {
-  const userInitials = 'AH'; // Replace with dynamic initials if available
+export default function Index() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [profileImageError, setProfileImageError] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Simulate loading for demonstration purposes
-  setTimeout(() => {
-    setLoading(false);
-  }, 2000);
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        await getDb();
+        const profile = await getProfile();
+        if (profile) {
+          router.replace('/(tabs)');
+          return;
+        }
+        const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+        if (completed !== 'true') {
+          router.replace('/(tabs)');
+          return;
+        }
+        setShowOnboarding(true);
+      } catch {
+        setShowOnboarding(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkOnboarding();
+  }, [router]);
 
   if (loading) {
-    return <SplashScreen />;
+    return <View className="bg-background flex-1" />;
   }
-  return (
-    <SafeAreaView>
-      {/* header */}
-      <Header />
-      <WhipserScreen />
-    </SafeAreaView>
-  );
-};
 
-export default HomeScreen;
+  if (!showOnboarding) {
+    return null;
+  }
+
+  return <OnboardingScreen />;
+}
