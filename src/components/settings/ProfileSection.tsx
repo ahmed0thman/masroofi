@@ -134,8 +134,8 @@ export function ProfileSection() {
       </View>
 
       <BottomSheet visible={showSheet} onClose={closeSheet} title={t('profile.edit')}>
-        <View className="gap-4">
-          <View>
+        <View className="gap-4 ">
+          <View className="flex-row items-start">
             <Text className="text-muted-foreground font-cairo text-sm mb-1">
               {t('profile.enterName')}
             </Text>
@@ -147,7 +147,7 @@ export function ProfileSection() {
               placeholderTextColor={colors.onSurfaceVariant}
             />
           </View>
-          <View>
+          <View className="flex-row items-start">
             <Text className="text-muted-foreground font-cairo text-sm mb-1">
               {t('profile.gender')}
             </Text>
@@ -178,7 +178,7 @@ export function ProfileSection() {
               </Pressable>
             </View>
           </View>
-          <View>
+          <View className="flex-row items-start">
             <Text className="text-muted-foreground font-cairo text-sm mb-1">
               {t('profile.location')}
             </Text>
@@ -190,7 +190,7 @@ export function ProfileSection() {
               placeholderTextColor={colors.onSurfaceVariant}
             />
           </View>
-          <View>
+          <View className="flex-row items-start">
             <Text className="text-muted-foreground font-cairo text-sm mb-1">
               {t('profile.age')}
             </Text>

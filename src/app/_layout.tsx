@@ -3,15 +3,16 @@ import '@/i18n';
 import { useFonts } from 'expo-font';
 import Stack from 'expo-router/stack';
 import { DarkTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import * as ExpoSplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import {
   setNotificationChannelAsync,
   setNotificationHandler,
   AndroidImportance,
 } from 'expo-notifications';
+import SplashScreen from '@/screens/splash';
 import './global.css';
 
 setNotificationHandler({
@@ -24,7 +25,7 @@ setNotificationHandler({
   }),
 });
 
-SplashScreen.preventAutoHideAsync();
+ExpoSplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
@@ -36,10 +37,11 @@ export default function RootLayout() {
     'cairo-bold': require('../../assets/fonts/cairo/Cairo-Bold.ttf'),
     'cairo-extrabold': require('../../assets/fonts/cairo/Cairo-ExtraBold.ttf'),
   });
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     if (fontsLoaded || error) {
-      SplashScreen.hideAsync();
+      ExpoSplashScreen.hideAsync();
     }
   }, [fontsLoaded, error]);
 
@@ -57,6 +59,21 @@ export default function RootLayout() {
       <View className="flex-1 justify-center items-center bg-background">
         <Text className="text-foreground">Error loading fonts</Text>
       </View>
+    );
+  }
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  if (!splashDone) {
+    return (
+      <DirectionProvider defaultDirection="rtl">
+        <StatusBar style="light" />
+        <ThemeProvider value={DarkTheme}>
+          <SplashScreen onFinish={() => setSplashDone(true)} />
+        </ThemeProvider>
+      </DirectionProvider>
     );
   }
 
