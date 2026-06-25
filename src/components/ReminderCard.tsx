@@ -1,8 +1,9 @@
 import { View, Pressable, Switch } from 'react-native';
 import React from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Text } from '@/components/ui/text';
+
 import { useThemeColors } from '@/styles/global';
+import { Text } from 'react-native';
 
 interface ReminderCardProps {
   time: string;

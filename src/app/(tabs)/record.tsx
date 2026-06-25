@@ -1,11 +1,10 @@
-import { View, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, ScrollView, ActivityIndicator, Text } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import SafeAreaView from '@/components/layout/SafeAreaView';
-import { Text } from '@/components/ui/text';
 import { useRecordings } from '@/hooks/useRecordings';
 import { setPendingExpenses } from '@/lib/pending-expenses';
 
@@ -59,7 +58,7 @@ export default function Record() {
           </Text>
         </View>
 
-        <ScrollView className="flex-1 px-5 pb-8" showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1  pb-8" showsVerticalScrollIndicator={false}>
           {isTranscribing ? (
             <View className="px-4 py-3 rounded-lg bg-surface-bright">
               <Text className="text-sm text-on-surface font-cairo">
@@ -78,7 +77,7 @@ export default function Record() {
               <Text className="text-sm text-on-surface font-cairo">{transcriptionResult}</Text>
             </View>
           ) : (
-            <View className="bg-surface-container-low rounded-2xl p-4 mx-5 mt-2 w-full">
+            <View className="bg-surface-container-low rounded-2xl p-4 mx-5 mt-2">
               <View className="flex-row items-center gap-2 mb-4">
                 <Ionicons name="bulb-outline" size={22} color={colors.secondary} />
                 <Text className="text-base font-cairo-bold text-on-surface">
@@ -121,7 +120,7 @@ export default function Record() {
                   {t('recordings.tips.avoidNoise')}
                 </Text>
               </View>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 className="mt-4 bg-surface-container-high rounded-xl py-2.5 items-center"
                 activeOpacity={0.7}
                 onPress={() => {
@@ -161,7 +160,7 @@ export default function Record() {
                 }}
               >
                 <Text className="text-sm text-foreground font-cairo-semibold">🧪 Test Review</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           )}
         </ScrollView>

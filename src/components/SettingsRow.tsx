@@ -1,7 +1,6 @@
-import { Text } from '@/components/ui/text';
 import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 interface SettingsRowProps {
   icon: keyof typeof Ionicons.glyphMap;

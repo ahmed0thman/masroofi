@@ -1,6 +1,5 @@
-import { Modal, View, Pressable } from 'react-native';
+import { Modal, View, Pressable, Text } from 'react-native';
 import React from 'react';
-import { Text } from '@/components/ui/text';
 
 interface BottomSheetProps {
   visible: boolean;

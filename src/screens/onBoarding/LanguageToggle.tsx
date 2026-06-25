@@ -1,8 +1,7 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 
 interface LanguageToggleProps {
@@ -10,10 +9,7 @@ interface LanguageToggleProps {
   onToggle: (lang: string) => void;
 }
 
-const LanguageToggle: React.FC<LanguageToggleProps> = ({
-  isArabic,
-  onToggle,
-}) => {
+const LanguageToggle: React.FC<LanguageToggleProps> = ({ isArabic, onToggle }) => {
   const { t } = useTranslation();
 
   return (
@@ -25,7 +21,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
       <Pressable
         className={cn(
           'flex-1 items-center justify-center',
-          isArabic ? 'bg-primary' : 'bg-transparent'
+          isArabic ? 'bg-primary' : 'bg-transparent',
         )}
         onPress={() => onToggle('ar')}
         accessibilityRole="tab"
@@ -35,7 +31,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
         <Text
           className={cn(
             'font-cairo-medium text-sm text-center',
-            isArabic ? 'text-on-primary' : 'text-muted-foreground'
+            isArabic ? 'text-on-primary' : 'text-muted-foreground',
           )}
         >
           {t('onboarding.language.ar')}
@@ -45,7 +41,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
       <Pressable
         className={cn(
           'flex-1 items-center justify-center',
-          !isArabic ? 'bg-primary' : 'bg-transparent'
+          !isArabic ? 'bg-primary' : 'bg-transparent',
         )}
         onPress={() => onToggle('en')}
         accessibilityRole="tab"
@@ -55,7 +51,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
         <Text
           className={cn(
             'font-cairo-medium text-sm text-center',
-            !isArabic ? 'text-on-primary' : 'text-muted-foreground'
+            !isArabic ? 'text-on-primary' : 'text-muted-foreground',
           )}
         >
           {t('onboarding.language.en')}

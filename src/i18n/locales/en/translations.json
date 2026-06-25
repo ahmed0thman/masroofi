@@ -208,7 +208,11 @@
     "goBack": "Go Back",
     "saved": "Expenses saved successfully",
     "categoryPicker": "Choose Category",
-    "expenseNumber": "Expense {{number}}"
+    "expenseNumber": "Expense {{number}}",
+    "confidence": "Confidence",
+    "confidence.high": "High",
+    "confidence.medium": "Medium",
+    "confidence.low": "Low"
   },
   "analytics": {
     "comingSoon": "Coming Soon"

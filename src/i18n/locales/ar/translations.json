@@ -208,7 +208,11 @@
     "goBack": "عودة",
     "saved": "تم حفظ المصروفات بنجاح",
     "categoryPicker": "اختر الفئة",
-    "expenseNumber": "مصروف {{number}}"
+    "expenseNumber": "مصروف {{number}}",
+    "confidence": "دقة التحليل",
+    "confidence.high": "عالية",
+    "confidence.medium": "متوسطة",
+    "confidence.low": "منخفضة"
   },
   "analytics": {
     "comingSoon": "قريباً"

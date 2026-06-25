@@ -7,6 +7,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Text,
   View,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -19,7 +20,7 @@ import DateTimePicker, {
 
 import SafeAreaView from '@/components/layout/SafeAreaView';
 import { Button } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
+
 import { cn } from '@/lib/utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDirection } from '@/components/ui/direction-provider';
@@ -39,7 +40,11 @@ import SlideContent from './SlideContent';
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: externalName, onNameChange: externalOnNameChange }) => {
+const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
+  onFinish,
+  name: externalName,
+  onNameChange: externalOnNameChange,
+}) => {
   const { t, i18n } = useTranslation();
   const { isRTL, setDirection } = useDirection();
   const router = useRouter();
@@ -65,10 +70,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
-    const subscription = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setReduceMotion
-    );
+    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
     return () => subscription.remove();
   }, []);
 
@@ -93,7 +95,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
         animated: !reduceMotion,
       });
     },
-    [reduceMotion, isRTL]
+    [reduceMotion, isRTL],
   );
 
   const goNext = useCallback(() => {
@@ -134,7 +136,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
       }
       setActiveSlide(page);
     },
-    [isRTL, activeSlide, name, goToSlide]
+    [isRTL, activeSlide, name, goToSlide],
   );
 
   // ── Handle Finish / Get Started ───────────────────────────────────────
@@ -194,7 +196,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
       const dir = lang === 'ar' ? 'rtl' : 'ltr';
       setDirection(dir);
     },
-    [i18n, setDirection]
+    [i18n, setDirection],
   );
 
   // ── Button Press Haptics (no animated scale) ──────────────────────────
@@ -284,17 +286,14 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
     setReminders((prev) => [...prev, formatTime(timePickerDate)]);
   }, [timePickerDate, scheduleReminder]);
 
-  const handleRemoveReminder = useCallback(
-    async (time: string) => {
-      try {
-        await Notifications.cancelScheduledNotificationAsync(time);
-      } catch {
-        // Silently fail
-      }
-      setReminders((prev) => prev.filter((t) => t !== time));
-    },
-    [],
-  );
+  const handleRemoveReminder = useCallback(async (time: string) => {
+    try {
+      await Notifications.cancelScheduledNotificationAsync(time);
+    } catch {
+      // Silently fail
+    }
+    setReminders((prev) => prev.filter((t) => t !== time));
+  }, []);
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -304,10 +303,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
         {!isLastSlide && (
           <Pressable
             onPress={handleSkip}
-            className={cn(
-              'absolute top-2 z-10 px-5 py-2',
-              isRTL ? 'left-0' : 'right-0'
-            )}
+            className={cn('absolute top-2 z-10 px-5 py-2', isRTL ? 'left-0' : 'right-0')}
             accessibilityRole="button"
             accessibilityLabel={t('onboarding.skip')}
             hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
@@ -352,25 +348,16 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
         </View>
 
         <View className="px-5 pb-6 gap-6">
-          <DotIndicators
-            slidesCount={SLIDE_COUNT}
-            activeSlide={activeSlide}
-          />
+          <DotIndicators slidesCount={SLIDE_COUNT} activeSlide={activeSlide} />
 
           <Button
             variant="default"
             className="w-full h-12 rounded-xl"
             onPress={isLastSlide ? handleFinish : goNext}
             onPressIn={handlePressIn}
-            accessibilityLabel={
-              isLastSlide
-                ? t('onboarding.getStarted')
-                : t('onboarding.next')
-            }
+            accessibilityLabel={isLastSlide ? t('onboarding.getStarted') : t('onboarding.next')}
           >
-            {isLastSlide
-              ? t('onboarding.getStarted')
-              : t('onboarding.next')}
+            {isLastSlide ? t('onboarding.getStarted') : t('onboarding.next')}
           </Button>
         </View>
 
@@ -396,10 +383,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish, name: ext
                 </Button>
               )}
               {Platform.OS === 'ios' && (
-                <Pressable
-                  className="mt-2"
-                  onPress={() => setShowTimePicker(false)}
-                >
+                <Pressable className="mt-2" onPress={() => setShowTimePicker(false)}>
                   <Text className="font-cairo-medium text-sm text-muted-foreground text-center">
                     {t('common.cancel')}
                   </Text>

@@ -1,11 +1,9 @@
-import { View, Pressable } from 'react-native';
-import React from 'react';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Text } from '@/components/ui/text';
-import { useThemeColors } from '@/styles/global';
-import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import SafeAreaView from '@/components/layout/SafeAreaView';
+import { useThemeColors } from '@/styles/global';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { Pressable, Text, View } from 'react-native';
 
 export default function About() {
   const colors = useThemeColors();
@@ -19,18 +17,14 @@ export default function About() {
           <Pressable onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={24} color={colors.onSurface} />
           </Pressable>
-          <Text className="text-2xl font-cairo-bold text-on-surface">
-            {t('settings.about')}
-          </Text>
+          <Text className="text-2xl font-cairo-bold text-on-surface">{t('settings.about')}</Text>
         </View>
 
         <View className="items-center mb-8">
           <View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center mb-4">
             <Ionicons name="wallet-outline" size={40} color={colors.primary} />
           </View>
-          <Text className="text-2xl font-cairo-bold text-on-surface">
-            {t('common.appName')}
-          </Text>
+          <Text className="text-2xl font-cairo-bold text-on-surface">{t('common.appName')}</Text>
           <Text className="text-sm text-muted-foreground font-cairo mt-1">
             {t('settings.about.version', { version: '1.0.0' })}
           </Text>

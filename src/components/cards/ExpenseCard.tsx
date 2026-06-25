@@ -1,8 +1,8 @@
-import { View, Animated } from 'react-native';
+import { View, Animated, Text } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
-import { Text } from '@/components/ui/text';
+
 import { useTranslation } from 'react-i18next';
 import type { ExpenseRow } from '@/db/expense-repo';
 import { formatAmount, formatRelativeTime } from '@/lib/format';

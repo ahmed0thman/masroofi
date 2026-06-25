@@ -1,17 +1,16 @@
-import { View, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useThemeColors } from '@/styles/global';
-import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
-import SafeAreaView from '@/components/layout/SafeAreaView';
-import { Text } from '@/components/ui/text';
-import * as Haptics from 'expo-haptics';
-import { insertExpense } from '@/db/expense-repo';
-import type { ExpenseRecord } from '@/services/gemini';
 import { BottomSheet } from '@/components/BottomSheet';
+import SafeAreaView from '@/components/layout/SafeAreaView';
+import { insertExpense } from '@/db/expense-repo';
+import { clearPendingExpenses, getPendingExpenses } from '@/lib/pending-expenses';
 import { cn } from '@/lib/utils';
-import { getPendingExpenses, clearPendingExpenses } from '@/lib/pending-expenses';
+import type { ExpenseRecord } from '@/services/gemini';
+import { useThemeColors } from '@/styles/global';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const CATEGORIES = [
   'أكل ومشروبات',
@@ -131,9 +130,37 @@ export default function ReviewScreen() {
         {expenses.map((expense, index) => (
           <View key={expense.localId} className="bg-card w-full rounded-2xl p-4 mb-4">
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-sm font-cairo-bold text-muted-foreground">
-                {t('review.expenseNumber', { number: index + 1 })}
-              </Text>
+              <View className="flex-row items-center gap-2">
+                <Text className="text-lg font-cairo-bold text-muted-foreground">{index + 1}</Text>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-sm font-cairo text-muted-foreground">
+                    {t('review.confidence')}:
+                  </Text>
+                  <View
+                    className={cn(
+                      'rounded-full items-center px-3 py-1',
+                      expense.confidence >= 0.8 && 'bg-success/15',
+                      expense.confidence >= 0.5 && expense.confidence < 0.8 && 'bg-warning/15',
+                      expense.confidence < 0.5 && 'bg-destructive/15',
+                    )}
+                  >
+                    <Text
+                      className={cn(
+                        'text-sm font-cairo-bold',
+                        expense.confidence >= 0.8 && 'text-success',
+                        expense.confidence >= 0.5 && expense.confidence < 0.8 && 'text-warning',
+                        expense.confidence < 0.5 && 'text-destructive',
+                      )}
+                    >
+                      {expense.confidence >= 0.8
+                        ? t('review.confidence.high')
+                        : expense.confidence >= 0.5
+                          ? t('review.confidence.medium')
+                          : t('review.confidence.low')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
               <TouchableOpacity
                 onPress={() => deleteExpense(expense.localId)}
                 className="bg-destructive/10 rounded-full p-2"
@@ -229,28 +256,14 @@ export default function ReviewScreen() {
                   {t('review.description')}
                 </Text>
                 <TextInput
-                  className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
+                  className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo min-h-20"
                   value={expense.description}
                   onChangeText={(text) => updateExpense(expense.localId, { description: text })}
                   placeholderTextColor={colors.mutedForeground}
                   multiline
                   textAlignVertical="top"
+                  numberOfLines={3}
                 />
-              </View>
-
-              <View className="flex-row items-center gap-2">
-                <View className="h-1.5 flex-1 rounded-full bg-surface-bright overflow-hidden">
-                  <View
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${Math.round(expense.confidence * 100)}%`,
-                      backgroundColor: expense.confidence >= 0.6 ? colors.success : colors.warning,
-                    }}
-                  />
-                </View>
-                <Text className="text-xs font-cairo text-muted-foreground">
-                  {Math.round(expense.confidence * 100)}%
-                </Text>
               </View>
             </View>
           </View>

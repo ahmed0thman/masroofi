@@ -1,10 +1,9 @@
-import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import { colors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 const tabConfig: Record<
   string,
