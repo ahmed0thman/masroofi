@@ -51,6 +51,10 @@
     "daysAgo": "منذ {{count}} يوم",
     "deleteConfirm": "هل أنت متأكد من حذف هذا التسجيل؟",
     "deleteSuccess": "تم حذف التسجيل",
+    "dailyLimit": "لقد استنفدت الحد اليومي للتسجيل (١٠/١٠)",
+    "maxDuration": "أقصى مدة ٦٠ ثانية",
+    "remaining": "اليوم: {{count}}/١٠",
+    "seconds": "{{count}}ث",
     "tips": {
       "title": "نصائح للتسجيل الصوتي",
       "itemAndPrice": "قل اسم الصنف وسعره واسم المحل بوضوح",

@@ -2,7 +2,7 @@ import { transcribeAudioFile } from '@/services/transcription';
 import { refineAndExtractEnititesFromTranscript } from '@/services/gemini';
 import type { ExpenseRecord } from '@/services/gemini';
 import type { IRecording } from '@/types';
-import { insertRecording } from '@/db/recording-repo';
+import { insertRecording, getTodayRecordingCount } from '@/db/recording-repo';
 import {
   AudioModule,
   RecordingPresets,
@@ -12,21 +12,28 @@ import {
 } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { Directory, File, Paths } from 'expo-file-system';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
+
+export const MAX_RECORDING_MS = 60000;
+export const MAX_DAILY_RECORDINGS = 10;
 
 export const useRecordings = () => {
+  const { t } = useTranslation();
   const [recordingList, setRecordingList] = useState<IRecording[]>([]);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptionResult, setTranscriptionResult] = useState<string | null>(null);
   const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [todayCount, setTodayCount] = useState(0);
   const audioRecorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
     directory: 'document',
   });
   const recorderState = useAudioRecorderState(audioRecorder);
   const recordingDir = new Directory(Paths.document, 'recordings');
+  const handleToggleRef = useRef<() => Promise<void> | null>(null);
 
   const loadRecordings = useCallback(async () => {
     const items = (await recordingDir
@@ -92,12 +99,13 @@ export const useRecordings = () => {
         // Step 1b: Save recording to SQLite
         const recordingId = destFile.name.replace('.m4a', '');
         if (transcriptText) {
-            try {
-              await insertRecording({
-                id: recordingId,
-                transcript: transcriptText,
-                duration_ms: recorderState.durationMillis ?? 0,
-              });
+          try {
+            await insertRecording({
+              id: recordingId,
+              transcript: transcriptText,
+              duration_ms: recorderState.durationMillis ?? 0,
+            });
+            setTodayCount((prev) => prev + 1);
           } catch (err) {
             console.error('Failed to save recording to DB:', err);
           }
@@ -112,32 +120,38 @@ export const useRecordings = () => {
 
           // Haptic feedback based on extraction results
           if (extracted && extracted.length > 0) {
-            const allGoodConfidence = extracted.every(
-              (r) => r.confidence >= 0.6,
-            );
+            const allGoodConfidence = extracted.every((r) => r.confidence >= 0.6);
             if (allGoodConfidence) {
-              await Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } else {
-              await Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Error,
-              );
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             }
           } else {
-            await Haptics.notificationAsync(
-              Haptics.NotificationFeedbackType.Error,
-            );
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
           }
           setIsExtracting(false);
         }
       }
       await loadRecordings();
     } else {
+      const count = await getTodayRecordingCount();
+      if (count >= MAX_DAILY_RECORDINGS) {
+        Alert.alert(t('recordings.dailyLimit'));
+        return;
+      }
+      setTodayCount(count);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await record();
     }
   };
+
+  handleToggleRef.current = handleRecordingToggle;
+
+  useEffect(() => {
+    if (recorderState.isRecording && recorderState.durationMillis >= MAX_RECORDING_MS) {
+      handleToggleRef.current?.();
+    }
+  }, [recorderState.durationMillis, recorderState.isRecording]);
 
   useEffect(() => {
     const initAudio = async () => {
@@ -145,6 +159,8 @@ export const useRecordings = () => {
         recordingDir.create();
       }
       loadRecordings();
+      const count = await getTodayRecordingCount();
+      setTodayCount(count);
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
         Alert.alert('Permission to access microphone is required!');
@@ -189,5 +205,6 @@ export const useRecordings = () => {
     transcriptionResult,
     expenseRecords,
     isExtracting,
+    todayCount,
   };
 };

@@ -5,8 +5,9 @@ import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import SafeAreaView from '@/components/layout/SafeAreaView';
-import { useRecordings } from '@/hooks/useRecordings';
+import { useRecordings, MAX_DAILY_RECORDINGS } from '@/hooks/useRecordings';
 import { setPendingExpenses } from '@/lib/pending-expenses';
+import { cn } from '@/lib/utils';
 
 export default function Record() {
   const colors = useThemeColors();
@@ -16,11 +17,14 @@ export default function Record() {
   const {
     isRecording,
     handleRecordingToggle,
+    recorderState,
     isTranscribing,
     transcriptionResult,
     expenseRecords,
     isExtracting,
+    todayCount,
   } = useRecordings();
+  const atDailyLimit = todayCount >= MAX_DAILY_RECORDINGS;
 
   // Navigate to review screen when extraction completes
   useEffect(() => {
@@ -43,9 +47,13 @@ export default function Record() {
       <View className="flex-1">
         <View className="flex-1 justify-center items-center">
           <TouchableOpacity
-            className="bg-primary rounded-full w-20 h-20 items-center justify-center"
+            className={cn(
+              'rounded-full w-20 h-20 items-center justify-center',
+              atDailyLimit ? 'bg-muted' : 'bg-primary',
+            )}
             activeOpacity={0.8}
             onPress={handleRecordingToggle}
+            disabled={atDailyLimit && !isRecording}
           >
             {isRecording ? (
               <Ionicons name="stop" size={36} color={colors.onPrimary} />
@@ -53,9 +61,30 @@ export default function Record() {
               <Ionicons name="mic" size={36} color={colors.onPrimary} />
             )}
           </TouchableOpacity>
-          <Text className="text-sm text-muted-foreground text-center mt-2 font-cairo">
-            {t('home.tapToRecord')}
-          </Text>
+          {isRecording ? (
+            <View className="mt-2 items-center">
+              <Text className="text-sm text-on-surface font-cairo-semibold">
+                {t('recordings.seconds', { count: Math.floor(recorderState.durationMillis / 1000) })}
+                {' / '}
+                {t('recordings.maxDuration')}
+              </Text>
+            </View>
+          ) : atDailyLimit ? (
+            <View className="mt-2 items-center">
+              <Text className="text-sm text-destructive font-cairo-semibold text-center">
+                {t('recordings.dailyLimit')}
+              </Text>
+            </View>
+          ) : (
+            <Text className="text-sm text-muted-foreground text-center mt-2 font-cairo">
+              {t('home.tapToRecord')}
+            </Text>
+          )}
+          {!isRecording && !atDailyLimit && (
+            <Text className="text-xs text-muted-foreground text-center mt-1 font-cairo">
+              {t('recordings.remaining', { count: MAX_DAILY_RECORDINGS - todayCount })}
+            </Text>
+          )}
         </View>
 
         <ScrollView className="flex-1  pb-8" showsVerticalScrollIndicator={false}>

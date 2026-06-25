@@ -43,6 +43,10 @@
     "daysAgo": "{{count}} day ago",
     "deleteConfirm": "Are you sure you want to delete this recording?",
     "deleteSuccess": "Recording deleted",
+    "dailyLimit": "Daily recording limit reached",
+    "maxDuration": "Max 60 seconds",
+    "remaining": "Today: {{count}}/10",
+    "seconds": "{{count}}s",
     "tips": {
       "title": "Voice Recording Tips",
       "itemAndPrice": "Say the item, price, and store name clearly",

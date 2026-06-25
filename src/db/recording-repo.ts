@@ -25,6 +25,17 @@ export async function insertRecording(recording: NewRecording): Promise<void> {
   );
 }
 
+export async function getTodayRecordingCount(): Promise<number> {
+  const db = await getDb();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const row = await db.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM recordings WHERE created_at >= ?',
+    today.toISOString(),
+  );
+  return row?.count ?? 0;
+}
+
 export async function getAllRecordings(): Promise<RecordingRow[]> {
   const db = await getDb();
   return db.getAllAsync<RecordingRow>('SELECT * FROM recordings ORDER BY created_at DESC');
