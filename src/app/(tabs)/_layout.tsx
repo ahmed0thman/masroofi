@@ -123,7 +123,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           accessibilityRole="tab"
           accessibilityState={{ selected: state.index === state.routes.indexOf(recordRoute) }}
         >
-          <Ionicons name="mic" size={28} color="#ffffff" className="rotate-180" />
+          <Ionicons name="mic" size={28} color={colors.dark.primary} className="rotate-180" />
         </TouchableOpacity>
       )}
     </View>
