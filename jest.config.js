@@ -14,6 +14,7 @@ module.exports = {
         },
         baseUrl: '.',
       },
+      diagnostics: false,
     }],
   },
   moduleNameMapper: {
@@ -23,7 +24,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|expo-.*|@expo.*|react-native-.*|@react-native-community|react-native-reanimated|nativewind|react-native-css|react-native-gesture-handler|react-native-safe-area-context|react-native-screens|react-native-svg|react-native-web|react-native-worklets|whisper\\.rn)/)',
+    'node_modules/(?!(expo|expo-.*|@expo.*|react-native|@react-native|@react-navigation|react-native-.*|@react-native-community|react-native-reanimated|nativewind|react-native-css|react-native-gesture-handler|react-native-safe-area-context|react-native-screens|react-native-svg|react-native-web|react-native-worklets|whisper\\.rn)/)',
   ],
   setupFiles: ['./jest.setup.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/', '/dist/', '/web-build/'],

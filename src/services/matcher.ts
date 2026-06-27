@@ -8,20 +8,11 @@ export interface MatchResult {
   confidence: number;
 }
 
-const ARABIC_EQUIVALENCES: Record<string, string[]> = {
-  'خبز': ['عيش', 'عيشة'],
-  'حليب': ['لبن', 'لبنة'],
-  'فلوس': ['مصاري', 'دراهم'],
-  'موز': ['وز'],
-  'بصل': ['بصلة'],
-  'طماطم': ['طماطم', 'قوطة'],
-  'بطاطس': ['بطاطا', 'بطاطس'],
-  'برتقال': ['برتقال', 'يوسفي'],
-  'عنب': ['عنب'],
-  'فراخ': ['فرخة', 'دجاج', 'كتكوت'],
-  'لحمة': ['لحم', 'لحمة'],
-  'جبنة': ['جبن', 'جبنة'],
-};
+const STOP_WORDS = new Set([
+  'كيلو', 'نص', 'ربع', 'علبة', 'كرتونة', 'زوج', 'زوجين',
+  'حبة', 'حبتين', 'قطعة', 'قطع', 'جرام', 'تو',
+  'كجم', 'كج', 'لتر', 'لترين', 'package', 'pack', 'bag', 'box', 'cross',
+]);
 
 function levenshteinDistance(a: string, b: string): number {
   const m = a.length;
@@ -42,7 +33,8 @@ function levenshteinDistance(a: string, b: string): number {
 export function normalizeArabic(text: string): string {
   return text
     .replace(/[آأإا]/g, 'ا')
-    .replace(/[ةه]/g, 'ة')
+    .replace(/ة/g, 'ة')
+    .replace(/ه($|\s)/g, 'ة$1')
     .replace(/[ىي]/g, 'ي')
     .replace(/ؤ/g, 'و')
     .replace(/ئ/g, 'ي')
@@ -50,6 +42,27 @@ export function normalizeArabic(text: string): string {
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
+}
+
+export function wordOverlapScore(a: string, b: string): number {
+  const wordsA = normalizeArabic(a).split(/\s+/).filter(w => w.length > 0 && !STOP_WORDS.has(w));
+  const wordsB = normalizeArabic(b).split(/\s+/).filter(w => w.length > 0 && !STOP_WORDS.has(w));
+
+  if (wordsA.length === 0 || wordsB.length === 0) return 0;
+
+  const setA = new Set(wordsA);
+  const setB = new Set(wordsB);
+
+  let overlap = 0;
+  for (const word of setA) {
+    if (setB.has(word)) overlap++;
+  }
+
+  if (setA.size <= setB.size && overlap === setA.size) return 0.85;
+  if (setB.size <= setA.size && overlap === setB.size) return 0.85;
+
+  const union = new Set([...setA, ...setB]);
+  return overlap / union.size;
 }
 
 export function arabicSimilarity(a: string, b: string): number {
@@ -61,12 +74,8 @@ export function arabicSimilarity(a: string, b: string): number {
   const maxLen = Math.max(na.length, nb.length);
   if (maxLen === 0) return 1.0;
 
-  for (const [canonical, variants] of Object.entries(ARABIC_EQUIVALENCES)) {
-    const normalizedCanonical = normalizeArabic(canonical);
-    const normalizedVariants = variants.map(normalizeArabic);
-    const all = [normalizedCanonical, ...normalizedVariants];
-    if (all.includes(na) && all.includes(nb)) return 0.9;
-  }
+  const overlapScore = wordOverlapScore(a, b);
+  if (overlapScore >= 0.5) return 0.85;
 
   const dist = levenshteinDistance(na, nb);
   return 1 - dist / maxLen;
@@ -76,21 +85,40 @@ export function findBestMatch(
   searchText: string,
   candidates: Array<{ id: number; name: string; name_variants?: string | null }>,
   threshold = 0.7,
+  equivalenceMap?: Map<string, string>,
 ): { id: number | null; score: number } {
   let bestId: number | null = null;
   let bestScore = 0;
 
-  for (const candidate of candidates) {
-    let score = arabicSimilarity(searchText, candidate.name);
+  const normalizedSearch = normalizeArabic(searchText);
+  const searchAliases = [searchText];
+  if (equivalenceMap?.has(normalizedSearch)) {
+    searchAliases.push(equivalenceMap.get(normalizedSearch)!);
+  }
 
-    if (candidate.name_variants) {
-      try {
-        const variants: string[] = JSON.parse(candidate.name_variants);
-        for (const variant of variants) {
-          const vScore = arabicSimilarity(searchText, variant);
-          if (vScore > score) score = vScore;
-        }
-      } catch {}
+  for (const candidate of candidates) {
+    const normalizedName = normalizeArabic(candidate.name);
+    const candidateAliases = [candidate.name];
+    if (equivalenceMap?.has(normalizedName)) {
+      candidateAliases.push(equivalenceMap.get(normalizedName)!);
+    }
+
+    let score = 0;
+    for (const s of searchAliases) {
+      for (const c of candidateAliases) {
+        const sim = arabicSimilarity(s, c);
+        if (sim > score) score = sim;
+      }
+
+      if (candidate.name_variants) {
+        try {
+          const variants: string[] = JSON.parse(candidate.name_variants);
+          for (const variant of variants) {
+            const vScore = arabicSimilarity(s, variant);
+            if (vScore > score) score = vScore;
+          }
+        } catch {}
+      }
     }
 
     if (score > bestScore) {
@@ -110,6 +138,17 @@ interface CandidateRow {
 export async function matchExpenseRecord(record: { item: string; merchant?: string | null; mainCategory: string }): Promise<MatchResult> {
   const db = await getDb();
 
+  const eqRows = await db.getAllAsync<{ variant: string; canonical: string }>(
+    'SELECT variant, canonical FROM word_equivalences',
+  );
+  const equivalenceMap = new Map<string, string>();
+  for (const eq of eqRows) {
+    const nv = normalizeArabic(eq.variant);
+    if (!equivalenceMap.has(nv)) {
+      equivalenceMap.set(nv, eq.canonical);
+    }
+  }
+
   type RowWithVariants = { id: number; name: string; name_variants: string | null };
   const items = await db.getAllAsync<RowWithVariants>(
     'SELECT id, name, name_variants FROM items WHERE is_active = 1',
@@ -127,10 +166,10 @@ export async function matchExpenseRecord(record: { item: string; merchant?: stri
     'SELECT id, name FROM sub_categories WHERE is_active = 1',
   );
 
-  const itemMatch = findBestMatch(record.item, items);
-  const merchantMatch = record.merchant ? findBestMatch(record.merchant, merchants) : null;
-  const categoryMatch = findBestMatch(record.mainCategory, categories);
-  const subCategoryMatch = findBestMatch(record.mainCategory, subCategories);
+  const itemMatch = findBestMatch(record.item, items, 0.7, equivalenceMap);
+  const merchantMatch = record.merchant ? findBestMatch(record.merchant, merchants, 0.7, equivalenceMap) : null;
+  const categoryMatch = findBestMatch(record.mainCategory, categories, 0.7, equivalenceMap);
+  const subCategoryMatch = findBestMatch(record.mainCategory, subCategories, 0.7, equivalenceMap);
 
   const matchScores = [
     itemMatch.score,

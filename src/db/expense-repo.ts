@@ -67,7 +67,7 @@ const expenseJoinClause = `
   LEFT JOIN sub_categories sc ON sc.id = e.sub_category_id
 `;
 
-function buildWhereClause(filters: ExpenseFilters): { where: string; params: any[] } {
+export function buildWhereClause(filters: ExpenseFilters): { where: string; params: any[] } {
   const conditions: string[] = [];
   const params: any[] = [];
 

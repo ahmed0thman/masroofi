@@ -24,7 +24,7 @@ export async function runMigrations(): Promise<void> {
   await migrateToV2();
 }
 
-async function migrateToV2() {
+export async function migrateToV2() {
   const expensesColumns = await db!.getAllAsync<{ name: string }>("PRAGMA table_info('expenses')");
   const hasOldExpenses = expensesColumns.length > 0 && !expensesColumns.some(c => c.name === 'item_name');
 
@@ -43,6 +43,7 @@ async function migrateToV2() {
   try {
     await seedCurrencies();
     await seedCategories();
+    await seedWordEquivalences();
 
     const hasExpensesOld = await db!.getFirstAsync<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='expenses_old'",
@@ -179,6 +180,25 @@ async function createV2Tables() {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+  await db!.execAsync(`
+    CREATE TABLE IF NOT EXISTS word_equivalences (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      canonical TEXT NOT NULL,
+      variant TEXT NOT NULL,
+      dialect TEXT,
+      source TEXT NOT NULL DEFAULT 'system',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  await db!.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_we_variant ON word_equivalences(variant)
+  `);
+
+  await db!.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_we_canonical ON word_equivalences(canonical)
+  `);
 }
 
 async function seedCurrencies() {
@@ -210,6 +230,123 @@ async function seedCategories() {
       ('إيجار', 'essential', 8),
       ('أخرى', 'normal', 99)
   `);
+}
+
+async function seedWordEquivalences() {
+  const count = await db!.getFirstAsync<{ c: number }>('SELECT COUNT(*) as c FROM word_equivalences');
+  if (count!.c > 0) return;
+
+  const equivalences = [
+    { canonical: 'عيش', variant: 'خبز', dialect: 'egyptian' },
+    { canonical: 'عيش', variant: 'عيشة', dialect: 'egyptian' },
+    { canonical: 'عيش', variant: 'خبزة', dialect: 'levant' },
+    { canonical: 'حليب', variant: 'لبن', dialect: 'levant' },
+    { canonical: 'حليب', variant: 'لبنة', dialect: 'levant' },
+    { canonical: 'حليب', variant: 'حليبة', dialect: 'gulf' },
+    { canonical: 'جبنة', variant: 'جبن', dialect: 'levant' },
+    { canonical: 'جبنة', variant: 'جبنة بيضا', dialect: 'egyptian' },
+    { canonical: 'لحمة', variant: 'لحم', dialect: 'levant' },
+    { canonical: 'لحمة', variant: 'لحمة مفرومة', dialect: 'egyptian' },
+    { canonical: 'فراخ', variant: 'دجاج', dialect: 'levant' },
+    { canonical: 'فراخ', variant: 'فرخة', dialect: 'egyptian' },
+    { canonical: 'فراخ', variant: 'كتكوت', dialect: 'egyptian' },
+    { canonical: 'بطاطس', variant: 'بطاطا', dialect: 'levant' },
+    { canonical: 'طماطم', variant: 'قوطة', dialect: 'egyptian' },
+    { canonical: 'بصل', variant: 'بصلة', dialect: 'egyptian' },
+    { canonical: 'بصل', variant: 'بصل اخضر', dialect: 'levant' },
+    { canonical: 'موز', variant: 'وز', dialect: 'egyptian' },
+    { canonical: 'برتقال', variant: 'يوسفي', dialect: 'levant' },
+    { canonical: 'برتقال', variant: 'بوصفير', dialect: 'egyptian' },
+    { canonical: 'زبادي', variant: 'روب', dialect: 'gulf' },
+    { canonical: 'زبادي', variant: 'لبن زبادي', dialect: 'egyptian' },
+    { canonical: 'بيض', variant: 'بيضات', dialect: 'egyptian' },
+    { canonical: 'زيت', variant: 'زيت طعام', dialect: 'egyptian' },
+    { canonical: 'زيت', variant: 'زيت نباتي', dialect: 'levant' },
+    { canonical: 'سكر', variant: 'سكارة', dialect: 'egyptian' },
+    { canonical: 'شاي', variant: 'شاهي', dialect: 'levant' },
+    { canonical: 'قهوة', variant: 'نسكافيه', dialect: 'egyptian' },
+    { canonical: 'رز', variant: 'أرز', dialect: 'levant' },
+    { canonical: 'مكرونة', variant: 'باستا', dialect: 'levant' },
+    { canonical: 'فول', variant: 'فول مدشوش', dialect: 'egyptian' },
+    { canonical: 'بنزين', variant: 'وقود', dialect: 'levant' },
+    { canonical: 'بنزين', variant: 'سولار', dialect: 'egyptian' },
+    { canonical: 'مواصلات', variant: 'انتقالات', dialect: 'levant' },
+    { canonical: 'مواصلات', variant: 'طلوع ونزول', dialect: 'egyptian' },
+    { canonical: 'تاكسي', variant: 'أوبر', dialect: 'egyptian' },
+    { canonical: 'تاكسي', variant: 'كريم', dialect: 'egyptian' },
+    { canonical: 'تاكسي', variant: 'تكسي', dialect: 'gulf' },
+    { canonical: 'مترو', variant: 'مترو أنفاق', dialect: 'egyptian' },
+    { canonical: 'أتوبيس', variant: 'باص', dialect: 'levant' },
+    { canonical: 'أتوبيس', variant: 'حافلة', dialect: 'gulf' },
+    { canonical: 'ميكروباص', variant: 'ربع نقل', dialect: 'egyptian' },
+    { canonical: 'قطار', variant: 'ترين', dialect: 'gulf' },
+    { canonical: 'صيانة', variant: 'صيانة عربية', dialect: 'egyptian' },
+    { canonical: 'صيانة', variant: 'تصليح عربية', dialect: 'levant' },
+    { canonical: 'كهرباء', variant: 'كهربا', dialect: 'egyptian' },
+    { canonical: 'كهرباء', variant: 'فاتورة كهرباء', dialect: 'levant' },
+    { canonical: 'مياه', variant: 'ماية', dialect: 'egyptian' },
+    { canonical: 'مياه', variant: 'ميه', dialect: 'egyptian' },
+    { canonical: 'مياه', variant: 'فاتورة مياه', dialect: 'levant' },
+    { canonical: 'غاز', variant: 'غاز طبيعي', dialect: 'levant' },
+    { canonical: 'تليفون', variant: 'تلفون', dialect: 'egyptian' },
+    { canonical: 'تليفون', variant: 'موبايل', dialect: 'levant' },
+    { canonical: 'نت', variant: 'إنترنت', dialect: 'levant' },
+    { canonical: 'نت', variant: 'نت النت', dialect: 'egyptian' },
+    { canonical: 'اشتراكات', variant: 'تجديد اشتراك', dialect: 'egyptian' },
+    { canonical: 'إيجار', variant: 'أجرة شقة', dialect: 'egyptian' },
+    { canonical: 'صيانة منزل', variant: 'سباك', dialect: 'egyptian' },
+    { canonical: 'صيانة منزل', variant: 'كهربائي', dialect: 'egyptian' },
+    { canonical: 'ملابس', variant: 'هدوم', dialect: 'egyptian' },
+    { canonical: 'أحذية', variant: 'جزمة', dialect: 'egyptian' },
+    { canonical: 'أحذية', variant: 'كوتشي', dialect: 'egyptian' },
+    { canonical: 'أحذية', variant: 'حذاء', dialect: 'levant' },
+    { canonical: 'أدوات منزلية', variant: 'مستلزمات', dialect: 'egyptian' },
+    { canonical: 'إلكترونيات', variant: 'أجهزة', dialect: 'levant' },
+    { canonical: 'أدوات تنظيف', variant: 'مستلزمات تنظيف', dialect: 'egyptian' },
+    { canonical: 'أدوات تنظيف', variant: 'صابون', dialect: 'egyptian' },
+    { canonical: 'هدايا', variant: 'هدية', dialect: 'levant' },
+    { canonical: 'مستحضرات تجميل', variant: 'ميكاب', dialect: 'egyptian' },
+    { canonical: 'مستحضرات تجميل', variant: 'أدوات تجميل', dialect: 'levant' },
+    { canonical: 'عطور', variant: 'برفان', dialect: 'gulf' },
+    { canonical: 'دكتور', variant: 'طبيب', dialect: 'levant' },
+    { canonical: 'دكتور', variant: 'كشف', dialect: 'egyptian' },
+    { canonical: 'صيدلية', variant: 'أدوية', dialect: 'levant' },
+    { canonical: 'صيدلية', variant: 'علاج', dialect: 'egyptian' },
+    { canonical: 'جيم', variant: 'نادي رياضي', dialect: 'levant' },
+    { canonical: 'جيم', variant: 'صالة رياضة', dialect: 'egyptian' },
+    { canonical: 'مستشفى', variant: 'مشفى', dialect: 'levant' },
+    { canonical: 'تحاليل', variant: 'أشعة', dialect: 'egyptian' },
+    { canonical: 'أسنان', variant: 'دكتور أسنان', dialect: 'egyptian' },
+    { canonical: 'أسنان', variant: 'سنان', dialect: 'egyptian' },
+    { canonical: 'نظارات', variant: 'نضارة', dialect: 'egyptian' },
+    { canonical: 'عملية', variant: 'جراحة', dialect: 'levant' },
+    { canonical: 'سينما', variant: 'أفلام', dialect: 'egyptian' },
+    { canonical: 'مطعم', variant: 'أكل برة', dialect: 'egyptian' },
+    { canonical: 'مطعم', variant: 'رستوران', dialect: 'levant' },
+    { canonical: 'سفر', variant: 'سياحة', dialect: 'levant' },
+    { canonical: 'سفر', variant: 'رحلة', dialect: 'egyptian' },
+    { canonical: 'هوايات', variant: 'أنشطة', dialect: 'levant' },
+    { canonical: 'فلوس', variant: 'مصاري', dialect: 'levant' },
+    { canonical: 'فلوس', variant: 'دراهم', dialect: 'gulf' },
+    { canonical: 'فلوس', variant: 'نقود', dialect: 'levant' },
+    { canonical: 'تسوق', variant: 'شوبينج', dialect: 'egyptian' },
+    { canonical: 'دفع', variant: 'كاش', dialect: 'egyptian' },
+    { canonical: 'دفع', variant: 'نقدي', dialect: 'egyptian' },
+    { canonical: 'دفع', variant: 'كريدت', dialect: 'egyptian' },
+    { canonical: 'دفع', variant: 'بطاقة', dialect: 'levant' },
+    { canonical: 'توصيل', variant: 'دليفري', dialect: 'egyptian' },
+  ];
+
+  const stmt = await db!.prepareAsync(
+    'INSERT INTO word_equivalences (canonical, variant, dialect, source) VALUES (?, ?, ?, ?)',
+  );
+  try {
+    for (const eq of equivalences) {
+      await stmt.executeAsync(eq.canonical, eq.variant, eq.dialect, 'system');
+    }
+  } finally {
+    await stmt.finalizeAsync();
+  }
 }
 
 type OldExpenseRow = {
@@ -406,6 +543,10 @@ export async function seedIfEmpty(): Promise<void> {
   const catCount = await d.getFirstAsync<{ c: number }>('SELECT COUNT(*) as c FROM categories');
   if (catCount!.c === 0) {
     await seedCategories();
+  }
+  const weCount = await d.getFirstAsync<{ c: number }>('SELECT COUNT(*) as c FROM word_equivalences');
+  if (weCount!.c === 0) {
+    await seedWordEquivalences();
   }
 }
 

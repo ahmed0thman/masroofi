@@ -109,7 +109,7 @@ async function buildPromptContext(): Promise<PromptContext> {
   };
 }
 
-function buildContextSection(context: PromptContext): string {
+export function buildContextSection(context: PromptContext): string {
   const parts: string[] = [];
 
   if (context.items.length > 0) {
@@ -149,7 +149,7 @@ function buildFullPrompt(transcript: string, context: PromptContext): string {
   return `${SYSTEM_PROMPT}\n\nالنص:\n${transcript}`;
 }
 
-function parseExpenseResponse(text: string): ExpenseRecord[] {
+export function parseExpenseResponse(text: string): ExpenseRecord[] {
   let parsed: unknown = JSON.parse(text);
 
   if (!Array.isArray(parsed)) {
