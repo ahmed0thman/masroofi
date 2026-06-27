@@ -9,10 +9,7 @@ interface DotIndicatorsProps {
   activeSlide: number;
 }
 
-const DotIndicators: React.FC<DotIndicatorsProps> = ({
-  slidesCount,
-  activeSlide,
-}) => {
+const DotIndicators: React.FC<DotIndicatorsProps> = ({ slidesCount, activeSlide }) => {
   const { t } = useTranslation();
 
   return (
@@ -27,7 +24,7 @@ const DotIndicators: React.FC<DotIndicatorsProps> = ({
           key={i}
           className={cn(
             'h-2 rounded-full',
-            i === activeSlide ? 'w-8 bg-primary' : 'w-2 bg-primary/20'
+            i === activeSlide ? 'w-8 bg-secondary' : 'w-2 bg-secondary/20',
           )}
         />
       ))}

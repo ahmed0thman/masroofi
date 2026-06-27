@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAllExpenses, insertExpenses, insertExpense, deleteExpense, ExpenseRow, NewExpense } from '@/db/expense-repo';
+import { getAllExpenses, insertExpenses, insertExpense, deleteExpense, updateExpense as updateExpenseDb, ExpenseRow, NewExpense } from '@/db/expense-repo';
 
 export function useExpenses() {
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
@@ -36,7 +36,12 @@ export function useExpenses() {
     await refresh();
   }, [refresh]);
 
+  const update = useCallback(async (id: number, data: Parameters<typeof updateExpenseDb>[1]) => {
+    await updateExpenseDb(id, data);
+    await refresh();
+  }, [refresh]);
+
   useEffect(() => { refresh(); }, [refresh]);
 
-  return { expenses, isLoading, error, refresh, addExpenses: addMany, addExpense: addOne, deleteExpense: remove };
+  return { expenses, isLoading, error, refresh, addExpenses: addMany, addExpense: addOne, deleteExpense: remove, updateExpense: update };
 }

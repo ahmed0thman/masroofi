@@ -15,7 +15,10 @@ const SafeAreaView = ({
 }: StyledSafeAreaViewProps) => {
   //   TODO: read the status bar style from the global state manager and set it here
   return (
-    <StyledSafeAreaView className={cn('dark bg-background flex-1 p-5', className)} {...rest}>
+    <StyledSafeAreaView
+      className={cn('dark bg-background flex-1 p-4 pt-8 pb-0', className)}
+      {...rest}
+    >
       {children}
     </StyledSafeAreaView>
   );

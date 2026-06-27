@@ -1,8 +1,7 @@
-import { View, Animated, Text } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import React from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
-
 import { useTranslation } from 'react-i18next';
 import type { ExpenseRow } from '@/db/expense-repo';
 import { formatAmount, formatRelativeTime } from '@/lib/format';
@@ -23,76 +22,85 @@ const DEFAULT_ICON: keyof typeof Ionicons.glyphMap = 'ellipsis-horizontal';
 
 interface ExpenseCardProps {
   expense: ExpenseRow;
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function ExpenseCard({ expense }: ExpenseCardProps) {
+export default function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
   const colors = useThemeColors();
-  const { i18n } = useTranslation();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
+  const { t, i18n } = useTranslation();
   const categoryIcon = CATEGORY_ICONS[expense.main_category] ?? DEFAULT_ICON;
-  const showDescription = Boolean(expense.description && expense.description !== expense.item);
   const showMerchant = Boolean(expense.merchant);
   const formattedPrice = formatAmount(expense.price, expense.currency);
   const relativeTime = formatRelativeTime(expense.created_at, i18n.language);
 
+  const handleDelete = () => {
+    Alert.alert(t('review.delete'), t('review.deleteConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('review.delete'),
+        style: 'destructive',
+        onPress: () => onDelete?.(expense.id),
+      },
+    ]);
+  };
+
   return (
-    <Animated.View
-      className="bg-card rounded-[20px] p-4 items-start gap-3"
-      style={{ opacity: fadeAnim }}
-    >
-      <View className="flex-row items-start justify-between mb-3 gap-4">
-        <View className="bg-surface-bright rounded-md p-3">
-          <Ionicons name={categoryIcon} size={20} color={colors.white} />
+    <View className="bg-card rounded-xl p-4 gap-1.5">
+      <View className="flex-row items-center gap-2">
+        <View className="bg-surface-bright rounded-lg p-1.5">
+          <Ionicons name={categoryIcon} size={16} color={colors.white} />
         </View>
+        <View className="flex-1 flex-row items-center gap-2">
+          <Text className="font-cairo-semibold text-lg text-foreground" numberOfLines={1}>
+            {expense.item}
+          </Text>
+          <Text className="text-xs text-muted-foreground font-cairo">{relativeTime}</Text>
+        </View>
+        {onEdit ? (
+          <TouchableOpacity
+            onPress={() => onEdit(expense.id)}
+            className="p-1"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="create-outline" size={18} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        ) : null}
+        {onDelete ? (
+          <TouchableOpacity
+            onPress={handleDelete}
+            className="p-1"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="trash-outline" size={18} color={colors.destructive} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
-        <View className=" gap-1 items-start flex-grow">
-          {/* <Ionicons name="location-outline" size={12} color={colors.mutedForeground} /> */}
-          {showMerchant ? (
-            <Text className="text-muted-foreground font-cairo-medium text-xl">
-              {expense.merchant}
+      <View className="flex-row items-center gap-2">
+        {showMerchant ? (
+          <View className="bg-surface-bright rounded-full px-2.5 py-0.5 flex-row items-center gap-1">
+            <Ionicons name="storefront-outline" size={14} color={colors.onSurface} />
+            <Text className="text-sm font-cairo-medium text-on-surface">{expense.merchant}</Text>
+          </View>
+        ) : null}
+        <View className="bg-primary-container/70 rounded-full px-2 py-0.5">
+          <Text className="text-sm font-cairo text-on-primary">{expense.main_category}</Text>
+        </View>
+        <View className="flex-1" />
+        <View className="flex-row items-center gap-1">
+          <Text
+            className="font-cairo-bold text-2xl"
+            style={{ direction: 'ltr', color: colors.foreground }}
+          >
+            {formattedPrice.amount}
+            <Text className="text-sm font-cairo text-muted-foreground">
+              {' '}
+              {formattedPrice.suffix}
             </Text>
-          ) : null}
-          <Text className="text-muted-foreground font-cairo text-sm mb-2">
-            {expense.sub_category} . {relativeTime}
-          </Text>
-        </View>
-
-        <Text className="text-foreground leading-6! font-cairo-bold text-3xl">
-          {formattedPrice.amount}{' '}
-          <Text className="text-sm font-cairo text-muted-foreground">{formattedPrice.suffix}</Text>
-        </Text>
-      </View>
-
-      <Text className="text-on-surface font-cairo-semibold text-base mb-0.5">{expense.item}</Text>
-      {/* {showDescription ? (
-        <Text className="text-muted-foreground font-cairo text-xs flex-1" numberOfLines={2}>
-          {expense.description}
-        </Text>
-      ) : null} */}
-
-      <View className="flex-row w-full items-center justify-end gap-3 pt-2 border-t border-outline-variant/40">
-        <View className="bg-primary-container rounded-full px-3 py-1.5">
-          <Text className="text-on-primary font-cairo-semibold text-xs ">
-            {expense.main_category}
           </Text>
         </View>
       </View>
-
-      {expense.confidence < 0.6 ? (
-        <View className="flex-row items-center gap-1 mt-2">
-          <Ionicons name="alert-circle-outline" size={12} color={colors.warning} />
-          <Text className="text-warning font-cairo text-xs">قد يحتاج مراجعة</Text>
-        </View>
-      ) : null}
-    </Animated.View>
+    </View>
   );
 }

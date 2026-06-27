@@ -16,7 +16,7 @@ const SLIDES = [
     iconLabelKey: 'onboarding.slide0.iconLabel' as const,
   },
   {
-    icon: 'person-outline' as const,
+    icon: 'person-add-outline' as const,
     titleKey: 'onboarding.slideName.title' as const,
     descKey: 'onboarding.slideName.description' as const,
     iconLabelKey: 'onboarding.slideName.iconLabel' as const,

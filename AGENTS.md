@@ -2,7 +2,7 @@
 
 **Never do work yourself — always delegate to a subagent.** You are a coordinator. Use `task` tool for non-trivial coding, research, or design work.
 
-## Delegation protocol
+## Delegation protocol (CRITICAL)
 
 1. **Always start by re-reading this file** — respect the golden rule and instructions here on every turn.
 2. **Analyze the user's prompt** to determine which subagent is the best fit. If the user explicitly names a subagent, use that one. Otherwise, match the task to the most suitable subagent from the table below.
@@ -68,19 +68,19 @@ Components are copied into `src/components/ui/` as editable source files.
 
 ### Currently installed components
 
-| Component | Variants | Sizes | Notes |
-|---|---|---|---|
-| **Button** | `default`, `secondary`, `outline`, `ghost`, `destructive`, `link` | `sm`, `md`, `lg`, `icon` | Supports `icon`, `iconAfter`, `loading` props |
-| **Text** | `h1`, `h2`, `h3`, `h4`, `p`, `lead`, `large`, `small`, `muted` | — | Wraps RN `Text` with cva styling |
-| **Avatar** | — | `sm`, `md`, `lg` | Image with fallback initials |
-| **DirectionProvider** | — | — | RTL/LTR context; wrap root layout with it |
+| Component             | Variants                                                          | Sizes                    | Notes                                         |
+| --------------------- | ----------------------------------------------------------------- | ------------------------ | --------------------------------------------- |
+| **Button**            | `default`, `secondary`, `outline`, `ghost`, `destructive`, `link` | `sm`, `md`, `lg`, `icon` | Supports `icon`, `iconAfter`, `loading` props |
+| **Text**              | `h1`, `h2`, `h3`, `h4`, `p`, `lead`, `large`, `small`, `muted`    | —                        | Wraps RN `Text` with cva styling              |
+| **Avatar**            | —                                                                 | `sm`, `md`, `lg`         | Image with fallback initials                  |
+| **DirectionProvider** | —                                                                 | —                        | RTL/LTR context; wrap root layout with it     |
 
 ### Layout components (`src/components/layout/`)
 
-| Component | File | Usage |
-|---|---|---|
-| **SafeAreaView** | `src/components/layout/SafeAreaView.tsx` | Styled safe area with `bg-background flex-1 p-5` defaults |
-| **Container** | `src/components/layout/container.tsx` | Wraps the `.container` utility class (`flex-1 bg-background pt-16 px-4`)
+| Component        | File                                     | Usage                                                                    |
+| ---------------- | ---------------------------------------- | ------------------------------------------------------------------------ |
+| **SafeAreaView** | `src/components/layout/SafeAreaView.tsx` | Styled safe area with `bg-background flex-1 p-5` defaults                |
+| **Container**    | `src/components/layout/container.tsx`    | Wraps the `.container` utility class (`flex-1 bg-background pt-16 px-4`) |
 
 ---
 
@@ -89,18 +89,19 @@ Components are copied into `src/components/ui/` as editable source files.
 **All styling must use NativeWind/Tailwind CSS classes with color tokens defined in `src/app/global.css`.** Never use hardcoded hex/rgb colors.
 
 ## Available color tokens (NativeWind)
+
 Use Tailwind utility classes that map to CSS custom properties from `@theme` in `src/app/global.css`. For backgrounds: `bg-{token}`, for text: `text-{token}`, for borders: `border-{token}`. Supports opacity modifiers like `bg-primary/10`.
 
-| Category | Token classes |
-|---|---|
-| **Background** | `bg-background`, `bg-surface`, `bg-surface-dim`, `bg-surface-bright`, `bg-surface-container-lowest/low/high/highest` |
-| **Primary** | `bg-primary`, `text-primary`, `bg-primary-container`, `border-primary` |
-| **Secondary** | `bg-secondary`, `text-secondary`, `bg-secondary-container` |
-| **Tertiary** | `bg-tertiary`, `text-tertiary`, `bg-tertiary-container` |
-| **On-* (text/icons on colored backgrounds)** | `text-on-primary`, `text-on-surface`, `text-on-surface-variant`, `text-on-background`, `text-muted-foreground` |
-| **Semantic** | `bg-success`, `text-success`, `bg-warning`, `bg-error`, `bg-info` |
-| **Outline/Border** | `border-outline`, `border-outline-variant`, `bg-input`, `bg-border` |
-| **Foreground (alias)** | `text-foreground`, `bg-card`, `text-card-foreground`, `bg-popover`, `bg-muted`, `bg-accent`, `text-accent-foreground`, `bg-destructive`, `text-destructive-foreground` |
+| Category                                      | Token classes                                                                                                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Background**                                | `bg-background`, `bg-surface`, `bg-surface-dim`, `bg-surface-bright`, `bg-surface-container-lowest/low/high/highest`                                                   |
+| **Primary**                                   | `bg-primary`, `text-primary`, `bg-primary-container`, `border-primary`                                                                                                 |
+| **Secondary**                                 | `bg-secondary`, `text-secondary`, `bg-secondary-container`                                                                                                             |
+| **Tertiary**                                  | `bg-tertiary`, `text-tertiary`, `bg-tertiary-container`                                                                                                                |
+| **On-\* (text/icons on colored backgrounds)** | `text-on-primary`, `text-on-surface`, `text-on-surface-variant`, `text-on-background`, `text-muted-foreground`                                                         |
+| **Semantic**                                  | `bg-success`, `text-success`, `bg-warning`, `bg-error`, `bg-info`                                                                                                      |
+| **Outline/Border**                            | `border-outline`, `border-outline-variant`, `bg-input`, `bg-border`                                                                                                    |
+| **Foreground (alias)**                        | `text-foreground`, `bg-card`, `text-card-foreground`, `bg-popover`, `bg-muted`, `bg-accent`, `text-accent-foreground`, `bg-destructive`, `text-destructive-foreground` |
 
 ## Inline colors (for icons, imperative styles)
 
@@ -118,21 +119,24 @@ function MyComponent() {
 The `colors` object mirrors the CSS tokens and provides `light`/`dark` variants with a `useThemeColors()` hook.
 
 ## Available component utility classes
+
 Defined in `@layer components` in `global.css`:
 
-| Class | Contents |
-|---|---|
-| `.container` | `flex-1 bg-background pt-16 px-4` |
-| `.title` | `text-2xl font-bold text-foreground` |
+| Class            | Contents                                           |
+| ---------------- | -------------------------------------------------- |
+| `.container`     | `flex-1 bg-background pt-16 px-4`                  |
+| `.title`         | `text-2xl font-bold text-foreground`               |
 | `.section-title` | `text-lg font-semibold text-secondary mt-7.5 mb-4` |
-| `.empty` | `text-sm text-secondary` |
-| `.header` | `flex-row justify-between items-center` |
-| `.flex-center` | `items-center justify-center` |
+| `.empty`         | `text-sm text-secondary`                           |
+| `.header`        | `flex-row justify-between items-center`            |
+| `.flex-center`   | `items-center justify-center`                      |
 
 ## Available font families
+
 Use via `font-{name}`: `font-cairo`, `font-cairo-bold`, `font-cairo-semibold`, `font-cairo-medium`, `font-cairo-light`, `font-cairo-extralight`, `font-cairo-extrabold`.
 
 ## Forbidden patterns
+
 - `bg-[#hex]`, `text-[#hex]`, `color: '#hex'` — use token classes instead
 - `StyleSheet.create` with hardcoded colors — use `className` with token classes
 
@@ -143,6 +147,7 @@ Use via `font-{name}`: `font-cairo`, `font-cairo-bold`, `font-cairo-semibold`, `
 **All user-facing strings must use `t()` from `react-i18next`.** Never hardcode display strings.
 
 ## Setup
+
 - Library: `i18next` v26 + `react-i18next` v17
 - Import: `import { useTranslation } from 'react-i18next'`
 - Bootstrap: `import '@/i18n'` in `_layout.tsx`
@@ -152,15 +157,18 @@ Use via `font-{name}`: `font-cairo`, `font-cairo-bold`, `font-cairo-semibold`, `
 - Typesafe: `src/i18n/types.ts` provides full type inference against the Arabic JSON schema
 
 ## Usage patterns
+
 ```tsx
 const { t } = useTranslation();
-t('common.appName');              // simple string
-t('home.title', { name });        // interpolation
+t('common.appName'); // simple string
+t('home.title', { name }); // interpolation
 t('profile.followers', { count }); // pluralization (one/other keys)
 ```
 
 ## Translation file structure
+
 Keys are namespaced by screen/domain:
+
 ```
 common.{appName, loading, error, retry, cancel, save, delete, ...}
 home.{title, subtitle, ...}
@@ -171,6 +179,7 @@ profile.{title, followers, posts, ...}
 New keys should be added to both `ar/translations.json` and `en/translations.json` under the appropriate namespace.
 
 ## Forbidden patterns
+
 - Hardcoded user-facing strings like `"Loading..."`, `"حفظ"`, `"Next"` — use `t()` instead
 - Inline text in JSX — always extract to translation files
 
@@ -205,25 +214,25 @@ No test runner or typecheck script configured. TypeScript validation via `tsc` (
 
 ## What's built
 
-| Area | Status | Details |
-|---|---|---|
-| **SQLite (DB layer)** | ✅ Complete | `src/db/` — 3 tables: `profiles`, `expenses`, `recordings`. `openDatabaseAsync()` pattern, WAL mode, prepared statements for bulk inserts, FK constraints |
-| **Routing** | ✅ Complete | `src/app/` — Stack root → index (onboarding gate) → `(tabs)` group (home/history/settings) |
-| **Onboarding** | ✅ Complete | 4-slide carousel: language select, voice intro, privacy, mic+notif setup. Reminder scheduling via `expo-notifications` daily trigger. AsyncStorage persistence. |
-| **Voice recording** | ✅ Working | Mic toggle on home screen → records via `expo-audio` → saves to documents dir → transcribes via Groq Whisper API |
-| **Transcription** | ✅ Working | `src/services/transcription.ts` — sends to Groq `whisper-large-v3-turbo` with `verbose_json` format |
-| **Theme system** | ✅ Complete | Material Design 3 tokens in `global.css` + `src/styles/global.ts` (light/dark, `useThemeColors()` hook) |
-| **i18n** | ✅ Complete | Arabic (primary) + English. Full type inference from Arabic schema. AsyncStorage + device locale detection. |
-| **Fonts** | ✅ Complete | Cairo family (7 weights). Loaded in root `_layout.tsx`. |
-| **Custom tab bar** | ✅ Complete | Custom `Tabs` bar with Ionicons, active/inactive states, i18n labels |
-| **Settings screen** | ✅ Complete | List rows (language, reminders, about) with chevrons |
-| **History screen** | ✅ Complete | Empty state placeholder |
-| **Gemini service** | ⚠️ Stub | `src/services/gemini.ts` — skeleton, not wired to anything. Uses invalid model name `gemini-3.5-flash`. |
-| **Whisper test page** | ❌ Missing tab | `(tabs)/_layout.tsx` references a `whisper` screen but `whisper.tsx` does not exist → would crash navigation |
-| **DB layer** | ❌ Empty | `src/db/` directory exists but is empty |
-| **Config** | ❌ Empty | `src/config/` directory exists but is empty |
-| **Providers** | ❌ Empty | `src/providers/` directory exists but is empty |
-| **Utils** | ❌ Empty | `src/utils/` directory exists but is empty |
+| Area                  | Status         | Details                                                                                                                                                         |
+| --------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SQLite (DB layer)** | ✅ Complete    | `src/db/` — 3 tables: `profiles`, `expenses`, `recordings`. `openDatabaseAsync()` pattern, WAL mode, prepared statements for bulk inserts, FK constraints       |
+| **Routing**           | ✅ Complete    | `src/app/` — Stack root → index (onboarding gate) → `(tabs)` group (home/history/settings)                                                                      |
+| **Onboarding**        | ✅ Complete    | 4-slide carousel: language select, voice intro, privacy, mic+notif setup. Reminder scheduling via `expo-notifications` daily trigger. AsyncStorage persistence. |
+| **Voice recording**   | ✅ Working     | Mic toggle on home screen → records via `expo-audio` → saves to documents dir → transcribes via Groq Whisper API                                                |
+| **Transcription**     | ✅ Working     | `src/services/transcription.ts` — sends to Groq `whisper-large-v3-turbo` with `verbose_json` format                                                             |
+| **Theme system**      | ✅ Complete    | Material Design 3 tokens in `global.css` + `src/styles/global.ts` (light/dark, `useThemeColors()` hook)                                                         |
+| **i18n**              | ✅ Complete    | Arabic (primary) + English. Full type inference from Arabic schema. AsyncStorage + device locale detection.                                                     |
+| **Fonts**             | ✅ Complete    | Cairo family (7 weights). Loaded in root `_layout.tsx`.                                                                                                         |
+| **Custom tab bar**    | ✅ Complete    | Custom `Tabs` bar with Ionicons, active/inactive states, i18n labels                                                                                            |
+| **Settings screen**   | ✅ Complete    | List rows (language, reminders, about) with chevrons                                                                                                            |
+| **History screen**    | ✅ Complete    | Empty state placeholder                                                                                                                                         |
+| **Gemini service**    | ⚠️ Stub        | `src/services/gemini.ts` — skeleton, not wired to anything. Uses invalid model name `gemini-3.5-flash`.                                                         |
+| **Whisper test page** | ❌ Missing tab | `(tabs)/_layout.tsx` references a `whisper` screen but `whisper.tsx` does not exist → would crash navigation                                                    |
+| **DB layer**          | ❌ Empty       | `src/db/` directory exists but is empty                                                                                                                         |
+| **Config**            | ❌ Empty       | `src/config/` directory exists but is empty                                                                                                                     |
+| **Providers**         | ❌ Empty       | `src/providers/` directory exists but is empty                                                                                                                  |
+| **Utils**             | ❌ Empty       | `src/utils/` directory exists but is empty                                                                                                                      |
 
 ## File tree (src/)
 

@@ -1,14 +1,13 @@
-import { View, Pressable, Text } from 'react-native';
-import React, { useState, useCallback } from 'react';
-import * as Haptics from 'expo-haptics';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { BottomSheet } from '@/components/BottomSheet';
 import { SettingsRow } from '@/components/SettingsRow';
-import { useThemeColors } from '@/styles/global';
-import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import { useProfile } from '@/hooks/useProfile';
-import Container from '../layout/container';
+import { useThemeColors } from '@/styles/global';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, Text, View } from 'react-native';
 
 export function AppSettingsSection() {
   const colors = useThemeColors();
@@ -63,9 +62,9 @@ export function AppSettingsSection() {
 
   return (
     <>
-      <Container>
+      <View>
         <Text className="section-title">{t('home.settings.title')}</Text>
-      </Container>
+      </View>
       <View className="bg-surface-bright rounded-[20px] mx-5 overflow-hidden">
         <SettingsRow
           icon="language-outline"

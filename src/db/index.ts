@@ -24,6 +24,7 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
       language TEXT NOT NULL DEFAULT 'ar',
       theme TEXT NOT NULL DEFAULT 'system',
       reminders_enabled INTEGER NOT NULL DEFAULT 1,
+      user_type TEXT NOT NULL DEFAULT 'user',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     )
@@ -32,6 +33,7 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   await addColumnIfNotExists('profiles', 'gender', "TEXT DEFAULT ''");
   await addColumnIfNotExists('profiles', 'location', "TEXT DEFAULT ''");
   await addColumnIfNotExists('profiles', 'age', 'INTEGER DEFAULT 0');
+  await addColumnIfNotExists('profiles', 'user_type', "TEXT NOT NULL DEFAULT 'user'");
 
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS expenses (

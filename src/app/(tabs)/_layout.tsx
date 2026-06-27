@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils';
-import { colors } from '@/styles/global';
+import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const tabConfig: Record<
   string,
@@ -26,7 +27,8 @@ const tabConfig: Record<
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const { t } = useTranslation();
-  const tabColors = colors.dark;
+  const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
 
   const recordRoute = state.routes.find((r: any) => r.name === 'record');
   const otherRoutes = state.routes.filter((r: any) => r.name !== 'record');
@@ -66,14 +68,14 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         <Ionicons
           name={iconName}
           size={24}
-          color={isFocused ? tabColors.primary : tabColors.foreground}
+          color={isFocused ? colors.secondary : colors.foreground}
         />
         <Text
           className={cn(
             'mt-1 text-[11px]',
             isFocused
-              ? 'text-neutral-100 font-cairo-semibold'
-              : 'text-neutral-400 font-cairo-regular',
+              ? 'text-on-surface font-cairo-semibold'
+              : 'text-muted-foreground font-cairo-regular',
           )}
         >
           {t(config.labelKey as any)}
@@ -86,7 +88,8 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
     <View
       className="dark px-1 pb-1.5 border-t border-border bg-card items-center"
       style={{
-        height: 64,
+        height: 50 + insets.bottom,
+        paddingBottom: insets.bottom - 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
@@ -123,7 +126,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           accessibilityRole="tab"
           accessibilityState={{ selected: state.index === state.routes.indexOf(recordRoute) }}
         >
-          <Ionicons name="mic" size={28} color={colors.dark.primary} className="rotate-180" />
+          <Ionicons name="mic" size={28} color={colors.secondaryContainer} className="rotate-180" />
         </TouchableOpacity>
       )}
     </View>

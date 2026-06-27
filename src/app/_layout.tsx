@@ -17,7 +17,6 @@ import './global.css';
 
 setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
@@ -66,27 +65,20 @@ export default function RootLayout() {
     return null;
   }
 
-  if (!splashDone) {
-    return (
-      <DirectionProvider defaultDirection="rtl">
-        <StatusBar style="light" />
-        <ThemeProvider value={DarkTheme}>
-          <SplashScreen onFinish={() => setSplashDone(true)} />
-        </ThemeProvider>
-      </DirectionProvider>
-    );
-  }
-
   return (
     <DirectionProvider defaultDirection="rtl">
       <StatusBar style="light" />
       <ThemeProvider value={DarkTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="about" options={{ headerShown: false }} />
-          <Stack.Screen name="review" options={{ headerShown: false, presentation: 'modal' }} />
-        </Stack>
+        {!splashDone ? (
+          <SplashScreen onFinish={() => setSplashDone(true)} />
+        ) : (
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="about" options={{ headerShown: false }} />
+            <Stack.Screen name="review" options={{ headerShown: false, presentation: 'modal' }} />
+          </Stack>
+        )}
       </ThemeProvider>
     </DirectionProvider>
   );

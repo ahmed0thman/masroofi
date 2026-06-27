@@ -1,8 +1,9 @@
 import { transcribeAudioFile } from '@/services/transcription';
 import { refineAndExtractEnititesFromTranscript } from '@/services/gemini';
 import type { ExpenseRecord } from '@/services/gemini';
-import type { IRecording } from '@/types';
 import { insertRecording, getTodayRecordingCount } from '@/db/recording-repo';
+import { getProfile } from '@/db/profile-repo';
+import { setPendingExpenses } from '@/lib/pending-expenses';
 import {
   AudioModule,
   RecordingPresets,
@@ -21,34 +22,27 @@ export const MAX_DAILY_RECORDINGS = 10;
 
 export const useRecordings = () => {
   const { t } = useTranslation();
-  const [recordingList, setRecordingList] = useState<IRecording[]>([]);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptionResult, setTranscriptionResult] = useState<string | null>(null);
   const [expenseRecords, setExpenseRecords] = useState<ExpenseRecord[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
   const [todayCount, setTodayCount] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [userType, setUserType] = useState<string>('user');
   const audioRecorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
     directory: 'document',
   });
   const recorderState = useAudioRecorderState(audioRecorder);
   const recordingDir = new Directory(Paths.document, 'recordings');
-  const handleToggleRef = useRef<() => Promise<void> | null>(null);
+  const finishRecordingRef = useRef<() => Promise<void>>(async () => {});
 
   const loadRecordings = useCallback(async () => {
     const items = (await recordingDir
       .list()
       .filter((item) => item instanceof File && item.uri.includes('.m4a'))) as File[];
     const sortedRecordings = [...items].sort((a, b) => b.lastModified! - a.lastModified!);
-    setRecordingList(
-      sortedRecordings.map((file) => ({
-        id: file.name,
-        transcript: file.name,
-        durationMs: 0,
-        createdAt: new Date(file.lastModified!).toISOString(),
-        uri: file.uri,
-      })),
-    );
   }, []);
 
   const configureAudioSession = async () => {
@@ -79,77 +73,107 @@ export const useRecordings = () => {
     }
   };
 
-  const handleRecordingToggle = async () => {
-    if (recorderState.isRecording) {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      const destFile = await stopRecording();
-      if (destFile) {
-        // Step 1: Transcribe via Whisper
-        setIsTranscribing(true);
-        const transcription = await transcribeAudioFile(destFile);
-        console.log({ transcription });
-        const transcriptText = transcription?.text ?? null;
-        setTranscriptionResult(transcriptText);
-        setIsTranscribing(false);
+  const startRecording = async (): Promise<boolean> => {
+    if (isRecording) return false;
+    const count = await getTodayRecordingCount();
+    if (userType === 'user' && count >= MAX_DAILY_RECORDINGS) {
+      Alert.alert(t('recordings.dailyLimit'));
+      return false;
+    }
+    setIsPaused(false);
+    setTodayCount(count);
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await record();
+    setIsRecording(true);
+    return true;
+  };
 
-        if (!transcriptText) {
+  const processTranscription = async (destFile: File) => {
+    setIsTranscribing(true);
+    const transcription = await transcribeAudioFile(destFile);
+    console.log({ transcription });
+    const transcriptText = transcription?.text ?? null;
+    setTranscriptionResult(transcriptText);
+    setIsTranscribing(false);
+
+    if (!transcriptText) {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+
+    const recordingId = destFile.name.replace('.m4a', '');
+    if (transcriptText) {
+      try {
+        await insertRecording({
+          id: recordingId,
+          transcript: transcriptText,
+          duration_ms: recorderState.durationMillis ?? 0,
+        });
+        setTodayCount((prev) => prev + 1);
+      } catch (err) {
+        console.error('Failed to save recording to DB:', err);
+      }
+    }
+
+    if (transcriptText) {
+      setIsExtracting(true);
+      const extracted = await refineAndExtractEnititesFromTranscript(transcriptText);
+      console.log({ extracted });
+      setExpenseRecords(extracted ?? []);
+      setPendingExpenses(extracted ?? []);
+
+      if (extracted && extracted.length > 0) {
+        const allGoodConfidence = extracted.every((r) => r.confidence >= 0.6);
+        if (allGoodConfidence) {
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else {
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
-
-        // Step 1b: Save recording to SQLite
-        const recordingId = destFile.name.replace('.m4a', '');
-        if (transcriptText) {
-          try {
-            await insertRecording({
-              id: recordingId,
-              transcript: transcriptText,
-              duration_ms: recorderState.durationMillis ?? 0,
-            });
-            setTodayCount((prev) => prev + 1);
-          } catch (err) {
-            console.error('Failed to save recording to DB:', err);
-          }
-        }
-
-        // Step 2: Extract expense via Gemini
-        if (transcriptText) {
-          setIsExtracting(true);
-          const extracted = await refineAndExtractEnititesFromTranscript(transcriptText);
-          console.log({ extracted });
-          setExpenseRecords(extracted ?? []);
-
-          // Haptic feedback based on extraction results
-          if (extracted && extracted.length > 0) {
-            const allGoodConfidence = extracted.every((r) => r.confidence >= 0.6);
-            if (allGoodConfidence) {
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            } else {
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            }
-          } else {
-            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-          }
-          setIsExtracting(false);
-        }
+      } else {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
-      await loadRecordings();
-    } else {
-      const count = await getTodayRecordingCount();
-      if (count >= MAX_DAILY_RECORDINGS) {
-        Alert.alert(t('recordings.dailyLimit'));
-        return;
-      }
-      setTodayCount(count);
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await record();
+      setIsExtracting(false);
     }
   };
 
-  handleToggleRef.current = handleRecordingToggle;
+  const stopRecordingOnly = async (): Promise<File | undefined> => {
+    if (!isRecording) return;
+    setIsRecording(false);
+    setIsPaused(false);
+    const destFile = await stopRecording();
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    return destFile;
+  };
+
+  const finishRecording = async () => {
+    const destFile = await stopRecordingOnly();
+    if (destFile) {
+      await processTranscription(destFile);
+    }
+    await loadRecordings();
+  };
+
+  const togglePauseRecording = async () => {
+    if (isPaused) {
+      audioRecorder.record();
+      setIsPaused(false);
+    } else {
+      audioRecorder.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const cancelRecording = async () => {
+    if (!isRecording) return;
+    setIsRecording(false);
+    setIsPaused(false);
+    await audioRecorder.stop();
+  };
+
+  finishRecordingRef.current = finishRecording;
 
   useEffect(() => {
     if (recorderState.isRecording && recorderState.durationMillis >= MAX_RECORDING_MS) {
-      handleToggleRef.current?.();
+      finishRecordingRef.current?.();
     }
   }, [recorderState.durationMillis, recorderState.isRecording]);
 
@@ -161,6 +185,10 @@ export const useRecordings = () => {
       loadRecordings();
       const count = await getTodayRecordingCount();
       setTodayCount(count);
+      const profile = await getProfile();
+      if (profile) {
+        setUserType(profile.user_type);
+      }
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
         Alert.alert('Permission to access microphone is required!');
@@ -169,42 +197,21 @@ export const useRecordings = () => {
     initAudio();
   }, []);
 
-  const onDelete = async (file: File) => {
-    Alert.alert('Delete Recording', 'Are you sure you want to delete this recording?', [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            await file.delete();
-            loadRecordings();
-          } catch (error) {
-            Alert.alert(
-              'Error deleting recording',
-              `An error occurred while deleting the recording: ${error}`,
-            );
-          }
-        },
-      },
-    ]);
-  };
-
   return {
-    isRecording: recorderState.isRecording,
-    handleRecordingToggle,
-    recordingList,
+    startRecording,
+    finishRecording,
+    stopRecordingOnly,
+    processTranscription,
+    cancelRecording,
+    togglePauseRecording,
+    isRecording,
+    isPaused,
     recorderState,
-    recordingDir,
-    onDelete,
-    isTranscribing,
-    transcriptionResult,
-    expenseRecords,
-    isExtracting,
     todayCount,
+    isTranscribing,
+    isExtracting,
+    expenseRecords,
+    transcriptionResult,
+    userType,
   };
 };

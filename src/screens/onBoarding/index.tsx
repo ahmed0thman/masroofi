@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDirection } from '@/components/ui/direction-provider';
 import { useProfile } from '@/hooks/useProfile';
+import { getProfile } from '@/db/profile-repo';
 import { getAllReminders, insertReminder } from '@/db/reminder-repo';
 
 import {
@@ -38,8 +40,6 @@ import type { OnboardingScreenProps } from './constants';
 import DotIndicators from './DotIndicators';
 import SlideContent from './SlideContent';
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   onFinish,
   name: externalName,
@@ -48,12 +48,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const { t, i18n } = useTranslation();
   const { isRTL, setDirection } = useDirection();
   const router = useRouter();
-  const { createProfile } = useProfile();
-
-  // ── State ──────────────────────────────────────────────────────────────
+  const { createProfile, updateProfile } = useProfile();
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [name, setName] = useState(externalName ?? '');
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showNameError, setShowNameError] = useState(false);
   const [reminders, setReminders] = useState<string[]>([]);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -61,12 +60,84 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const [timePickerDate, setTimePickerDate] = useState(new Date());
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  // ── Refs ───────────────────────────────────────────────────────────────
-
   const scrollViewRef = useRef<ScrollView>(null);
   const lastPressTime = useRef(0);
+  const profileCreatedRef = useRef(false);
 
-  // ── Check reduce motion ────────────────────────────────────────────────
+  // ── Create/load profile on mount ─────────────────────────────────────
+
+  useEffect(() => {
+    const initProfile = async () => {
+      if (profileCreatedRef.current) return;
+      profileCreatedRef.current = true;
+      let p = await getProfile();
+      if (!p) {
+        const lang = i18n.language?.startsWith('ar') ? 'ar' : 'en';
+        p = await createProfile({
+          name: '',
+          language: lang,
+          theme: 'system',
+          reminders_enabled: 0,
+        });
+      }
+      if (p?.name) setName(p.name);
+      if (p?.avatar_uri) setAvatarUri(p.avatar_uri);
+    };
+    initProfile();
+  }, []);
+
+  // ── Update profile name when user types (debounced) ─────────────────
+
+  const nameUpdateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleNameChange = useCallback(
+    (text: string) => {
+      setName(text);
+      if (showNameError) setShowNameError(false);
+      externalOnNameChange?.(text);
+
+      if (nameUpdateTimer.current) clearTimeout(nameUpdateTimer.current);
+      nameUpdateTimer.current = setTimeout(() => {
+        updateProfile({ name: text.trim() || '' });
+      }, 600);
+    },
+    [showNameError, externalOnNameChange, updateProfile],
+  );
+
+  // ── Avatar picker ───────────────────────────────────────────────────
+
+  const handleAvatarPress = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('common.error'), t('profile.avatar.permissionDenied'));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      const uri = result.assets[0].uri;
+      setAvatarUri(uri);
+      updateProfile({ avatar_uri: uri });
+    }
+  }, [t, updateProfile]);
+
+  // ── Initial scroll position ─────────────────────────────────────────
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({
+        x: isRTL ? (SLIDE_COUNT - 1) * SCREEN_WIDTH : 0,
+        animated: false,
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isRTL]);
+
+  // ── Check reduce motion ─────────────────────────────────────────────
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
@@ -74,7 +145,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     return () => subscription.remove();
   }, []);
 
-  // ── Load reminders from DB on mount ────────────────────────────────
+  // ── Load reminders from DB on mount ─────────────────────────────────
 
   useEffect(() => {
     getAllReminders().then((rows) => {
@@ -84,7 +155,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     });
   }, []);
 
-  // ── Slide Navigation ──────────────────────────────────────────────────
+  // ── Slide Navigation ────────────────────────────────────────────────
 
   const goToSlide = useCallback(
     (index: number) => {
@@ -123,7 +194,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     }
   }, [activeSlide, goToSlide]);
 
-  // ── Scroll event handler (user swipes) ─────────────────────────────────
+  // ── Scroll event handler ───────────────────────────────────────────
 
   const handleMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -139,7 +210,19 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     [isRTL, activeSlide, name, goToSlide],
   );
 
-  // ── Handle Finish / Get Started ───────────────────────────────────────
+  // ── Handle language change ─────────────────────────────────────────
+
+  const handleLanguageChange = useCallback(
+    (lang: string) => {
+      i18n.changeLanguage(lang);
+      const dir = lang === 'ar' ? 'rtl' : 'ltr';
+      setDirection(dir);
+      updateProfile({ language: lang });
+    },
+    [i18n, setDirection, updateProfile],
+  );
+
+  // ── Handle Finish (profile already exists) ──────────────────────────
 
   const handleFinish = useCallback(async () => {
     const trimmed = name.trim();
@@ -147,14 +230,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       setShowNameError(true);
       return;
     }
-    const lang = i18n.language?.startsWith('ar') ? 'ar' : 'en';
+    await updateProfile({ name: trimmed });
     try {
-      await createProfile({
-        name: trimmed,
-        language: lang,
-        theme: 'system',
-        reminders_enabled: reminders.length > 0 ? 1 : 0,
-      });
       for (const r of reminders) {
         const [timePart, meridiem] = r.split(' ');
         await insertReminder({ time: timePart, meridiem });
@@ -164,9 +241,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     } catch {
       Alert.alert(t('common.error'), t('common.retry'));
     }
-  }, [name, reminders, createProfile, router, t, i18n.language]);
+  }, [name, reminders, updateProfile, router, t]);
 
-  // ── Handle Skip ──────────────────────────────────────────────────────
+  // ── Handle Skip ────────────────────────────────────────────────────
 
   const handleSkip = useCallback(async () => {
     const trimmed = name.trim();
@@ -174,9 +251,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       setShowNameError(true);
       return;
     }
-    const lang = i18n.language?.startsWith('ar') ? 'ar' : 'en';
+    await updateProfile({ name: trimmed });
     try {
-      await createProfile({ name: trimmed, language: lang });
       for (const r of reminders) {
         const [timePart, meridiem] = r.split(' ');
         await insertReminder({ time: timePart, meridiem });
@@ -186,20 +262,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     } catch {
       Alert.alert(t('common.error'), t('common.retry'));
     }
-  }, [name, reminders, createProfile, router, t, i18n.language]);
+  }, [name, reminders, updateProfile, router, t]);
 
-  // ── Language Toggle ──────────────────────────────────────────────────
-
-  const handleLanguageChange = useCallback(
-    (lang: string) => {
-      i18n.changeLanguage(lang);
-      const dir = lang === 'ar' ? 'rtl' : 'ltr';
-      setDirection(dir);
-    },
-    [i18n, setDirection],
-  );
-
-  // ── Button Press Haptics (no animated scale) ──────────────────────────
+  // ── Button Press Haptics ────────────────────────────────────────────
 
   const handlePressIn = useCallback(() => {
     try {
@@ -209,13 +274,13 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     }
   }, []);
 
-  // ── Derived State ────────────────────────────────────────────────────
+  // ── Derived State ───────────────────────────────────────────────────
 
   const isLastSlide = activeSlide === SLIDE_COUNT - 1;
   const currentLang = i18n.language?.startsWith('ar') ? 'ar' : 'en';
   const isArabic = currentLang === 'ar';
 
-  // ── Time formatting ─────────────────────────────────────────────
+  // ── Time formatting ────────────────────────────────────────────
 
   const formatTime = (date: Date): string => {
     const hours = date.getHours();
@@ -225,7 +290,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     return `${hour12}:${minutes} ${period}`;
   };
 
-  // ── Reminder handlers ────────────────────────────────────────────────
+  // ── Reminder handlers ──────────────────────────────────────────────
 
   const handleAddReminder = useCallback(async () => {
     if (reminders.length >= 3) return;
@@ -243,11 +308,22 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     async (date: Date) => {
       const timeStr = formatTime(date);
       try {
+        if (Platform.OS === 'android') {
+          await Notifications.setNotificationChannelAsync('masroofi-reminders', {
+            name: t('onboarding.reminder.notificationChannelName'),
+            importance: Notifications.AndroidImportance.HIGH,
+            vibrationPattern: [0, 100, 100, 100],
+            lightColor: '#4CAF50',
+          });
+        }
         await Notifications.scheduleNotificationAsync({
           identifier: timeStr,
           content: {
-            title: t('onboarding.reminder.title'),
+            title: t('onboarding.reminder.notificationTitle'),
+            subtitle: t('onboarding.reminder.notificationSubtitle'),
             body: t('onboarding.reminder.notificationBody'),
+            data: { type: 'reminder' },
+            sound: true,
           },
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -295,7 +371,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     setReminders((prev) => prev.filter((t) => t !== time));
   }, []);
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────────────
 
   return (
     <SafeAreaView className="p-0">
@@ -335,13 +411,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                 onRemoveReminder={handleRemoveReminder}
                 notifDenied={notifDenied}
                 name={name}
-                onNameChange={(text) => {
-                  setName(text);
-                  if (showNameError) setShowNameError(false);
-                  externalOnNameChange?.(text);
-                }}
+                onNameChange={handleNameChange}
                 showNameError={showNameError}
                 onNameErrorDismiss={() => setShowNameError(false)}
+                nameAutoFocus={activeSlide === 1}
+                avatarUri={avatarUri}
+                onAvatarPress={handleAvatarPress}
               />
             ))}
           </ScrollView>
@@ -361,7 +436,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           </Button>
         </View>
 
-        {/* ── Time Picker Modal Overlay ─────────────────────────────── */}
         {showTimePicker && (
           <View className="absolute inset-0 z-50 items-center justify-center bg-black/50">
             <View className="bg-surface rounded-2xl p-6 mx-8 items-center shadow-lg">

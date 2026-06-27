@@ -8,6 +8,7 @@
     "cancel": "إلغاء",
     "save": "حفظ",
     "delete": "حذف",
+    "edit": "تعديل المصروف",
     "recordYourExpenses": "سجل مصروفاتك بصوتك"
   },
   "home": {
@@ -61,7 +62,13 @@
     "manualItemRequired": "يرجى إدخال اسم الصنف",
     "manualPriceRequired": "يرجى إدخال سعر صحيح",
     "manualAdd": "إضافة",
+    "addSomeFirst": "أضف مصروفاً أولاً",
     "manualPending": "{{count}} مصروفات في الانتظار",
+    "addMore": "إضافة المزيد",
+    "customCategory": "فئة مخصصة",
+    "customCategoryRequired": "يرجى إدخال اسم الفئة المخصصة",
+    "category": "الفئة",
+    "send": "إرسال",
     "manualSaveAll": "حفظ الكل ({{count}})",
     "tips": {
       "title": "نصائح للتسجيل الصوتي",
@@ -70,6 +77,9 @@
       "mentionContext": "حدد مكان المصروف (البيت، العربية، الجيم، ..)",
       "example": "مثال: 'خضار ب ٥٠ جنيه من كارفور للبيت'",
       "avoidNoise": "حاول تجنب الضوضاء للحصول على أفضل نتيجة"
+    },
+    "recordFormErrors": {
+      "inComplete": "الرجاء إدخال جميع الحقول المطلوبة"
     }
   },
   "settings": {
@@ -88,6 +98,10 @@
     "about.privacy": "سياسة الخصوصية",
     "about.contact": "تواصل معنا",
     "about.madeIn": "صنع في مصر 🇪🇬",
+    "about.testerMode": "وضع المختبر",
+    "about.testerEnabled": "تهانينا! تم تفعيل وضع المختبر",
+    "about.testerDisabled": "تم إلغاء وضع المختبر",
+    "about.revertToUser": "العودة إلى وضع المستخدم",
     "profile": "الملف الشخصي",
     "reminders": "التذكيرات",
     "reminders.add": "إضافة تذكير",
@@ -224,7 +238,8 @@
     "confidence": "دقة التحليل",
     "confidence.high": "عالية",
     "confidence.medium": "متوسطة",
-    "confidence.low": "منخفضة"
+    "confidence.low": "منخفضة",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا المصروف؟"
   },
   "analytics": {
     "comingSoon": "قريباً"
@@ -270,7 +285,11 @@
       "maxReached": "أقصى ٣ تذكيرات",
       "notifDenied": "الإشعارات مقفولة. فعلها من الإعدادات.",
       "notifPermission": "اسمح بالإشعارات عشان تضبط التذكيرات",
-      "notificationBody": "وقت تسجيل مصروفاتك!"
+      "notificationTitle": "مصروفي — وقت تسجيل المصروفات",
+      "notificationBody": "متنساش تسجل مصروفاتك النهاردة. افتح التطبيق وابدأ في ثواني.",
+      "notificationSubtitle": "تذكير يومي",
+      "notificationChannelName": "تذكيرات مصروفي",
+      "notificationChannelDescription": "تذكيرات يومية لتسجيل المصروفات"
     },
     "mic": {
       "explanation": "مصروفي محتاج الميكروفون عشان تسجل مصروفاتك بصوتك. مفيش تسجيل بينرفع لسيرفر.",

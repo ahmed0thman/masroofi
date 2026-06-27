@@ -25,6 +25,21 @@
       "version": "0.3.0",
       "hash": "28e28da3",
       "addedAt": "2026-06-18T11:23:55.342Z"
+    },
+    "select": {
+      "version": "0.3.0",
+      "hash": "148191f4",
+      "addedAt": "2026-06-27T10:55:59.246Z"
+    },
+    "input": {
+      "version": "0.3.0",
+      "hash": "7a4fd2c2",
+      "addedAt": "2026-06-27T11:09:54.991Z"
+    },
+    "textarea": {
+      "version": "0.3.0",
+      "hash": "30b3c322",
+      "addedAt": "2026-06-27T11:09:58.633Z"
     }
   }
 }

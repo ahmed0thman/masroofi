@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useLayoutEffect } from "react";
 import { I18nManager, View } from "react-native";
 import { cn } from "../../lib/utils";
 
@@ -45,6 +45,13 @@ export function DirectionProvider({
     I18nManager.allowRTL(true);
     I18nManager.forceRTL(dir === "rtl");
   }, []);
+
+  // Sync I18nManager with the initial direction on mount so the native layout
+  // direction matches the React context before children render.
+  useLayoutEffect(() => {
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(direction === "rtl");
+  }, [direction]);
 
   return (
     <DirectionContext.Provider

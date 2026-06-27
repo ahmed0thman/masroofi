@@ -15,7 +15,9 @@ i18n.on('languageChanged', (lang: string) => {
   if (I18nManager.isRTL !== isRTL) {
     I18nManager.allowRTL(isRTL);
     I18nManager.forceRTL(isRTL);
-    Updates.reloadAsync();
+    if (!__DEV__) {
+      Updates.reloadAsync();
+    }
   }
 });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, View } from 'react-native';
+import { Image, Pressable, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +23,9 @@ interface SlideContentProps {
   onNameChange?: (name: string) => void;
   showNameError?: boolean;
   onNameErrorDismiss?: () => void;
+  nameAutoFocus?: boolean;
+  avatarUri?: string | null;
+  onAvatarPress?: () => void;
 }
 
 const SlideContent: React.FC<SlideContentProps> = ({
@@ -38,6 +41,9 @@ const SlideContent: React.FC<SlideContentProps> = ({
   onNameChange,
   showNameError,
   onNameErrorDismiss,
+  nameAutoFocus,
+  avatarUri,
+  onAvatarPress,
 }) => {
   const { t } = useTranslation();
   const colors = useThemeColors();
@@ -46,13 +52,28 @@ const SlideContent: React.FC<SlideContentProps> = ({
     <View style={{ width: SCREEN_WIDTH }} className="px-5 flex-1 items-center justify-center">
       <View className="flex-1" />
 
-      <View
-        className="w-24 h-24 rounded-full bg-primary/10 items-center justify-center"
-        accessibilityLabel={t(slide.iconLabelKey)}
-        accessibilityRole="image"
-      >
-        <Ionicons name={slide.icon} size={48} color={colors.primary} />
-      </View>
+      {slideIndex === 1 ? (
+        <Pressable onPress={onAvatarPress} className="relative">
+          <View className="w-24 h-24 rounded-full bg-primary/10 items-center justify-center overflow-hidden">
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} className="w-full h-full" resizeMode="cover" />
+            ) : (
+              <Ionicons name="person-outline" size={48} color={colors.primary} />
+            )}
+          </View>
+          <View className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary items-center justify-center border-2 border-background">
+            <Ionicons name="add" size={16} color="white" />
+          </View>
+        </Pressable>
+      ) : (
+        <View
+          className="w-24 h-24 rounded-full bg-primary/10 items-center justify-center"
+          accessibilityLabel={t(slide.iconLabelKey)}
+          accessibilityRole="image"
+        >
+          <Ionicons name={slide.icon} size={48} color={colors.primary} />
+        </View>
+      )}
 
       <View className="h-6" />
 
@@ -86,51 +107,17 @@ const SlideContent: React.FC<SlideContentProps> = ({
                 : 'bg-surface-container-low',
             )}
             placeholder={t('profile.namePlaceholder')}
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholderTextColor={colors.muted}
             value={name}
             onChangeText={(text) => {
               onNameChange?.(text);
               onNameErrorDismiss?.();
             }}
-            autoFocus
+            autoFocus={nameAutoFocus}
             textAlign="center"
           />
         </View>
       )}
-
-      {/* {slideIndex === 3 && (
-        <View className="w-full mt-8 gap-6">
-          <LanguageToggle isArabic={isArabic} onToggle={onLanguageChange} />
-
-          <View className="w-full gap-2">
-            <Text className="text-sm text-muted-foreground font-cairo">
-              {t('profile.enterName')}
-            </Text>
-            <TextInput
-              className={cn(
-                'bg-surface-bright rounded-xl h-12 px-4 text-on-surface font-cairo text-base',
-                showNameError ? 'border border-destructive' : 'border border-outline-variant',
-              )}
-              value={name}
-              onChangeText={(text) => {
-                onNameChange?.(text);
-                onNameErrorDismiss?.();
-              }}
-              placeholder={t('profile.namePlaceholder')}
-              placeholderTextColor={colors.onSurfaceVariant}
-              textAlign="right"
-            />
-          </View>
-
-          <ReminderSection
-            reminders={reminders}
-            onAddReminder={onAddReminder}
-            onRemoveReminder={onRemoveReminder}
-            maxReminders={3}
-            notifDenied={notifDenied}
-          />
-        </View>
-      )} */}
 
       {slideIndex === 3 && (
         <View className="w-full mt-8 gap-6">

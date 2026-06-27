@@ -198,6 +198,28 @@ export async function getExpenseById(id: number): Promise<ExpenseRow | null> {
   return row ?? null;
 }
 
+export async function updateExpense(id: number, data: Partial<Omit<ExpenseRow, 'id' | 'created_at' | 'updated_at'>>): Promise<void> {
+  const db = await getDb();
+  const now = new Date().toISOString();
+  const setClauses: string[] = [];
+  const params: any[] = [];
+
+  const fields: (keyof typeof data)[] = ['item', 'price', 'currency', 'sub_category', 'main_category', 'description', 'confidence', 'merchant', 'transcript_id'];
+  for (const field of fields) {
+    if (data[field] !== undefined) {
+      setClauses.push(`${field} = ?`);
+      params.push(data[field]);
+    }
+  }
+
+  if (setClauses.length === 0) return;
+  setClauses.push('updated_at = ?');
+  params.push(now);
+  params.push(id);
+
+  await db.runAsync(`UPDATE expenses SET ${setClauses.join(', ')} WHERE id = ?`, ...params);
+}
+
 export async function deleteExpense(id: number): Promise<void> {
   const db = await getDb();
   await db.runAsync('DELETE FROM expenses WHERE id = ?', id);

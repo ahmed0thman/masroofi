@@ -1,5 +1,5 @@
-import { View, Text, ScrollView } from 'react-native';
-import React, { useCallback } from 'react';
+import { View, Text, FlatList } from 'react-native';
+import React, { useCallback, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
@@ -11,11 +11,14 @@ import { useProfile } from '@/hooks/useProfile';
 import ExpenseCard from '@/components/cards/ExpenseCard';
 import { ErrorState } from '@/components/ErrorState';
 import { formatAmount } from '@/lib/format';
+import { EditExpenseSheet } from '@/components/cards/EditExpenseSheet';
+import type { ExpenseRow } from '@/db/expense-repo';
 
 export default function Home() {
   const colors = useThemeColors();
   const { t } = useTranslation();
-  const { expenses, isLoading, error, refresh } = useExpenses();
+  const { expenses, isLoading, error, refresh, deleteExpense, updateExpense } = useExpenses();
+  const [editingExpense, setEditingExpense] = useState<ExpenseRow | null>(null);
   const { profile, refresh: refreshProfile } = useProfile();
 
   useFocusEffect(
@@ -79,7 +82,7 @@ export default function Home() {
 
   return (
     <SafeAreaView className="bg-background flex-1 w-full">
-      <View className="flex-1 gap-3">
+      <View className="flex-1 gap-3 ">
         <Header name={profile?.name} avatarUri={profile?.avatar_uri} />
         {error ? (
           <View className="pt-4">
@@ -164,18 +167,39 @@ export default function Home() {
             </View>
           </View>
         )}
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="gap-8 pb-8 w-full">
-            {todayExpenses.length > 0 && (
-              <View className="gap-3">
-                {todayExpenses.map((expense) => (
-                  <ExpenseCard key={expense.id} expense={expense} />
-                ))}
-              </View>
-            )}
-          </View>
-        </ScrollView>
+        <View>
+          <Text className="text-lg font-cairo-bold text-foreground">
+            {t('home.recentExpenses')}
+          </Text>
+        </View>
+        <FlatList
+          data={todayExpenses}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <ExpenseCard expense={item} onEdit={(id) => { const exp = expenses.find(e => e.id === id); if (exp) setEditingExpense(exp); }} onDelete={deleteExpense} />
+          )}
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center pt-20">
+              <Text className="text-muted-foreground font-cairo">
+                {t('home.history.emptyTitle')}
+              </Text>
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="pb-8"
+          className="flex-1"
+          ItemSeparatorComponent={() => <View className="h-2" />}
+        />
       </View>
+      <EditExpenseSheet
+        visible={!!editingExpense}
+        expense={editingExpense}
+        onClose={() => setEditingExpense(null)}
+        onSave={async (id, data) => {
+          await updateExpense?.(id, data);
+          setEditingExpense(null);
+        }}
+      />
     </SafeAreaView>
   );
 }

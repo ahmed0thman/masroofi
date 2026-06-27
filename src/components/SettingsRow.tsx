@@ -1,6 +1,6 @@
 import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, Text, View } from 'react-native';
+import { I18nManager, Pressable, Text, View } from 'react-native';
 
 interface SettingsRowProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -26,10 +26,10 @@ export function SettingsRow({ icon, label, value, onPress, isLast }: SettingsRow
           </View>
         </View>
         <Ionicons
-          className="scale-x-[-1]"
           name="chevron-forward"
           size={18}
           color={colors.mutedForeground}
+          style={I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : undefined}
         />
       </View>
       {!isLast ? <View className="border-b border-outline-variant ml-14" /> : null}

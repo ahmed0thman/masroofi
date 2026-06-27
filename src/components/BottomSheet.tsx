@@ -1,5 +1,6 @@
 import { Modal, View, Pressable, Text } from 'react-native';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface BottomSheetProps {
   visible: boolean;
@@ -9,11 +10,15 @@ interface BottomSheetProps {
 }
 
 export function BottomSheet({ visible, onClose, title, children }: BottomSheetProps) {
+  const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View className="flex-1 justify-end">
         <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-        <View className="bg-surface rounded-t-[20px] p-5 pb-8">
+        <View
+          className="bg-surface rounded-t-[20px] p-5 pb-8"
+          style={{ marginBottom: insets.bottom }}
+        >
           <View className="w-8 h-1 bg-outline rounded-full self-center mb-4" />
           <Text className="text-lg font-cairo-bold text-on-surface text-center mb-4">{title}</Text>
           {children}

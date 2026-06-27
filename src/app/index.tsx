@@ -17,14 +17,14 @@ export default function Index() {
     const checkOnboarding = async () => {
       try {
         await getDb();
-        const profile = await getProfile();
-        if (profile) {
+        const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+        if (completed === 'true') {
           router.replace('/(tabs)');
           return;
         }
-        const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
-        if (completed !== 'true') {
-          router.replace('/(tabs)');
+        const profile = await getProfile();
+        if (profile) {
+          setShowOnboarding(true);
           return;
         }
         setShowOnboarding(true);

@@ -7,7 +7,7 @@ import { RemindersSection } from '@/components/settings/RemindersSection';
 
 export default function Settings() {
   return (
-    <SafeAreaView className="p-0">
+    <SafeAreaView className="px-5">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <ProfileSection />
         <AppSettingsSection />

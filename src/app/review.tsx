@@ -1,16 +1,22 @@
 import { BottomSheet } from '@/components/BottomSheet';
 import SafeAreaView from '@/components/layout/SafeAreaView';
+import { ReviewList } from '@/components/review/ReviewList';
 import { insertExpense } from '@/db/expense-repo';
-import { clearPendingExpenses, getPendingExpenses } from '@/lib/pending-expenses';
+import {
+  clearPendingExpenses,
+  getPendingExpenses,
+  isPendingLoading,
+  subscribe,
+} from '@/lib/pending-expenses';
 import { cn } from '@/lib/utils';
 import type { ExpenseRecord } from '@/services/gemini';
 import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const CATEGORIES = [
   'أكل ومشروبات',
@@ -35,28 +41,82 @@ export default function ReviewScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [expenses, setExpenses] = useState<EditableExpense[]>([]);
+  const [loading, setLoading] = useState(() => isPendingLoading());
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [categoryPickerIndex, setCategoryPickerIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const pending = getPendingExpenses();
-    setExpenses(
-      pending.map((exp) => ({
-        ...exp,
-        localId: nextLocalId++,
-      })),
-    );
+    if (pending.length > 0) {
+      setExpenses(
+        pending.map((exp) => ({
+          ...exp,
+          localId: nextLocalId++,
+        })),
+      );
+      setLoading(false);
+      return;
+    }
+    const unsub = subscribe(() => {
+      const records = getPendingExpenses();
+      setExpenses(
+        records.map((exp) => ({
+          ...exp,
+          localId: nextLocalId++,
+        })),
+      );
+      setLoading(false);
+    });
+    return unsub;
   }, []);
 
-  const updateExpense = (localId: number, updates: Partial<ExpenseRecord>) => {
-    setExpenses((prev) =>
-      prev.map((exp) => (exp.localId === localId ? { ...exp, ...updates } : exp)),
-    );
-  };
+  const updateExpense = useCallback(
+    (localId: number, updates: Partial<ExpenseRecord>) => {
+      setExpenses((prev) =>
+        prev.map((exp) => (exp.localId === localId ? { ...exp, ...updates } : exp)),
+      );
+    },
+    [],
+  );
 
-  const deleteExpense = (localId: number) => {
-    setExpenses((prev) => prev.filter((exp) => exp.localId !== localId));
-  };
+  const handleEdit = useCallback(
+    (localId: number) => {
+      const idx = expenses.findIndex((e) => e.localId === localId);
+      setEditingIndex(idx);
+    },
+    [expenses],
+  );
+
+  const handleSaveCard = useCallback(
+    (localId: number, updates: Partial<ExpenseRecord>) => {
+      setExpenses((prev) =>
+        prev.map((e) => (e.localId === localId ? { ...e, ...updates } : e)),
+      );
+      setEditingIndex(null);
+    },
+    [],
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingIndex(null);
+  }, []);
+
+  const handleDelete = useCallback(
+    (localId: number) => {
+      setExpenses((prev) => prev.filter((e) => e.localId !== localId));
+      setEditingIndex(null);
+    },
+    [],
+  );
+
+  const handleCategoryPress = useCallback(
+    (localId: number) => {
+      const idx = expenses.findIndex((e) => e.localId === localId);
+      setCategoryPickerIndex(idx);
+    },
+    [expenses],
+  );
 
   const handleSave = async () => {
     if (expenses.length === 0) return;
@@ -88,6 +148,20 @@ export default function ReviewScreen() {
   const handleGoBack = () => {
     router.back();
   };
+
+  // Loading state: waiting for transcription/extraction
+  if (loading) {
+    return (
+      <SafeAreaView className="bg-background flex-1">
+        <View className="flex-1 justify-center items-center px-8">
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text className="text-on-surface font-cairo-bold text-lg mt-6 text-center">
+            {t('recordings.transcribing')}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // Empty state: all expenses deleted
   if (expenses.length === 0) {
@@ -124,154 +198,26 @@ export default function ReviewScreen() {
       {/* Expenses List */}
       <ScrollView
         className="flex-1"
-        contentContainerClassName="items-center"
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="always"
+        automaticallyAdjustKeyboardInsets
+        nestedScrollEnabled
       >
-        {expenses.map((expense, index) => (
-          <View key={expense.localId} className="bg-card w-full rounded-2xl p-4 mb-4">
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center gap-2">
-                <Text className="text-lg font-cairo-bold text-muted-foreground">{index + 1}</Text>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-sm font-cairo text-muted-foreground">
-                    {t('review.confidence')}:
-                  </Text>
-                  <View
-                    className={cn(
-                      'rounded-full items-center px-3 py-1',
-                      expense.confidence >= 0.8 && 'bg-success/15',
-                      expense.confidence >= 0.5 && expense.confidence < 0.8 && 'bg-warning/15',
-                      expense.confidence < 0.5 && 'bg-destructive/15',
-                    )}
-                  >
-                    <Text
-                      className={cn(
-                        'text-sm font-cairo-bold',
-                        expense.confidence >= 0.8 && 'text-success',
-                        expense.confidence >= 0.5 && expense.confidence < 0.8 && 'text-warning',
-                        expense.confidence < 0.5 && 'text-destructive',
-                      )}
-                    >
-                      {expense.confidence >= 0.8
-                        ? t('review.confidence.high')
-                        : expense.confidence >= 0.5
-                          ? t('review.confidence.medium')
-                          : t('review.confidence.low')}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => deleteExpense(expense.localId)}
-                className="bg-destructive/10 rounded-full p-2"
-              >
-                <Ionicons name="trash-outline" size={18} color={colors.destructive} />
-              </TouchableOpacity>
-            </View>
-
-            <View className="gap-3">
-              <View>
-                <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                  {t('review.item')}
-                </Text>
-                <TextInput
-                  className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-                  value={expense.item}
-                  onChangeText={(text) => updateExpense(expense.localId, { item: text })}
-                  placeholder={t('review.item')}
-                  placeholderTextColor={colors.mutedForeground}
-                />
-              </View>
-
-              <View className="flex-row gap-3">
-                <View className="flex-1">
-                  <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                    {t('review.price')}
-                  </Text>
-                  <TextInput
-                    className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-                    value={String(expense.price)}
-                    onChangeText={(text) => {
-                      const cleaned = text.replace(/[^0-9]/g, '');
-                      updateExpense(expense.localId, { price: cleaned ? Number(cleaned) : 0 });
-                    }}
-                    keyboardType="number-pad"
-                    placeholderTextColor={colors.mutedForeground}
-                  />
-                </View>
-                <View className="w-24">
-                  <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                    {t('review.currency')}
-                  </Text>
-                  <TextInput
-                    className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-                    value={expense.currency}
-                    onChangeText={(text) => updateExpense(expense.localId, { currency: text })}
-                    placeholderTextColor={colors.mutedForeground}
-                  />
-                </View>
-              </View>
-
-              <View>
-                <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                  {t('review.category')}
-                </Text>
-                <TouchableOpacity
-                  className="bg-surface-bright rounded-xl px-3 py-2.5 flex-row items-center justify-between"
-                  onPress={() => setCategoryPickerIndex(index)}
-                >
-                  <Text className="text-on-surface font-cairo">{expense.mainCategory}</Text>
-                  <Ionicons name="chevron-down" size={18} color={colors.mutedForeground} />
-                </TouchableOpacity>
-              </View>
-
-              <View>
-                <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                  {t('review.subCategory')}
-                </Text>
-                <TextInput
-                  className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-                  value={expense.subCategory}
-                  onChangeText={(text) => updateExpense(expense.localId, { subCategory: text })}
-                  placeholderTextColor={colors.mutedForeground}
-                />
-              </View>
-
-              <View>
-                <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                  {t('review.merchant')}
-                </Text>
-                <TextInput
-                  className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-                  value={expense.merchant ?? ''}
-                  onChangeText={(text) =>
-                    updateExpense(expense.localId, { merchant: text || null })
-                  }
-                  placeholderTextColor={colors.mutedForeground}
-                />
-              </View>
-
-              <View>
-                <Text className="text-xs font-cairo text-muted-foreground mb-1">
-                  {t('review.description')}
-                </Text>
-                <TextInput
-                  className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo min-h-20"
-                  value={expense.description}
-                  onChangeText={(text) => updateExpense(expense.localId, { description: text })}
-                  placeholderTextColor={colors.mutedForeground}
-                  multiline
-                  textAlignVertical="top"
-                  numberOfLines={3}
-                />
-              </View>
-            </View>
-          </View>
-        ))}
-        <View className="h-24" />
+        <ReviewList
+          expenses={expenses}
+          editingIndex={editingIndex}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onSaveCard={handleSaveCard}
+          onCancelEdit={handleCancelEdit}
+          onCategoryPress={handleCategoryPress}
+          colors={colors}
+          t={t}
+        />
+        <View className="h-48" />
       </ScrollView>
 
-      {/* Save Button */}
+      {/* Save All Button */}
       <View className="px-4 pb-4 pt-2 bg-background">
         <TouchableOpacity
           className="bg-primary rounded-xl py-3.5 items-center"
@@ -293,8 +239,9 @@ export default function ReviewScreen() {
       >
         <View className="gap-2">
           {CATEGORIES.map((cat) => {
-            const isSelected =
-              categoryPickerIndex !== null && expenses[categoryPickerIndex]?.mainCategory === cat;
+            const expense =
+              categoryPickerIndex !== null ? expenses[categoryPickerIndex] : null;
+            const isSelected = expense?.mainCategory === cat;
             return (
               <TouchableOpacity
                 key={cat}
@@ -304,8 +251,8 @@ export default function ReviewScreen() {
                 )}
                 activeOpacity={0.7}
                 onPress={() => {
-                  if (categoryPickerIndex !== null) {
-                    updateExpense(expenses[categoryPickerIndex].localId, {
+                  if (expense) {
+                    updateExpense(expense.localId, {
                       mainCategory: cat,
                     });
                     setCategoryPickerIndex(null);

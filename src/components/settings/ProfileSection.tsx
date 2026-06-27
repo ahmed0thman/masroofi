@@ -7,14 +7,14 @@ import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
-import Container from '../layout/container';
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../ui/button';
 
 export function ProfileSection() {
   const colors = useThemeColors();
   const { t } = useTranslation();
-
+  const insets = useSafeAreaInsets();
   const {
     profile,
     name,
@@ -101,7 +101,7 @@ export function ProfileSection() {
   }, [t, setAvatarUri, updateProfile]);
 
   return (
-    <Container>
+    <View>
       <View>
         <Text className="section-title">{t('settings.profile')}</Text>
       </View>
@@ -110,7 +110,7 @@ export function ProfileSection() {
         <Pressable onPress={handleAvatarTap} className="active:opacity-80">
           <Avatar src={avatarUri ?? undefined} fallback={userInitials} className="w-16 h-16" />
         </Pressable>
-        <View className="flex-1 mx-4 items-start">
+        <View className="flex-1 mx-4 ">
           <Text className="text-foreground font-cairo-bold text-lg">{profile?.name ?? ''}</Text>
           {/* <Text className="text-muted-foreground font-cairo text-sm">
             {profile?.gender ? t(`profile.gender.${profile.gender}` as any) : ''}
@@ -134,93 +134,98 @@ export function ProfileSection() {
       </View>
 
       <BottomSheet visible={showSheet} onClose={closeSheet} title={t('profile.edit')}>
-        <View className="gap-4 ">
-          <View className="flex-row items-start">
-            <Text className="text-muted-foreground font-cairo text-sm mb-1">
-              {t('profile.enterName')}
-            </Text>
-            <TextInput
-              className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
-              value={name}
-              onChangeText={setName}
-              placeholder={t('profile.namePlaceholder')}
-              placeholderTextColor={colors.onSurfaceVariant}
-            />
-          </View>
-          <View className="flex-row items-start">
-            <Text className="text-muted-foreground font-cairo text-sm mb-1">
-              {t('profile.gender')}
-            </Text>
-            <View className="flex-row gap-3">
-              <Pressable
-                className={`flex-1 py-3 rounded-xl items-center ${
-                  gender === 'male' ? 'bg-primary' : 'bg-surface-container-high'
-                }`}
-                onPress={() => setGender('male')}
-              >
-                <Text
-                  className={`font-cairo ${gender === 'male' ? 'text-on-primary' : 'text-on-surface'}`}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        >
+          <View className="gap-4">
+            <View className="flex-1 gap-1 ">
+              <Text className="text-muted-foreground font-cairo text-sm mb-1">
+                {t('profile.enterName')}
+              </Text>
+              <TextInput
+                className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
+                value={name}
+                onChangeText={setName}
+                placeholder={t('profile.namePlaceholder')}
+                placeholderTextColor={colors.onSurfaceVariant}
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground font-cairo text-sm mb-1">
+                {t('profile.gender')}
+              </Text>
+              <View className="flex-row gap-3">
+                <Pressable
+                  className={`flex-1 py-3 rounded-xl items-center ${
+                    gender === 'male' ? 'bg-primary' : 'bg-surface-container-high'
+                  }`}
+                  onPress={() => setGender('male')}
                 >
-                  {t('profile.gender.male')}
-                </Text>
-              </Pressable>
-              <Pressable
-                className={`flex-1 py-3 rounded-xl items-center ${
-                  gender === 'female' ? 'bg-primary' : 'bg-surface-container-high'
-                }`}
-                onPress={() => setGender('female')}
-              >
-                <Text
-                  className={`font-cairo ${gender === 'female' ? 'text-on-primary' : 'text-on-surface'}`}
+                  <Text
+                    className={`font-cairo ${gender === 'male' ? 'text-on-primary' : 'text-on-surface'}`}
+                  >
+                    {t('profile.gender.male')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  className={`flex-1 py-3 rounded-xl items-center ${
+                    gender === 'female' ? 'bg-primary' : 'bg-surface-container-high'
+                  }`}
+                  onPress={() => setGender('female')}
                 >
-                  {t('profile.gender.female')}
-                </Text>
-              </Pressable>
+                  <Text
+                    className={`font-cairo ${gender === 'female' ? 'text-on-primary' : 'text-on-surface'}`}
+                  >
+                    {t('profile.gender.female')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground font-cairo text-sm mb-1">
+                {t('profile.location')}
+              </Text>
+              <TextInput
+                className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
+                value={location}
+                onChangeText={setLocation}
+                placeholder={t('profile.location')}
+                placeholderTextColor={colors.onSurfaceVariant}
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground font-cairo text-sm mb-1">
+                {t('profile.age')}
+              </Text>
+              <TextInput
+                className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
+                value={age}
+                onChangeText={(text) => setAge(text.replace(/[^0-9]/g, ''))}
+                placeholder={t('profile.age')}
+                placeholderTextColor={colors.onSurfaceVariant}
+                keyboardType="number-pad"
+              />
             </View>
           </View>
-          <View className="flex-row items-start">
-            <Text className="text-muted-foreground font-cairo text-sm mb-1">
-              {t('profile.location')}
-            </Text>
-            <TextInput
-              className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
-              value={location}
-              onChangeText={setLocation}
-              placeholder={t('profile.location')}
-              placeholderTextColor={colors.onSurfaceVariant}
-            />
+          <View className="flex-row gap-3 mt-6">
+            <Pressable
+              className="flex-1 py-3 rounded-xl bg-surface-container-high items-center"
+              onPress={closeSheet}
+            >
+              <Text className="text-on-surface font-cairo">{t('common.cancel')}</Text>
+            </Pressable>
+            <Pressable
+              className="flex-1 py-3 rounded-xl bg-primary items-center"
+              onPress={handleSave}
+            >
+              <Text className="text-on-primary font-cairo-semibold">
+                {isSaving ? t('common.loading') : t('common.save')}
+              </Text>
+            </Pressable>
           </View>
-          <View className="flex-row items-start">
-            <Text className="text-muted-foreground font-cairo text-sm mb-1">
-              {t('profile.age')}
-            </Text>
-            <TextInput
-              className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
-              value={age}
-              onChangeText={(text) => setAge(text.replace(/[^0-9]/g, ''))}
-              placeholder={t('profile.age')}
-              placeholderTextColor={colors.onSurfaceVariant}
-              keyboardType="number-pad"
-            />
-          </View>
-        </View>
-        <View className="flex-row gap-3 mt-6">
-          <Pressable
-            className="flex-1 py-3 rounded-xl bg-surface-container-high items-center"
-            onPress={closeSheet}
-          >
-            <Text className="text-on-surface font-cairo">{t('common.cancel')}</Text>
-          </Pressable>
-          <Pressable
-            className="flex-1 py-3 rounded-xl bg-primary items-center"
-            onPress={handleSave}
-          >
-            <Text className="text-on-primary font-cairo-semibold">
-              {isSaving ? t('common.loading') : t('common.save')}
-            </Text>
-          </Pressable>
-        </View>
+        </ScrollView>
       </BottomSheet>
-    </Container>
+    </View>
   );
 }

@@ -29,9 +29,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function RecordingsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { recordings, isLoading, error, refresh, onDelete } = useRecordingsList();
 
@@ -52,10 +54,11 @@ function RecordingsSheet({ visible, onClose }: { visible: boolean; onClose: () =
         </View>
       ) : (
         <FlatList
+          style={{ marginBottom: insets.bottom }}
           data={recordings}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
-          className="max-h-96"
+          className="min-h-96 border border-destructive"
           renderItem={({ item }) => <RecordingCard recording={item} onDelete={onDelete} />}
         />
       )}
