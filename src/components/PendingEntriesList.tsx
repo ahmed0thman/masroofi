@@ -38,10 +38,10 @@ export function PendingEntriesList({
               className="text-sm font-cairo-semibold text-on-surface"
               numberOfLines={1}
             >
-              {entry.item}
+              {entry.item_name}
             </UIText>
             <UIText className="text-xs font-cairo text-muted-foreground">
-              {entry.price} {entry.currency} · {entry.main_category}
+              {entry.price} {entry.description}
             </UIText>
           </View>
           <View className="flex-row items-center gap-1">

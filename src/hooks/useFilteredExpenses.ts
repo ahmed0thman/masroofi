@@ -2,11 +2,10 @@ import { useState, useCallback } from 'react';
 import {
   getFilteredExpenses,
   getFilteredExpensesCount,
-  getDistinctMainCategories,
-  getDistinctSubCategories,
   type ExpenseRow,
   type ExpenseFilters,
 } from '@/db/expense-repo';
+import { getAllCategories, getSubCategories, type CategoryRow, type SubCategoryRow } from '@/db/category-repo';
 
 const PAGE_SIZE = 20;
 
@@ -18,8 +17,8 @@ export function useFilteredExpenses() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFiltersState] = useState<ExpenseFilters>({});
-  const [categories, setCategories] = useState<string[]>([]);
-  const [subCategories, setSubCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
+  const [subCategories, setSubCategories] = useState<SubCategoryRow[]>([]);
 
   const loadInitial = useCallback(async (newFilters: ExpenseFilters) => {
     setIsLoading(true);
@@ -27,14 +26,14 @@ export function useFilteredExpenses() {
     setFiltersState(newFilters);
     setPage(0);
     try {
-      const [cats, subs, count, data] = await Promise.all([
-        getDistinctMainCategories(),
-        getDistinctSubCategories(newFilters.main_category),
+      const [cats, subsResult, count, data] = await Promise.all([
+        getAllCategories(),
+        newFilters.category_id ? getSubCategories(newFilters.category_id) : Promise.resolve([]),
         getFilteredExpensesCount(newFilters),
         getFilteredExpenses(newFilters, PAGE_SIZE, 0),
       ]);
       setCategories(cats);
-      setSubCategories(subs);
+      setSubCategories(subsResult);
       setTotalCount(count);
       setExpenses(data);
       setHasMore(data.length >= PAGE_SIZE && data.length < count);

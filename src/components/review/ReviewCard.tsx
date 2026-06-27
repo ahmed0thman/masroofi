@@ -17,6 +17,36 @@ interface ReviewCardProps {
   t: TFunction;
 }
 
+function getPriorityLabel(priority: string): string {
+  switch (priority) {
+    case 'essential':
+      return 'أساسي';
+    case 'important':
+      return 'مهم';
+    case 'normal':
+      return 'عادي';
+    case 'luxury':
+      return 'رفاهية';
+    default:
+      return priority;
+  }
+}
+
+function getPriorityColor(priority: string): string {
+  switch (priority) {
+    case 'essential':
+      return 'text-destructive';
+    case 'important':
+      return 'text-warning';
+    case 'normal':
+      return 'text-success';
+    case 'luxury':
+      return 'text-muted-foreground';
+    default:
+      return 'text-muted-foreground';
+  }
+}
+
 function getConfidenceLabel(confidence: number, t: TFunction): string {
   if (confidence >= 0.8) return t('review.confidence.high');
   if (confidence >= 0.5) return t('review.confidence.medium');
@@ -62,13 +92,26 @@ export function ReviewCard({
         </Text>
       </View>
 
-      {/* Row 2: Category badge + Confidence indicator */}
+      {/* Row 2: Category badge + Priority + Match + Confidence */}
       <View className="flex-row items-center gap-2 flex-wrap">
         <View className="bg-primary-container/70 rounded-full px-2.5 py-0.5">
           <Text className="text-xs font-cairo text-on-primary-container">
             {expense.mainCategory}
           </Text>
         </View>
+        <Text
+          className={cn('text-xs font-cairo', getPriorityColor(expense.priority))}
+        >
+          ● {getPriorityLabel(expense.priority)}
+        </Text>
+        <Text
+          className={cn(
+            'text-xs font-cairo',
+            expense.matchedItemId ? 'text-success' : 'text-warning',
+          )}
+        >
+          {expense.matchedItemId ? '✓ مطابق' : 'جديد'}
+        </Text>
         <Text
           className={cn(
             'text-xs font-cairo',

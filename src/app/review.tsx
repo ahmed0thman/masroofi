@@ -2,6 +2,7 @@ import { BottomSheet } from '@/components/BottomSheet';
 import SafeAreaView from '@/components/layout/SafeAreaView';
 import { ReviewList } from '@/components/review/ReviewList';
 import { insertExpense } from '@/db/expense-repo';
+import { getAllCategories, type CategoryRow } from '@/db/category-repo';
 import {
   clearPendingExpenses,
   getPendingExpenses,
@@ -18,18 +19,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-const CATEGORIES = [
-  'أكل ومشروبات',
-  'مواصلات',
-  'فواتير',
-  'تسوق',
-  'صحة',
-  'ترفيه',
-  'تعليم',
-  'إيجار',
-  'أخرى',
-];
-
 interface EditableExpense extends ExpenseRecord {
   localId: number;
 }
@@ -45,8 +34,10 @@ export default function ReviewScreen() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [categoryPickerIndex, setCategoryPickerIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
 
   useEffect(() => {
+    getAllCategories().then(setCategories).catch(() => {});
     const pending = getPendingExpenses();
     if (pending.length > 0) {
       setExpenses(
@@ -124,15 +115,17 @@ export default function ReviewScreen() {
     try {
       for (const exp of expenses) {
         await insertExpense({
-          item: exp.item,
+          item_name: exp.item,
           price: exp.price,
-          currency: exp.currency,
-          sub_category: exp.subCategory,
-          main_category: exp.mainCategory,
+          currency_id: 1,
           description: exp.description,
+          merchant_id: exp.matchedMerchantId,
+          item_id: exp.matchedItemId,
+          category_id: exp.matchedCategoryId,
+          sub_category_id: exp.matchedSubCategoryId,
           confidence: exp.confidence,
-          merchant: exp.merchant,
           transcript_id: null,
+          source: 'voice',
         });
       }
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -238,13 +231,13 @@ export default function ReviewScreen() {
         title={t('review.categoryPicker')}
       >
         <View className="gap-2">
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const expense =
               categoryPickerIndex !== null ? expenses[categoryPickerIndex] : null;
-            const isSelected = expense?.mainCategory === cat;
+            const isSelected = expense?.mainCategory === cat.name;
             return (
               <TouchableOpacity
-                key={cat}
+                key={cat.id}
                 className={cn(
                   'rounded-xl px-4 py-3',
                   isSelected ? 'bg-primary-container' : 'bg-surface-bright',
@@ -253,7 +246,7 @@ export default function ReviewScreen() {
                 onPress={() => {
                   if (expense) {
                     updateExpense(expense.localId, {
-                      mainCategory: cat,
+                      mainCategory: cat.name,
                     });
                     setCategoryPickerIndex(null);
                   }
@@ -265,7 +258,7 @@ export default function ReviewScreen() {
                     isSelected ? 'text-on-primary-container' : 'text-on-surface',
                   )}
                 >
-                  {cat}
+                  {cat.name}
                 </Text>
               </TouchableOpacity>
             );

@@ -86,7 +86,7 @@ export default function Archive() {
   const [searchText, setSearchText] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showRecordings, setShowRecordings] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [priceMin, setPriceMin] = useState('');
@@ -116,14 +116,12 @@ export default function Archive() {
   );
 
   const getCurrentFilters = useCallback(
-    (overrides?: { search?: string; category?: string | undefined }): ExpenseFilters => {
-      const category = selectedCategory === 'all' ? undefined : selectedCategory;
+    (overrides?: { search?: string; category?: number | undefined }): ExpenseFilters => {
       const f: ExpenseFilters = {};
       const effectiveSearch = overrides?.search !== undefined ? overrides.search : searchText;
-      const rawCategory = overrides?.category !== undefined ? overrides.category : category;
-      const effectiveCategory = rawCategory === 'all' ? undefined : rawCategory;
+      const effectiveCategory = overrides?.category !== undefined ? overrides.category : selectedCategory;
       if (effectiveSearch) f.search = effectiveSearch;
-      if (effectiveCategory) f.main_category = effectiveCategory;
+      if (effectiveCategory !== undefined) f.category_id = effectiveCategory;
       if (dateFrom) f.dateFrom = dateFrom.toISOString();
       if (dateTo) f.dateTo = dateTo.toISOString();
       if (priceMin) f.priceMin = Number(priceMin);
@@ -141,7 +139,7 @@ export default function Archive() {
     }, 300);
   };
 
-  const handleCategoryPress = (category: string | undefined) => {
+  const handleCategoryPress = (category: number | undefined) => {
     setSelectedCategory(category);
     applyFilters(getCurrentFilters({ category }));
   };
@@ -225,21 +223,21 @@ export default function Archive() {
         >
           <View className="flex-row gap-2">
             <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
+              variant={selectedCategory === undefined ? 'default' : 'outline'}
               size="sm"
-              onPress={() => handleCategoryPress('all')}
+              onPress={() => handleCategoryPress(undefined)}
               className="rounded-full min-h-3 py-1.5"
             >
               {t('archive.allCategories')}
             </Button>
             {categories.map((cat) => (
               <Button
-                key={cat}
-                variant={selectedCategory === cat ? 'default' : 'outline'}
-                onPress={() => handleCategoryPress(cat)}
+                key={cat.id}
+                variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                onPress={() => handleCategoryPress(cat.id)}
                 className="rounded-full min-h-3 py-1.5"
               >
-                {cat}
+                {cat.name}
               </Button>
             ))}
           </View>

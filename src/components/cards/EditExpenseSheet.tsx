@@ -6,19 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/components/BottomSheet';
 import { Button } from '@/components/ui/button';
 import type { ExpenseRow } from '@/db/expense-repo';
+import { getAllCategories, type CategoryRow } from '@/db/category-repo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const CATEGORIES = [
-  'أكل ومشروبات',
-  'مواصلات',
-  'فواتير',
-  'تسوق',
-  'صحة',
-  'ترفيه',
-  'تعليم',
-  'إيجار',
-  'أخرى',
-];
 
 interface EditExpenseSheetProps {
   visible: boolean;
@@ -32,6 +21,7 @@ export function EditExpenseSheet({ visible, expense, onClose, onSave }: EditExpe
   const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
 
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [item, setItem] = useState('');
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState('');
@@ -41,13 +31,17 @@ export function EditExpenseSheet({ visible, expense, onClose, onSave }: EditExpe
   const [description, setDescription] = useState('');
 
   useEffect(() => {
+    getAllCategories().then(setCategories).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (expense) {
-      setItem(expense.item);
+      setItem(expense.item_name);
       setPrice(String(expense.price));
-      setCurrency(expense.currency);
-      setMainCategory(expense.main_category);
-      setSubCategory(expense.sub_category);
-      setMerchant(expense.merchant ?? '');
+      setCurrency(expense.currency_symbol ?? expense.currency_code ?? '');
+      setMainCategory(expense.category_name ?? '');
+      setSubCategory(expense.sub_category_name ?? '');
+      setMerchant(expense.merchant_name ?? '');
       setDescription(expense.description);
     }
   }, [expense]);
@@ -55,12 +49,8 @@ export function EditExpenseSheet({ visible, expense, onClose, onSave }: EditExpe
   const handleSave = () => {
     if (!expense) return;
     onSave(expense.id, {
-      item,
+      item_name: item,
       price: parseFloat(price) || 0,
-      currency,
-      main_category: mainCategory,
-      sub_category: subCategory,
-      merchant: merchant || null,
       description,
     });
   };
@@ -125,8 +115,8 @@ export function EditExpenseSheet({ visible, expense, onClose, onSave }: EditExpe
                   onValueChange={setMainCategory}
                   style={{ color: colors.onSurface }}
                 >
-                  {CATEGORIES.map((cat) => (
-                    <Picker.Item key={cat} label={cat} value={cat} color={colors.onSurface} />
+                  {categories.map((cat) => (
+                    <Picker.Item key={cat.id} label={cat.name} value={cat.name} color={colors.onSurface} />
                   ))}
                 </Picker>
               </View>

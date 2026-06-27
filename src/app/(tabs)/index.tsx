@@ -1,9 +1,9 @@
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import SafeAreaView from '@/components/layout/SafeAreaView';
 import Header from '@/components/Header';
 import { useExpenses } from '@/hooks/useExpenses';
@@ -12,19 +12,29 @@ import ExpenseCard from '@/components/cards/ExpenseCard';
 import { ErrorState } from '@/components/ErrorState';
 import { formatAmount } from '@/lib/format';
 import { EditExpenseSheet } from '@/components/cards/EditExpenseSheet';
+import { getLatestAnalyticsSummary } from '@/services/analytics';
+import { cn } from '@/lib/utils';
 import type { ExpenseRow } from '@/db/expense-repo';
 
 export default function Home() {
   const colors = useThemeColors();
   const { t } = useTranslation();
+  const router = useRouter();
   const { expenses, isLoading, error, refresh, deleteExpense, updateExpense } = useExpenses();
   const [editingExpense, setEditingExpense] = useState<ExpenseRow | null>(null);
+  const [analyticsSummary, setAnalyticsSummary] = useState<{
+    totalSpent: number;
+    changeFromPrevious: string;
+    topInsight: string;
+    topRecommendation: string;
+  } | null>(null);
   const { profile, refresh: refreshProfile } = useProfile();
 
   useFocusEffect(
     useCallback(() => {
       refresh();
       refreshProfile();
+      getLatestAnalyticsSummary().then(setAnalyticsSummary).catch(() => {});
     }, [refresh, refreshProfile]),
   );
 
@@ -74,8 +84,8 @@ export default function Home() {
   const dayChange =
     yesterdayTotal > 0 ? ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100 : null;
 
-  const monthCurrency = thisMonthExpenses.length > 0 ? thisMonthExpenses[0].currency : 'جنيه';
-  const todayCurrency = todayExpenses.length > 0 ? todayExpenses[0].currency : 'جنيه';
+  const monthCurrency = thisMonthExpenses.length > 0 ? (thisMonthExpenses[0].currency_symbol || thisMonthExpenses[0].currency_code || 'ج.م') : 'ج.م';
+  const todayCurrency = todayExpenses.length > 0 ? (todayExpenses[0].currency_symbol || todayExpenses[0].currency_code || 'ج.م') : 'ج.م';
 
   const monthFormatted = formatAmount(monthTotal, monthCurrency);
   const todayFormatted = formatAmount(todayTotal, todayCurrency);
@@ -166,6 +176,26 @@ export default function Home() {
               </View>
             </View>
           </View>
+        )}
+        {analyticsSummary && (
+          <TouchableOpacity
+            className="bg-surface-container-low rounded-2xl p-4 flex-row items-center gap-3"
+            activeOpacity={0.7}
+            onPress={() => router.push('/(tabs)/analytics')}
+          >
+            <View className="bg-primary-container/20 rounded-xl p-2">
+              <Ionicons name="bulb-outline" size={20} color={colors.primary} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-sm font-cairo-semibold text-on-surface" numberOfLines={1}>
+                {analyticsSummary.topInsight}
+              </Text>
+              <Text className="text-xs font-cairo text-muted-foreground mt-0.5" numberOfLines={1}>
+                {analyticsSummary.topRecommendation}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.mutedForeground} />
+          </TouchableOpacity>
         )}
         <View>
           <Text className="text-lg font-cairo-bold text-foreground">

@@ -1,8 +1,15 @@
 import type { ExpenseRecord } from '@/services/gemini';
+import { getAllItems } from '@/db/item-repo';
+import { getAllCategories } from '@/db/category-repo';
+import { getAllMerchants } from '@/db/merchant-repo';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { TFunction } from 'i18next';
-import { useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import type { ItemRow } from '@/db/item-repo';
+import type { CategoryRow } from '@/db/category-repo';
+import type { MerchantRow } from '@/db/merchant-repo';
 
 interface EditableExpense extends ExpenseRecord {
   localId: number;
@@ -22,7 +29,6 @@ export function ReviewEditForm({
   expense,
   onSave,
   onCancel,
-  onCategoryPress,
   colors,
   t,
 }: ReviewEditFormProps) {
@@ -33,14 +39,63 @@ export function ReviewEditForm({
   const [merchant, setMerchant] = useState(expense.merchant ?? '');
   const [description, setDescription] = useState(expense.description);
 
+  const [items, setItems] = useState<ItemRow[]>([]);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
+  const [merchants, setMerchants] = useState<MerchantRow[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(expense.matchedItemId);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(expense.matchedCategoryId);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<number | null>(expense.matchedMerchantId);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [allItems, allCategories, allMerchants] = await Promise.all([
+          getAllItems(),
+          getAllCategories(),
+          getAllMerchants(),
+        ]);
+        setItems(allItems);
+        setCategories(allCategories);
+        setMerchants(allMerchants);
+
+        if (!expense.matchedCategoryId && expense.mainCategory) {
+          const found = allCategories.find((c) => c.name === expense.mainCategory);
+          if (found) setSelectedCategoryId(found.id);
+        }
+        if (!expense.matchedItemId && expense.item) {
+          const found = allItems.find((i) => i.name === expense.item);
+          if (found) setSelectedItemId(found.id);
+        }
+        if (!expense.matchedMerchantId && expense.merchant) {
+          const found = allMerchants.find((m) => m.name === expense.merchant);
+          if (found) setSelectedMerchantId(found.id);
+        }
+      } catch (error) {
+        console.error('Failed to load reference data:', error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    })();
+  }, []);
+
   const handleSave = () => {
+    const selectedItem = items.find((i) => i.id === selectedItemId);
+    const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+    const selectedMerchant = merchants.find((m) => m.id === selectedMerchantId);
+
     onSave(expense.localId, {
-      item,
+      item: selectedItem?.name || item,
       price: price ? Number(price) : 0,
       currency,
+      mainCategory: selectedCategory?.name || expense.mainCategory,
       subCategory,
       description,
-      merchant: merchant || null,
+      merchant: selectedMerchant?.name || merchant || null,
+      matchedItemId: selectedItemId,
+      matchedMerchantId: selectedMerchantId,
+      matchedCategoryId: selectedCategoryId,
     });
   };
 
@@ -49,6 +104,14 @@ export function ReviewEditForm({
     setPrice(cleaned);
   };
 
+  if (isLoadingData) {
+    return (
+      <View className="bg-card rounded-2xl p-4 items-center py-8">
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View className="bg-card rounded-2xl p-4 gap-3">
       {/* Item name */}
@@ -56,12 +119,19 @@ export function ReviewEditForm({
         <Text className="text-xs font-cairo text-muted-foreground mb-1">
           {t('review.item')}
         </Text>
-        <TextInput
-          className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-          value={item}
-          onChangeText={setItem}
+        <SearchableSelect
+          items={items}
+          displayKey="name"
+          valueKey="id"
           placeholder={t('review.item')}
-          placeholderTextColor={colors.mutedForeground}
+          selectedValue={selectedItemId}
+          selectedItem={items.find((i) => i.id === selectedItemId) || null}
+          onSelect={(value, item) => {
+            setSelectedItemId(value);
+            setItem(item.name);
+          }}
+          searchThreshold={1}
+          showCreateNew={false}
         />
       </View>
 
@@ -92,19 +162,24 @@ export function ReviewEditForm({
         </View>
       </View>
 
-      {/* Category (TouchableOpacity → opens bottom sheet) */}
+      {/* Category */}
       <View>
         <Text className="text-xs font-cairo text-muted-foreground mb-1">
           {t('review.category')}
         </Text>
-        <TouchableOpacity
-          className="bg-surface-bright rounded-xl px-3 py-2.5 flex-row items-center justify-between"
-          activeOpacity={0.7}
-          onPress={() => onCategoryPress(expense.localId)}
-        >
-          <Text className="text-on-surface font-cairo">{expense.mainCategory}</Text>
-          <Ionicons name="chevron-down" size={18} color={colors.mutedForeground} />
-        </TouchableOpacity>
+        <SearchableSelect
+          items={categories}
+          displayKey="name"
+          valueKey="id"
+          placeholder={t('review.category')}
+          selectedValue={selectedCategoryId}
+          selectedItem={categories.find((c) => c.id === selectedCategoryId) || null}
+          onSelect={(value, item) => {
+            setSelectedCategoryId(value);
+          }}
+          searchThreshold={1}
+          showCreateNew={false}
+        />
       </View>
 
       {/* Sub-category */}
@@ -125,11 +200,19 @@ export function ReviewEditForm({
         <Text className="text-xs font-cairo text-muted-foreground mb-1">
           {t('review.merchant')}
         </Text>
-        <TextInput
-          className="bg-surface-bright rounded-xl px-3 py-2.5 text-on-surface font-cairo"
-          value={merchant}
-          onChangeText={setMerchant}
-          placeholderTextColor={colors.mutedForeground}
+        <SearchableSelect
+          items={merchants}
+          displayKey="name"
+          valueKey="id"
+          placeholder={t('review.merchant')}
+          selectedValue={selectedMerchantId}
+          selectedItem={merchants.find((m) => m.id === selectedMerchantId) || null}
+          onSelect={(value, item) => {
+            setSelectedMerchantId(value);
+            setMerchant(item.name);
+          }}
+          searchThreshold={1}
+          showCreateNew={false}
         />
       </View>
 
