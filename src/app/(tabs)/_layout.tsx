@@ -97,11 +97,11 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         elevation: 8,
       }}
     >
-      <View className="flex-row w-full justify-around gap-16 items-center flex-1 px-4">
-        <View className="flex-row  w-full justify-between items-center flex-1 px-4">
+      <View className="flex-row w-full justify-around gap-16 items-center flex-1 px-2">
+        <View className="flex-row  w-full justify-between items-center flex-1 px-3">
           {otherRoutes.slice(0, 2).map(renderTab)}
         </View>
-        <View className="flex-row  w-full justify-between items-center flex-1 px-4">
+        <View className="flex-row  w-full justify-between items-center flex-1 px-3">
           {otherRoutes.slice(2, 4).map(renderTab)}
         </View>
       </View>

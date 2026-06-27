@@ -13,6 +13,9 @@ export interface Profile {
   gender: string;
   location: string;
   age: number;
+  monthly_budget: number;
+  saving_goal: number;
+  analytics_day: number;
   created_at: string;
   updated_at: string;
 }
@@ -44,7 +47,7 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
   const age = input.age ?? 0;
 
   const result = await db.runAsync(
-    'INSERT INTO profiles (id, name, language, theme, reminders_enabled, gender, location, age, user_type, created_at, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO profiles (id, name, language, theme, reminders_enabled, gender, location, age, user_type, monthly_budget, saving_goal, analytics_day, created_at, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 5, ?, ?)',
     input.name,
     language,
     theme,
@@ -67,6 +70,9 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
     gender,
     location,
     age,
+    monthly_budget: 0,
+    saving_goal: 0,
+    analytics_day: 5,
     created_at: now,
     updated_at: now,
   };
@@ -75,7 +81,7 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
 export async function updateProfile(updates: Partial<Profile>): Promise<void> {
   const db = await getDb();
   const now = new Date().toISOString();
-  const allowed = ['name', 'avatar_uri', 'language', 'theme', 'reminders_enabled', 'gender', 'location', 'age', 'user_type'] as const;
+  const allowed = ['name', 'avatar_uri', 'language', 'theme', 'reminders_enabled', 'gender', 'location', 'age', 'user_type', 'monthly_budget', 'saving_goal', 'analytics_day'] as const;
   const setClauses: string[] = [];
   const values: (string | number | null)[] = [];
 

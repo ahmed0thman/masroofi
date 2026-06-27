@@ -101,7 +101,7 @@ export function ProfileSection() {
   }, [t, setAvatarUri, updateProfile]);
 
   return (
-    <View>
+    <View className="flex-col gap-4 mb-8">
       <View>
         <Text className="section-title">{t('settings.profile')}</Text>
       </View>

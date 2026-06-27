@@ -1,13 +1,13 @@
-import { BottomSheet } from '@/components/BottomSheet';
-import { SettingsRow } from '@/components/SettingsRow';
+import React, { useCallback } from 'react';
+import { View, Text, TouchableOpacity, I18nManager } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useProfile } from '@/hooks/useProfile';
 import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 export function AppSettingsSection() {
   const colors = useThemeColors();
@@ -15,156 +15,89 @@ export function AppSettingsSection() {
   const router = useRouter();
   const { profile, updateProfile } = useProfile();
 
-  const [activeSheet, setActiveSheet] = useState<'language' | 'theme' | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('ar');
-  const [selectedTheme, setSelectedTheme] = useState('system');
+  const handleLanguageChange = useCallback(
+    async (lang: string) => {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await updateProfile({ language: lang });
+      await i18n.changeLanguage(lang);
+    },
+    [updateProfile, i18n],
+  );
 
-  const closeSheet = useCallback(() => {
-    setActiveSheet(null);
-  }, []);
-
-  const openLanguageSheet = useCallback(() => {
-    setSelectedLanguage(profile?.language ?? 'ar');
-    setActiveSheet('language');
-  }, [profile?.language]);
-
-  const openThemeSheet = useCallback(() => {
-    setSelectedTheme(profile?.theme ?? 'system');
-    setActiveSheet('theme');
-  }, [profile?.theme]);
+  const handleThemeChange = useCallback(
+    async (theme: string) => {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await updateProfile({ theme });
+    },
+    [updateProfile],
+  );
 
   const handleAbout = useCallback(() => {
     router.push('/about');
   }, [router]);
 
-  const handleLanguageSave = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await updateProfile({ language: selectedLanguage });
-    await i18n.changeLanguage(selectedLanguage);
-    setActiveSheet(null);
-  }, [selectedLanguage, updateProfile, i18n]);
-
-  const handleThemeSave = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await updateProfile({ theme: selectedTheme });
-    setActiveSheet(null);
-  }, [selectedTheme, updateProfile]);
-
-  const getLanguageValue = () => {
-    const lang = profile?.language ?? 'ar';
-    return lang === 'ar' ? t('onboarding.language.ar') : t('onboarding.language.en');
-  };
-
-  const getThemeValue = () => {
-    const theme = profile?.theme ?? 'system';
-    return t(`settings.theme.${theme}` as any);
-  };
+  const languageOptions = [
+    { label: t('onboarding.language.ar'), value: 'ar' },
+    { label: t('onboarding.language.en'), value: 'en' },
+  ];
 
   return (
-    <>
-      <View>
-        <Text className="section-title">{t('home.settings.title')}</Text>
-      </View>
-      <View className="bg-surface-bright rounded-[20px] mx-5 overflow-hidden">
-        <SettingsRow
-          icon="language-outline"
-          label={t('settings.language')}
-          value={getLanguageValue()}
-          onPress={openLanguageSheet}
-        />
-        <SettingsRow
-          icon="color-palette-outline"
-          label={t('settings.theme')}
-          value={getThemeValue()}
-          onPress={openThemeSheet}
-        />
-        <SettingsRow
-          icon="information-circle-outline"
-          label={t('settings.about')}
+    <View className="flex-col gap-6 mb-8">
+      <Text className="section-title">{t('home.settings.title')}</Text>
+
+      <View className="bg-surface-container rounded-3xl p-6 gap-8 shadow-sm">
+        {/* Language Setting */}
+        <View className="flex-col gap-3">
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="language-outline" size={20} color={colors.secondary} />
+            <Text className="font-cairo-semibold text-on-surface">{t('settings.language')}</Text>
+          </View>
+          <Select
+            options={languageOptions}
+            value={profile?.language ?? 'ar'}
+            onValueChange={handleLanguageChange}
+            className="bg-surface-container-low border-outline-variant"
+          />
+        </View>
+
+        {/* Theme Setting */}
+        <View className="flex-col gap-3">
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="color-palette-outline" size={20} color={colors.secondary} />
+            <Text className="font-cairo-semibold text-on-surface">{t('settings.theme')}</Text>
+          </View>
+          <View className="bg-surface-container-low rounded-full p-1 flex-row items-center">
+            {(['light', 'dark', 'system'] as const).map((theme) => (
+              <Button
+                key={theme}
+                variant={profile?.theme === theme ? 'default' : 'ghost'}
+                size="sm"
+                className="flex-1 rounded-full py-1 px-2"
+                onPress={() => handleThemeChange(theme)}
+              >
+                {t(`settings.theme.${theme}` as any)}
+              </Button>
+            ))}
+          </View>
+        </View>
+
+        {/* About Setting */}
+        <TouchableOpacity
           onPress={handleAbout}
-          isLast
-        />
+          className="flex-row items-center justify-between p-4 rounded-2xl bg-surface-container-low active:bg-surface-container-high"
+        >
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="information-circle-outline" size={20} color={colors.secondary} />
+            <Text className="font-cairo-medium text-on-surface">{t('settings.about')}</Text>
+          </View>
+          <Ionicons
+            style={I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : {}}
+            name="chevron-forward-outline"
+            size={20}
+            color={colors.onSurfaceVariant}
+          />
+        </TouchableOpacity>
       </View>
-
-      <BottomSheet
-        visible={activeSheet === 'language'}
-        onClose={closeSheet}
-        title={t('settings.language')}
-      >
-        <Pressable
-          className="flex-row items-center justify-between px-4 py-3 rounded-xl"
-          onPress={() => setSelectedLanguage('ar')}
-        >
-          <Text className="text-on-surface font-cairo">{t('onboarding.language.ar')}</Text>
-          {selectedLanguage === 'ar' ? (
-            <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-          ) : null}
-        </Pressable>
-        <Pressable
-          className="flex-row items-center justify-between px-4 py-3 rounded-xl"
-          onPress={() => setSelectedLanguage('en')}
-        >
-          <Text className="text-on-surface font-cairo">{t('onboarding.language.en')}</Text>
-          {selectedLanguage === 'en' ? (
-            <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-          ) : null}
-        </Pressable>
-        <View className="flex-row gap-3 mt-6">
-          <Pressable
-            className="flex-1 py-3 rounded-xl bg-surface-container-high items-center"
-            onPress={closeSheet}
-          >
-            <Text className="text-on-surface font-cairo">{t('common.cancel')}</Text>
-          </Pressable>
-          <Pressable
-            className="flex-1 py-3 rounded-xl bg-primary items-center"
-            onPress={handleLanguageSave}
-          >
-            <Text className="text-on-primary font-cairo-semibold">{t('common.save')}</Text>
-          </Pressable>
-        </View>
-      </BottomSheet>
-
-      <BottomSheet
-        visible={activeSheet === 'theme'}
-        onClose={closeSheet}
-        title={t('settings.theme')}
-      >
-        {(['light', 'dark', 'system'] as const).map((themeOption) => (
-          <Pressable
-            key={themeOption}
-            className="flex-row items-center justify-between px-4 py-3 rounded-xl"
-            onPress={() => setSelectedTheme(themeOption)}
-          >
-            <Text
-              className={`font-cairo ${
-                selectedTheme === themeOption ? 'text-primary' : 'text-muted-foreground'
-              }`}
-            >
-              {t(`settings.theme.${themeOption}` as any)}
-            </Text>
-            {selectedTheme === themeOption ? (
-              <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-            ) : (
-              <View className="w-6 h-6 rounded-full border-2 border-outline-variant" />
-            )}
-          </Pressable>
-        ))}
-        <View className="flex-row gap-3 mt-6">
-          <Pressable
-            className="flex-1 py-3 rounded-xl bg-surface-container-high items-center"
-            onPress={closeSheet}
-          >
-            <Text className="text-on-surface font-cairo">{t('common.cancel')}</Text>
-          </Pressable>
-          <Pressable
-            className="flex-1 py-3 rounded-xl bg-primary items-center"
-            onPress={handleThemeSave}
-          >
-            <Text className="text-on-primary font-cairo-semibold">{t('common.save')}</Text>
-          </Pressable>
-        </View>
-      </BottomSheet>
-    </>
+    </View>
   );
 }

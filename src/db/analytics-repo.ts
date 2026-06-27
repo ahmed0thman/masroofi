@@ -78,3 +78,13 @@ export async function getAnalyticsByDateRange(from: string, to: string): Promise
     to,
   );
 }
+
+export async function getDailySpendingSum(startDate: string, endDate: string): Promise<{ date: string; amount: number }[]> {
+  const db = await getDb();
+  return db.getAllAsync<{ date: string; total: number }>(
+    'SELECT date(created_at) as date, SUM(price) as total FROM expenses WHERE created_at >= ? AND created_at <= ? GROUP BY date ORDER BY date ASC',
+    startDate,
+    endDate,
+  ).then(rows => rows.map(row => ({ date: row.date, amount: row.total })));
+}
+

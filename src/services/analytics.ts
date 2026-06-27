@@ -24,6 +24,53 @@ export interface AnalyticsInput {
   }>;
 }
 
+export function getDayPeriod(date: Date): { start: string; end: string } {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+export function getMonthPeriod(date: Date): { start: string; end: string } {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  end.setHours(23, 59, 59, 999);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+export function getWeekPeriods(date: Date, count: number): { start: string; end: string }[] {
+  const periods: { start: string; end: string }[] = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(date);
+    d.setDate(d.getDate() - i * 7);
+    const day = d.getDay();
+    const diffToFriday = day >= 5 ? day - 5 : day + 2;
+    const friday = new Date(d);
+    friday.setDate(d.getDate() - diffToFriday);
+    friday.setHours(0, 0, 0, 0);
+    const thursday = new Date(friday);
+    thursday.setDate(friday.getDate() + 6);
+    thursday.setHours(23, 59, 59, 999);
+    periods.push({ start: friday.toISOString(), end: thursday.toISOString() });
+  }
+  return periods;
+}
+
+export async function aggregateForDateRange(from: string, to: string) {
+  return aggregateExpensesForPeriod(from, to);
+}
+
+export function getPreviousPeriod(start: string, end: string): { start: string; end: string } {
+  const s = new Date(start);
+  const e = new Date(end);
+  const diffMs = e.getTime() - s.getTime();
+  const prevStart = new Date(s.getTime() - diffMs - 1);
+  const prevEnd = new Date(s.getTime() - 1);
+  return { start: prevStart.toISOString(), end: prevEnd.toISOString() };
+}
+
 export function getCurrentWeekPeriod(): { start: string; end: string } {
   const now = new Date();
   const day = now.getDay();

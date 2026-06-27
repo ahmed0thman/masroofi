@@ -133,7 +133,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         >
           <View className="flex-1 items-center justify-center">
             <Image
-              source={require('@/assets/images/Icon.png')}
+               source={require('@/assets/images/icon.png')}
               className="w-11 h-11"
               resizeMode="contain"
             />

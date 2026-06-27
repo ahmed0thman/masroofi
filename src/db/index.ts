@@ -1,12 +1,13 @@
 import * as SQLite from 'expo-sqlite';
 
 let db: SQLite.SQLiteDatabase | null = null;
+let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export const SCHEMA_VERSION = 2;
 
-async function addColumnIfNotExists(table: string, column: string, def: string) {
+async function addColumnIfNotExists(database: SQLite.SQLiteDatabase, table: string, column: string, def: string) {
   try {
-    await db!.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
+    await database.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
   } catch {}
 }
 
@@ -198,6 +199,33 @@ async function createV2Tables() {
 
   await db!.execAsync(`
     CREATE INDEX IF NOT EXISTS idx_we_canonical ON word_equivalences(canonical)
+  `);
+
+  await db!.execAsync(`
+    CREATE TABLE IF NOT EXISTS budgets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      month TEXT NOT NULL,
+      amount REAL NOT NULL,
+      category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(month, category_id)
+    )
+  `);
+
+  await db!.execAsync(`
+    CREATE TABLE IF NOT EXISTS savings_goals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      target_amount REAL NOT NULL,
+      current_amount REAL NOT NULL DEFAULT 0,
+      deadline TEXT,
+      icon TEXT DEFAULT 'flag',
+      color TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
   `);
 }
 
@@ -552,52 +580,61 @@ export async function seedIfEmpty(): Promise<void> {
 
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
+  if (dbInitPromise) return dbInitPromise;
 
-  db = await SQLite.openDatabaseAsync('masroofi.db');
+  dbInitPromise = (async () => {
+    const database = await SQLite.openDatabaseAsync('masroofi.db');
+    db = database;
 
-  await db.execAsync('PRAGMA journal_mode = WAL');
-  await db.execAsync('PRAGMA foreign_keys = ON');
+    await database.execAsync('PRAGMA journal_mode = WAL');
+    await database.execAsync('PRAGMA foreign_keys = ON');
 
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS profiles (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL,
-      avatar_uri TEXT,
-      language TEXT NOT NULL DEFAULT 'ar',
-      theme TEXT NOT NULL DEFAULT 'system',
-      reminders_enabled INTEGER NOT NULL DEFAULT 1,
-      user_type TEXT NOT NULL DEFAULT 'user',
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    )
-  `);
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS profiles (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        avatar_uri TEXT,
+        language TEXT NOT NULL DEFAULT 'ar',
+        theme TEXT NOT NULL DEFAULT 'system',
+        reminders_enabled INTEGER NOT NULL DEFAULT 1,
+        user_type TEXT NOT NULL DEFAULT 'user',
+        monthly_budget REAL DEFAULT 0,
+        saving_goal REAL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    `);
 
-  await addColumnIfNotExists('profiles', 'gender', "TEXT DEFAULT ''");
-  await addColumnIfNotExists('profiles', 'location', "TEXT DEFAULT ''");
-  await addColumnIfNotExists('profiles', 'age', 'INTEGER DEFAULT 0');
-  await addColumnIfNotExists('profiles', 'user_type', "TEXT NOT NULL DEFAULT 'user'");
-  await addColumnIfNotExists('profiles', 'analytics_day', 'INTEGER DEFAULT 5');
+    await addColumnIfNotExists(database, 'profiles', 'gender', "TEXT DEFAULT ''");
+    await addColumnIfNotExists(database, 'profiles', 'location', "TEXT DEFAULT ''");
+    await addColumnIfNotExists(database, 'profiles', 'age', 'INTEGER DEFAULT 0');
+    await addColumnIfNotExists(database, 'profiles', 'analytics_day', 'INTEGER DEFAULT 5');
+    await addColumnIfNotExists(database, 'profiles', 'monthly_budget', 'REAL DEFAULT 0');
+    await addColumnIfNotExists(database, 'profiles', 'saving_goal', 'REAL DEFAULT 0');
 
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS recordings (
-      id TEXT PRIMARY KEY,
-      transcript TEXT NOT NULL,
-      duration_ms INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL
-    )
-  `);
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS recordings (
+        id TEXT PRIMARY KEY,
+        transcript TEXT NOT NULL,
+        duration_ms INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    `);
 
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS reminders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      time TEXT NOT NULL,
-      meridiem TEXT NOT NULL DEFAULT 'PM',
-      enabled INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL
-    )
-  `);
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS reminders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        time TEXT NOT NULL,
+        meridiem TEXT NOT NULL DEFAULT 'PM',
+        enabled INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
+      )
+    `);
 
-  await runMigrations();
+    await runMigrations();
 
-  return db;
+    return database;
+  })();
+
+  return dbInitPromise;
 }
