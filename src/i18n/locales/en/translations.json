@@ -10,8 +10,6 @@
     "delete": "Delete",
     "edit": "Edit Expense",
     "recordYourExpenses": "Record Your Expenses with Your Voice",
-    "egp": "EGP",
-    "le": "E£",
     "noData": "No data available"
   },
   "home": {
@@ -132,7 +130,24 @@
     "savingGoalDeleted": "Goal deleted",
     "savingGoalProgress": "Progress",
     "analyticsScheduler": "Analytics Day",
-    "analyticsSchedulerDesc": "Day to generate weekly analytics report"
+    "analyticsSchedulerDesc": "Day to generate weekly analytics report",
+    "days.0": "Sun",
+    "days.1": "Mon",
+    "days.2": "Tue",
+    "days.3": "Wed",
+    "days.4": "Thu",
+    "days.5": "Fri",
+    "days.6": "Sat",
+    "budgetSpent": "Spent",
+    "budgetRemaining_text": "Remaining",
+    "budgetDaysLeft_one": "{{count}} day left",
+    "budgetDaysLeft_other": "{{count}} days left",
+    "budgetDailyAllowance": "Daily allowance",
+    "budgetEdit": "Edit Budget",
+    "budgetRemoveConfirm": "Remove budget?",
+    "savingGoalEmptyTitle": "No savings goals yet",
+    "savingGoalEmptyDesc": "Set a goal and track your progress every day!",
+    "savingGoalCreateFirst": "Create Your First Goal"
   },
   "profile": {
     "title": "Profile",

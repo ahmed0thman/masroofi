@@ -1,56 +1,10 @@
 import { getDb } from './index';
-
-export interface ExpenseRow {
-  id: number;
-  item_name: string;
-  price: number;
-  currency_id: number;
-  currency_code?: string;
-  currency_symbol?: string;
-  description: string;
-  merchant_id: number | null;
-  merchant_name?: string | null;
-  item_id: number | null;
-  item_name_variants?: string | null;
-  category_id: number | null;
-  category_name?: string | null;
-  category_default_priority?: string | null;
-  sub_category_id: number | null;
-  sub_category_name?: string | null;
-  confidence: number;
-  transcript_id: string | null;
-  source: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface NewExpense {
-  item_name: string;
-  price: number;
-  currency_id: number;
-  description?: string;
-  merchant_id?: number | null;
-  item_id?: number | null;
-  category_id?: number | null;
-  sub_category_id?: number | null;
-  confidence?: number;
-  transcript_id?: string | null;
-  source?: string;
-}
-
-export interface ExpenseFilters {
-  search?: string;
-  category_id?: number;
-  sub_category_id?: number;
-  dateFrom?: string;
-  dateTo?: string;
-  priceMin?: number;
-  priceMax?: number;
-}
+import type { ExpenseRow, NewExpense, ExpenseFilters } from '@/schemas';
+export type { ExpenseRow, NewExpense, ExpenseFilters };
 
 const expenseSelectColumns = `
   e.id, e.item_name, e.price, e.currency_id,
-  c.code AS currency_code, c.symbol AS currency_symbol,
+  c.code AS currency_code, c.symbol AS currency_symbol, c.symbol_en AS currency_symbol_en,
   e.description, e.merchant_id, m.name AS merchant_name,
   e.item_id, i.name_variants AS item_name_variants,
   e.category_id, cat.name AS category_name, cat.default_priority AS category_default_priority,
@@ -67,9 +21,9 @@ const expenseJoinClause = `
   LEFT JOIN sub_categories sc ON sc.id = e.sub_category_id
 `;
 
-export function buildWhereClause(filters: ExpenseFilters): { where: string; params: any[] } {
+export function buildWhereClause(filters: ExpenseFilters): { where: string; params: (string | number)[] } {
   const conditions: string[] = [];
-  const params: any[] = [];
+  const params: (string | number)[] = [];
 
   if (filters.search) {
     conditions.push('(e.item_name LIKE ? OR e.description LIKE ? OR m.name LIKE ?)');
@@ -218,7 +172,7 @@ export async function updateExpense(id: number, data: Partial<Omit<ExpenseRow, '
   const db = await getDb();
   const now = new Date().toISOString();
   const setClauses: string[] = [];
-  const params: any[] = [];
+  const params: (string | number | null)[] = [];
 
   const fields: (keyof typeof data)[] = ['item_name', 'price', 'currency_id', 'description', 'merchant_id', 'item_id', 'category_id', 'sub_category_id', 'confidence', 'transcript_id', 'source'];
   for (const field of fields) {

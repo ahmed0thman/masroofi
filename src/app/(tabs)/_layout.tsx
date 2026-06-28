@@ -2,40 +2,42 @@ import { cn } from '@/lib/utils';
 import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
+import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const tabConfig: Record<
-  string,
-  {
-    iconFilled: keyof typeof Ionicons.glyphMap;
-    iconOutline: keyof typeof Ionicons.glyphMap;
-    labelKey: string;
-  }
-> = {
-  index: { iconFilled: 'home', iconOutline: 'home-outline', labelKey: 'tabs.home' },
-  history: { iconFilled: 'archive', iconOutline: 'archive-outline', labelKey: 'tabs.archive' },
-  record: { iconFilled: 'mic', iconOutline: 'mic', labelKey: 'tabs.record' },
+const tabConfig = {
+  index: { iconFilled: 'home', iconOutline: 'home-outline', labelKey: 'tabs.home' as const },
+  history: {
+    iconFilled: 'archive',
+    iconOutline: 'archive-outline',
+    labelKey: 'tabs.archive' as const,
+  },
+  record: { iconFilled: 'mic', iconOutline: 'mic', labelKey: 'tabs.record' as const },
   analytics: {
     iconFilled: 'bar-chart',
     iconOutline: 'bar-chart-outline',
-    labelKey: 'tabs.analytics',
+    labelKey: 'tabs.analytics' as const,
   },
-  settings: { iconFilled: 'settings', iconOutline: 'settings-outline', labelKey: 'tabs.settings' },
-};
+  settings: {
+    iconFilled: 'settings',
+    iconOutline: 'settings-outline',
+    labelKey: 'tabs.settings' as const,
+  },
+} as const;
 
-function CustomTabBar({ state, descriptors, navigation }: any) {
+function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
 
-  const recordRoute = state.routes.find((r: any) => r.name === 'record');
-  const otherRoutes = state.routes.filter((r: any) => r.name !== 'record');
+  const recordRoute = state.routes.find((r) => r.name === 'record');
+  const otherRoutes = state.routes.filter((r) => r.name !== 'record');
 
-  const renderTab = (route: any) => {
+  const renderTab = (route: (typeof state.routes)[number]) => {
     const isFocused = state.index === state.routes.indexOf(route);
-    const config = tabConfig[route.name];
+    const config = tabConfig[route.name as keyof typeof tabConfig];
     if (!config) return null;
 
     const onPress = () => {
@@ -78,7 +80,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
               : 'text-muted-foreground font-cairo-regular',
           )}
         >
-          {t(config.labelKey as any)}
+          {t(config.labelKey)}
         </Text>
       </TouchableOpacity>
     );
@@ -97,11 +99,11 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         elevation: 8,
       }}
     >
-      <View className="flex-row w-full justify-around gap-16 items-center flex-1 px-2">
-        <View className="flex-row  w-full justify-between items-center flex-1 px-3">
+      <View className="flex-row w-full justify-around gap-16 items-center flex-1 px-4">
+        <View className="flex-row  w-full justify-between items-center flex-1 px-4">
           {otherRoutes.slice(0, 2).map(renderTab)}
         </View>
-        <View className="flex-row  w-full justify-between items-center flex-1 px-3">
+        <View className="flex-row  w-full justify-between items-center flex-1 px-4">
           {otherRoutes.slice(2, 4).map(renderTab)}
         </View>
       </View>
@@ -137,7 +139,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
-      tabBar={(props: any) => <CustomTabBar {...props} />}
+      tabBar={(props: BottomTabBarProps) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="history" />

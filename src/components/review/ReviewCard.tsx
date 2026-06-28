@@ -1,12 +1,8 @@
 import { cn } from '@/lib/utils';
-import type { ExpenseRecord } from '@/services/gemini';
+import type { EditableExpense } from '@/schemas';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { TFunction } from 'i18next';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
-
-interface EditableExpense extends ExpenseRecord {
-  localId: number;
-}
 
 interface ReviewCardProps {
   expense: EditableExpense;

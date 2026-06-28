@@ -1,18 +1,6 @@
 import { getDb } from './index';
-
-export interface Reminder {
-  id: number;
-  time: string;
-  meridiem: string;
-  enabled: number;
-  created_at: string;
-}
-
-export interface NewReminder {
-  time: string;
-  meridiem: string;
-  enabled?: number;
-}
+import type { Reminder, NewReminder } from '@/schemas';
+export type { Reminder, NewReminder };
 
 export async function getAllReminders(): Promise<Reminder[]> {
   const db = await getDb();

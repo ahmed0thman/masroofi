@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, I18nManager } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useProfile } from '@/hooks/useProfile';
 import { useThemeColors } from '@/styles/global';
@@ -49,7 +49,7 @@ export function AppSettingsSection() {
         {/* Language Setting */}
         <View className="flex-col gap-3">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="language-outline" size={20} color={colors.secondary} />
+            <Ionicons name="language-outline" size={20} color={colors.primary} />
             <Text className="font-cairo-semibold text-on-surface">{t('settings.language')}</Text>
           </View>
           <Select
@@ -63,21 +63,28 @@ export function AppSettingsSection() {
         {/* Theme Setting */}
         <View className="flex-col gap-3">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="color-palette-outline" size={20} color={colors.secondary} />
+            <Ionicons name="color-palette-outline" size={20} color={colors.primary} />
             <Text className="font-cairo-semibold text-on-surface">{t('settings.theme')}</Text>
           </View>
           <View className="bg-surface-container-low rounded-full p-1 flex-row items-center">
-            {(['light', 'dark', 'system'] as const).map((theme) => (
-              <Button
-                key={theme}
-                variant={profile?.theme === theme ? 'default' : 'ghost'}
-                size="sm"
-                className="flex-1 rounded-full py-1 px-2"
-                onPress={() => handleThemeChange(theme)}
-              >
-                {t(`settings.theme.${theme}` as any)}
-              </Button>
-            ))}
+            {(['light', 'dark', 'system'] as const).map((theme) => {
+              const themeLabel = theme === 'light'
+                ? t('settings.theme.light')
+                : theme === 'dark'
+                  ? t('settings.theme.dark')
+                  : t('settings.theme.system');
+              return (
+                <Button
+                  key={theme}
+                  variant={profile?.theme === theme ? 'default' : 'ghost'}
+                  size="sm"
+                  className="flex-1 rounded-full py-1 px-2"
+                  onPress={() => handleThemeChange(theme)}
+                >
+                  {themeLabel}
+                </Button>
+              );
+            })}
           </View>
         </View>
 
@@ -87,15 +94,10 @@ export function AppSettingsSection() {
           className="flex-row items-center justify-between p-4 rounded-2xl bg-surface-container-low active:bg-surface-container-high"
         >
           <View className="flex-row items-center gap-2">
-            <Ionicons name="information-circle-outline" size={20} color={colors.secondary} />
+            <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
             <Text className="font-cairo-medium text-on-surface">{t('settings.about')}</Text>
           </View>
-          <Ionicons
-            style={I18nManager.isRTL ? { transform: [{ scaleX: -1 }] } : {}}
-            name="chevron-forward-outline"
-            size={20}
-            color={colors.onSurfaceVariant}
-          />
+          <Ionicons name="chevron-forward-outline" size={20} color={colors.onSurfaceVariant} />
         </TouchableOpacity>
       </View>
     </View>

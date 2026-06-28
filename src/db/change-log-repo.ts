@@ -1,15 +1,6 @@
 import { getDb } from './index';
-
-export interface ChangeLogRow {
-  id: number;
-  table_name: string;
-  row_id: number;
-  action: 'CREATE' | 'UPDATE' | 'MERGE' | 'DELETE';
-  old_data: string | null;
-  new_data: string | null;
-  source: string;
-  created_at: string;
-}
+import type { ChangeLogRow } from '@/schemas';
+export type { ChangeLogRow };
 
 export async function insertChangeLog(data: {
   table_name: string;

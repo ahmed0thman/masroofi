@@ -1,4 +1,4 @@
-import type { ExpenseRecord } from '@/services/gemini';
+import type { ExpenseRecord, EditableExpense } from '@/schemas';
 import { getAllItems } from '@/db/item-repo';
 import { getAllCategories } from '@/db/category-repo';
 import { getAllMerchants } from '@/db/merchant-repo';
@@ -10,10 +10,6 @@ import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'reac
 import type { ItemRow } from '@/db/item-repo';
 import type { CategoryRow } from '@/db/category-repo';
 import type { MerchantRow } from '@/db/merchant-repo';
-
-interface EditableExpense extends ExpenseRecord {
-  localId: number;
-}
 
 interface ReviewEditFormProps {
   expense: EditableExpense;
@@ -127,7 +123,7 @@ export function ReviewEditForm({
           selectedValue={selectedItemId}
           selectedItem={items.find((i) => i.id === selectedItemId) || null}
           onSelect={(value, item) => {
-            setSelectedItemId(value);
+            setSelectedItemId(value as number | null);
             setItem(item.name);
           }}
           searchThreshold={1}
@@ -174,8 +170,8 @@ export function ReviewEditForm({
           placeholder={t('review.category')}
           selectedValue={selectedCategoryId}
           selectedItem={categories.find((c) => c.id === selectedCategoryId) || null}
-          onSelect={(value, item) => {
-            setSelectedCategoryId(value);
+          onSelect={(value) => {
+            setSelectedCategoryId(value as number | null);
           }}
           searchThreshold={1}
           showCreateNew={false}
@@ -208,7 +204,7 @@ export function ReviewEditForm({
           selectedValue={selectedMerchantId}
           selectedItem={merchants.find((m) => m.id === selectedMerchantId) || null}
           onSelect={(value, item) => {
-            setSelectedMerchantId(value);
+            setSelectedMerchantId(value as number | null);
             setMerchant(item.name);
           }}
           searchThreshold={1}

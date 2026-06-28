@@ -1,13 +1,6 @@
 import { getDb } from './index';
-
-export interface CurrencyRow {
-  id: number;
-  code: string;
-  name_ar: string;
-  name_en: string;
-  symbol: string;
-  is_default: number;
-}
+import type { CurrencyRow } from '@/schemas';
+export type { CurrencyRow };
 
 export async function getAllCurrencies(): Promise<CurrencyRow[]> {
   const db = await getDb();
@@ -35,12 +28,13 @@ export async function getCurrencyByCode(code: string): Promise<CurrencyRow | nul
 export async function createCurrency(data: Omit<CurrencyRow, 'id'>): Promise<number> {
   const db = await getDb();
   const result = await db.runAsync(
-    `INSERT INTO currencies (code, name_ar, name_en, symbol, is_default)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO currencies (code, name_ar, name_en, symbol, symbol_en, is_default)
+     VALUES (?, ?, ?, ?, ?, ?)`,
     data.code,
     data.name_ar,
     data.name_en,
     data.symbol,
+    data.symbol_en,
     data.is_default,
   );
   return result.lastInsertRowId as number;

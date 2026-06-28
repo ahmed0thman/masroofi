@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 let db: SQLite.SQLiteDatabase | null = null;
 let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 4;
 
 async function addColumnIfNotExists(database: SQLite.SQLiteDatabase, table: string, column: string, def: string) {
   try {
@@ -22,7 +22,9 @@ export async function runMigrations(): Promise<void> {
   const row = await d.getFirstAsync<{ 'user_version': number }>('PRAGMA user_version');
   const currentVersion = row?.user_version ?? 0;
   if (currentVersion >= SCHEMA_VERSION) return;
-  await migrateToV2();
+  if (currentVersion < 2) await migrateToV2();
+  if (currentVersion < 3) await migrateToV3();
+  if (currentVersion < 4) await migrateToV4();
 }
 
 export async function migrateToV2() {
@@ -61,6 +63,23 @@ export async function migrateToV2() {
   }
 }
 
+async function migrateToV3() {
+  // Create any tables that were added to the V2 schema after initial release
+  // (budgets, savings_goals) — IF NOT EXISTS makes this safe to re-run
+  await createV2Tables();
+  await db!.execAsync('PRAGMA user_version = 3');
+}
+
+async function migrateToV4() {
+  // Add symbol_en column to currencies table
+  await addColumnIfNotExists(db!, 'currencies', 'symbol_en', "TEXT NOT NULL DEFAULT ''");
+
+  // Re-seed currencies with the expanded list including symbol_en
+  await reseedCurrencies();
+
+  await db!.execAsync('PRAGMA user_version = 4');
+}
+
 async function createV2Tables() {
   await db!.execAsync(`
     CREATE TABLE IF NOT EXISTS currencies (
@@ -69,6 +88,7 @@ async function createV2Tables() {
       name_ar TEXT NOT NULL,
       name_en TEXT NOT NULL,
       symbol TEXT NOT NULL,
+      symbol_en TEXT NOT NULL DEFAULT '',
       is_default INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -234,12 +254,49 @@ async function seedCurrencies() {
   if (count!.c > 0) return;
 
   await db!.execAsync(`
-    INSERT INTO currencies (code, name_ar, name_en, symbol, is_default) VALUES
-      ('EGP', 'جنيه مصري', 'Egyptian Pound', 'ج.م', 1),
-      ('USD', 'دولار أمريكي', 'US Dollar', '$', 0),
-      ('SAR', 'ريال سعودي', 'Saudi Riyal', 'ر.س', 0),
-      ('EUR', 'يورو', 'Euro', '€', 0)
+    INSERT INTO currencies (code, name_ar, name_en, symbol, symbol_en, is_default) VALUES
+      ('AED', 'درهم إماراتي', 'UAE Dirham', 'د.إ', 'AED', 0),
+      ('SAR', 'ريال سعودي', 'Saudi Riyal', 'ر.س', 'SAR', 0),
+      ('EGP', 'جنيه مصري', 'Egyptian Pound', 'ج.م', 'EGP', 1),
+      ('QAR', 'ريال قطري', 'Qatari Riyal', 'ر.ق', 'QAR', 0),
+      ('KWD', 'دينار كويتي', 'Kuwaiti Dinar', 'د.ك', 'KWD', 0),
+      ('BHD', 'دينار بحريني', 'Bahraini Dinar', 'د.ب', 'BHD', 0),
+      ('OMR', 'ريال عماني', 'Omani Rial', 'ر.ع', 'OMR', 0),
+      ('USD', 'دولار أمريكي', 'US Dollar', '$', '$', 0),
+      ('EUR', 'يورو', 'Euro', '€', '€', 0)
   `);
+}
+
+async function reseedCurrencies() {
+  // Upsert all currencies: insert if missing, update symbol_en if exists
+  const currencies = [
+    { code: 'AED', name_ar: 'درهم إماراتي', name_en: 'UAE Dirham', symbol: 'د.إ', symbol_en: 'AED', is_default: 0 },
+    { code: 'SAR', name_ar: 'ريال سعودي', name_en: 'Saudi Riyal', symbol: 'ر.س', symbol_en: 'SAR', is_default: 0 },
+    { code: 'EGP', name_ar: 'جنيه مصري', name_en: 'Egyptian Pound', symbol: 'ج.م', symbol_en: 'EGP', is_default: 1 },
+    { code: 'QAR', name_ar: 'ريال قطري', name_en: 'Qatari Riyal', symbol: 'ر.ق', symbol_en: 'QAR', is_default: 0 },
+    { code: 'KWD', name_ar: 'دينار كويتي', name_en: 'Kuwaiti Dinar', symbol: 'د.ك', symbol_en: 'KWD', is_default: 0 },
+    { code: 'BHD', name_ar: 'دينار بحريني', name_en: 'Bahraini Dinar', symbol: 'د.ب', symbol_en: 'BHD', is_default: 0 },
+    { code: 'OMR', name_ar: 'ريال عماني', name_en: 'Omani Rial', symbol: 'ر.ع', symbol_en: 'OMR', is_default: 0 },
+    { code: 'USD', name_ar: 'دولار أمريكي', name_en: 'US Dollar', symbol: '$', symbol_en: '$', is_default: 0 },
+    { code: 'EUR', name_ar: 'يورو', name_en: 'Euro', symbol: '€', symbol_en: '€', is_default: 0 },
+  ];
+
+  for (const c of currencies) {
+    const existing = await db!.getFirstAsync<{ id: number }>(
+      'SELECT id FROM currencies WHERE code = ?', c.code,
+    );
+    if (existing) {
+      await db!.runAsync(
+        `UPDATE currencies SET symbol_en = ?, name_ar = ?, name_en = ?, symbol = ? WHERE code = ?`,
+        c.symbol_en, c.name_ar, c.name_en, c.symbol, c.code,
+      );
+    } else {
+      await db!.runAsync(
+        `INSERT INTO currencies (code, name_ar, name_en, symbol, symbol_en, is_default) VALUES (?, ?, ?, ?, ?, ?)`,
+        c.code, c.name_ar, c.name_en, c.symbol, c.symbol_en, c.is_default,
+      );
+    }
+  }
 }
 
 async function seedCategories() {
@@ -441,21 +498,28 @@ function normalizeCurrency(currency: string): string {
   if (c === 'usd' || c === 'دولار' || c === 'دولار أمريكي' || c === '$') return 'دولار أمريكي';
   if (c === 'sar' || c === 'ريال' || c === 'ريال سعودي' || c === 'ر.س') return 'ريال سعودي';
   if (c === 'eur' || c === 'يورو' || c === '€') return 'يورو';
+  if (c === 'aed' || c === 'درهم' || c === 'درهم إماراتي' || c === 'د.إ') return 'درهم إماراتي';
+  if (c === 'qar' || c === 'ريال قطري' || c === 'ر.ق') return 'ريال قطري';
+  if (c === 'kwd' || c === 'دينار' || c === 'دينار كويتي' || c === 'د.ك') return 'دينار كويتي';
+  if (c === 'bhd' || c === 'دينار بحريني' || c === 'د.ب') return 'دينار بحريني';
+  if (c === 'omr' || c === 'ريال عماني' || c === 'ر.ع') return 'ريال عماني';
   return c;
 }
 
 async function buildCurrencyMap(): Promise<Map<string, number>> {
-  const currencies = await db!.getAllAsync<{ id: number; name_ar: string; name_en: string; code: string }>(
-    'SELECT id, name_ar, name_en, code FROM currencies',
+  const currencies = await db!.getAllAsync<{ id: number; name_ar: string; name_en: string; code: string; symbol_en: string }>(
+    'SELECT id, name_ar, name_en, code, symbol_en FROM currencies',
   );
   const map = new Map<string, number>();
   for (const c of currencies) {
     map.set(c.name_ar, c.id);
     map.set(c.name_en, c.id);
     map.set(c.code, c.id);
+    map.set(c.symbol_en, c.id);
     map.set(c.name_ar.toLowerCase(), c.id);
     map.set(c.name_en.toLowerCase(), c.id);
     map.set(c.code.toLowerCase(), c.id);
+    map.set(c.symbol_en.toLowerCase(), c.id);
   }
   return map;
 }

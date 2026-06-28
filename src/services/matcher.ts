@@ -1,12 +1,6 @@
 import { getDb } from '@/db/index';
-
-export interface MatchResult {
-  itemId: number | null;
-  merchantId: number | null;
-  categoryId: number | null;
-  subCategoryId: number | null;
-  confidence: number;
-}
+import type { MatchResult } from '@/schemas';
+export type { MatchResult };
 
 const STOP_WORDS = new Set([
   'كيلو', 'نص', 'ربع', 'علبة', 'كرتونة', 'زوج', 'زوجين',

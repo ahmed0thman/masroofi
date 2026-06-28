@@ -10,8 +10,6 @@
     "delete": "حذف",
     "edit": "تعديل المصروف",
     "recordYourExpenses": "سجل مصروفاتك بصوتك",
-    "egp": "ج.م",
-    "le": "ج.م",
     "noData": "لا توجد بيانات"
   },
   "home": {
@@ -132,7 +130,24 @@
     "savingGoalDeleted": "تم حذف الهدف",
     "savingGoalProgress": "التقدم",
     "analyticsScheduler": "يوم التحليلات",
-    "analyticsSchedulerDesc": "اليوم المخصص لتوليد تقرير التحليلات الأسبوعي"
+    "analyticsSchedulerDesc": "اليوم المخصص لتوليد تقرير التحليلات الأسبوعي",
+    "days.0": "الأحد",
+    "days.1": "الإثنين",
+    "days.2": "الثلاثاء",
+    "days.3": "الأربعاء",
+    "days.4": "الخميس",
+    "days.5": "الجمعة",
+    "days.6": "السبت",
+    "budgetSpent": "المنفق",
+    "budgetRemaining_text": "المتبقي",
+    "budgetDaysLeft_one": "متبقي {{count}} يوم",
+    "budgetDaysLeft_other": "متبقي {{count}} أيام",
+    "budgetDailyAllowance": "المسموح يوميًا",
+    "budgetEdit": "تعديل الميزانية",
+    "budgetRemoveConfirm": "إلغاء الميزانية؟",
+    "savingGoalEmptyTitle": "لسه مفيش أهداف ادخار",
+    "savingGoalEmptyDesc": "حدد هدف وتابع تقدمك كل يوم!",
+    "savingGoalCreateFirst": "إنشاء أول هدف"
   },
   "profile": {
     "title": "الملف الشخصي",

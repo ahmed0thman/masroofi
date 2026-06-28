@@ -137,7 +137,7 @@ describe('parseExpenseResponse', () => {
     };
     const text = JSON.stringify([minimal]);
     const result = parseExpenseResponse(text);
-    expect(result[0].currency).toBe('جنيه');
+    expect(result[0].currency).toBe('EGP');
     expect(result[0].confidence).toBe(0);
     expect(result[0].priority).toBe('normal');
     expect(result[0].matchedItemId).toBeNull();

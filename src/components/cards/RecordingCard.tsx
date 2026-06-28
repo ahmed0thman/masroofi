@@ -3,11 +3,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useAudioPlayer } from 'expo-audio';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import type { IRecording } from '@/types';
+import type { IRecording } from '@/schemas';
 
-function formatRelativeTime(isoString: string, t: any): string {
+function formatRelativeTime(isoString: string, t: TFunction): string {
   const now = new Date();
   const date = new Date(isoString);
   const diffMs = now.getTime() - date.getTime();

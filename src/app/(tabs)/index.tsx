@@ -1,5 +1,5 @@
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
@@ -13,12 +13,12 @@ import { ErrorState } from '@/components/ErrorState';
 import { formatAmount } from '@/lib/format';
 import { EditExpenseSheet } from '@/components/cards/EditExpenseSheet';
 import { getLatestAnalyticsSummary } from '@/services/analytics';
-import { cn } from '@/lib/utils';
+import { getDefaultCurrency, type CurrencyRow } from '@/db/currency-repo';
 import type { ExpenseRow } from '@/db/expense-repo';
 
 export default function Home() {
   const colors = useThemeColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { expenses, isLoading, error, refresh, deleteExpense, updateExpense } = useExpenses();
   const [editingExpense, setEditingExpense] = useState<ExpenseRow | null>(null);
@@ -28,15 +28,22 @@ export default function Home() {
     topInsight: string;
     topRecommendation: string;
   } | null>(null);
+  const [defaultCurrency, setDefaultCurrency] = useState<CurrencyRow | null>(null);
   const { profile, refresh: refreshProfile } = useProfile();
 
   useFocusEffect(
     useCallback(() => {
       refresh();
       refreshProfile();
+      getDefaultCurrency().then(setDefaultCurrency);
       getLatestAnalyticsSummary().then(setAnalyticsSummary).catch(() => {});
     }, [refresh, refreshProfile]),
   );
+
+  const defaultSymbol = useMemo(() => {
+    if (!defaultCurrency) return '';
+    return i18n.language === 'ar' ? defaultCurrency.symbol : (defaultCurrency.symbol_en || defaultCurrency.symbol);
+  }, [defaultCurrency, i18n.language]);
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -84,11 +91,11 @@ export default function Home() {
   const dayChange =
     yesterdayTotal > 0 ? ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100 : null;
 
-  const monthCurrency = thisMonthExpenses.length > 0 ? (thisMonthExpenses[0].currency_symbol || thisMonthExpenses[0].currency_code || 'ج.م') : 'ج.م';
-  const todayCurrency = todayExpenses.length > 0 ? (todayExpenses[0].currency_symbol || todayExpenses[0].currency_code || 'ج.م') : 'ج.م';
+  const monthSymbol = defaultSymbol || (thisMonthExpenses.length > 0 ? (thisMonthExpenses[0].currency_symbol_en || thisMonthExpenses[0].currency_symbol || thisMonthExpenses[0].currency_code || '') : '');
+  const todaySymbol = defaultSymbol || (todayExpenses.length > 0 ? (todayExpenses[0].currency_symbol_en || todayExpenses[0].currency_symbol || todayExpenses[0].currency_code || '') : '');
 
-  const monthFormatted = formatAmount(monthTotal, monthCurrency);
-  const todayFormatted = formatAmount(todayTotal, todayCurrency);
+  const monthFormatted = formatAmount(monthTotal, monthSymbol, i18n.language);
+  const todayFormatted = formatAmount(todayTotal, todaySymbol, i18n.language);
 
   return (
     <SafeAreaView className="bg-background flex-1 w-full">

@@ -12,6 +12,7 @@ interface PeriodSelectorProps {
   customFrom: Date;
   customTo: Date;
   onCustomDateChange: (from: Date, to: Date) => void;
+  showComparisonToggleButton: boolean;
   showComparison: boolean;
   onComparisonToggle: (v: boolean) => void;
 }
@@ -22,6 +23,7 @@ export function PeriodSelector({
   customFrom,
   customTo,
   onCustomDateChange,
+  showComparisonToggleButton = true,
   showComparison,
   onComparisonToggle,
 }: PeriodSelectorProps) {
@@ -64,37 +66,39 @@ export function PeriodSelector({
 
       <View className="flex-row items-center justify-between px-1">
         {/* Comparison Toggle */}
-        <TouchableOpacity
-          onPress={() => onComparisonToggle(!showComparison)}
-          className={cn(
-            'flex-row items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200',
-            showComparison
-              ? 'bg-primary-container/30 border-primary'
-              : 'bg-surface-container-low border-outline-variant',
-          )}
-        >
-          <Text
+        {showComparisonToggleButton && (
+          <TouchableOpacity
+            onPress={() => onComparisonToggle(!showComparison)}
             className={cn(
-              'text-xs font-cairo-medium',
-              showComparison ? 'text-on-primary' : 'text-on-surface-variant',
+              'flex-row items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200',
+              showComparison
+                ? 'bg-primary-container/30 border-primary'
+                : 'bg-surface-container-low border-outline-variant',
             )}
           >
-            {t('analytics.compareToggle')}
-          </Text>
-          <View
-            className={cn(
-              'w-8 h-4 rounded-full relative transition-colors duration-200',
-              showComparison ? 'bg-primary' : 'bg-outline-variant',
-            )}
-          >
+            <Text
+              className={cn(
+                'text-xs font-cairo-medium',
+                showComparison ? 'text-on-primary' : 'text-on-surface-variant',
+              )}
+            >
+              {t('analytics.compareToggle')}
+            </Text>
             <View
               className={cn(
-                'absolute w-3 h-3 bg-white rounded-full top-0.5 transition-all duration-200',
-                showComparison ? 'right-0.5' : 'left-0.5',
+                'w-8 h-4 rounded-full relative transition-colors duration-200',
+                showComparison ? 'bg-primary' : 'bg-outline-variant',
               )}
-            />
-          </View>
-        </TouchableOpacity>
+            >
+              <View
+                className={cn(
+                  'absolute w-3 h-3 bg-white rounded-full top-0.5 transition-all duration-200',
+                  showComparison ? 'right-0.5' : 'left-0.5',
+                )}
+              />
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
       {/* Custom Date Range Chips */}
       {periodType === 'custom' && (

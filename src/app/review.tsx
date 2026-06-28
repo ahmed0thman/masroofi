@@ -3,6 +3,7 @@ import SafeAreaView from '@/components/layout/SafeAreaView';
 import { ReviewList } from '@/components/review/ReviewList';
 import { insertExpense } from '@/db/expense-repo';
 import { getAllCategories, type CategoryRow } from '@/db/category-repo';
+import { getCurrencyByCode, getDefaultCurrency } from '@/db/currency-repo';
 import {
   clearPendingExpenses,
   getPendingExpenses,
@@ -10,7 +11,7 @@ import {
   subscribe,
 } from '@/lib/pending-expenses';
 import { cn } from '@/lib/utils';
-import type { ExpenseRecord } from '@/services/gemini';
+import type { ExpenseRecord, EditableExpense } from '@/schemas';
 import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
@@ -18,10 +19,6 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-
-interface EditableExpense extends ExpenseRecord {
-  localId: number;
-}
 
 let nextLocalId = 0;
 
@@ -114,10 +111,20 @@ export default function ReviewScreen() {
     setIsSaving(true);
     try {
       for (const exp of expenses) {
+        // Resolve currency_id from the expense's currency code, or fall back to default
+        let currencyId: number | null = null;
+        if (exp.currency) {
+          const currencyRow = await getCurrencyByCode(exp.currency);
+          if (currencyRow) currencyId = currencyRow.id;
+        }
+        if (!currencyId) {
+          const defaultCurrency = await getDefaultCurrency();
+          currencyId = defaultCurrency?.id ?? 1;
+        }
         await insertExpense({
           item_name: exp.item,
           price: exp.price,
-          currency_id: 1,
+          currency_id: currencyId,
           description: exp.description,
           merchant_id: exp.matchedMerchantId,
           item_id: exp.matchedItemId,

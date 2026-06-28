@@ -10,14 +10,14 @@ import { useThemeColors } from "@/styles/global";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { cn } from "@/lib/utils";
 
-export interface SearchableSelectProps<T extends Record<string, any>> {
+export interface SearchableSelectProps<T extends Record<string, unknown>> {
   items: T[];
   displayKey: keyof T;
   valueKey: keyof T;
   placeholder: string;
-  selectedValue: any;
+  selectedValue: T[keyof T];
   selectedItem?: T | null;
-  onSelect: (value: any, item: T) => void;
+  onSelect: (value: T[keyof T], item: T) => void;
   onCreateNew?: (searchText: string) => void;
   emptyMessage?: string;
   showCreateNew?: boolean;
@@ -26,7 +26,7 @@ export interface SearchableSelectProps<T extends Record<string, any>> {
   disabled?: boolean;
 }
 
-export function SearchableSelect<T extends Record<string, any>>({
+export function SearchableSelect<T extends Record<string, unknown>>({
   items,
   displayKey,
   valueKey,

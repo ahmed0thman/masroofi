@@ -3,17 +3,19 @@ import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { formatFullCurrency } from '@/services/format';
 import { cn } from '@/lib/utils';
+import type { CurrencyRow } from '@/db/currency-repo';
 
 interface HeroCardProps {
   totalSpent: number;
   changePercentage: number;
   showComparison: boolean;
+  currency: CurrencyRow | null;
 }
 
-export function HeroCard({ totalSpent, changePercentage, showComparison }: HeroCardProps) {
+export function HeroCard({ totalSpent, changePercentage, showComparison, currency }: HeroCardProps) {
   const { t, i18n } = useTranslation();
   const isIncrease = changePercentage > 0;
-  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
+  const locale = i18n.language;
 
   return (
     <View className="bg-surface-container rounded-3xl p-8 items-center justify-center mb-6 shadow-sm">
@@ -22,7 +24,7 @@ export function HeroCard({ totalSpent, changePercentage, showComparison }: HeroC
       </Text>
 
       <Text className="text-on-surface leading-6 text-4xl font-cairo-bold mb-4">
-        {formatFullCurrency(totalSpent, locale, t('common.egp'))}
+        {currency ? formatFullCurrency(totalSpent, currency, locale) : totalSpent}
       </Text>
 
       {showComparison && (

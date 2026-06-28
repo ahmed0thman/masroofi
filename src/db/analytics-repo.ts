@@ -1,18 +1,6 @@
 import { getDb } from './index';
-
-export interface AnalyticsRow {
-  id: number;
-  period_start: string;
-  period_end: string;
-  period_type: string;
-  generated_at: string;
-  data: string;
-  insights: string | null;
-  recommendations: string | null;
-  status: string;
-  token_estimate: number | null;
-  model_used: string | null;
-}
+import type { AnalyticsRow } from '@/schemas';
+export type { AnalyticsRow };
 
 export async function insertAnalytics(data: {
   period_start: string;

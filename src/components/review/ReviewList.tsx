@@ -1,12 +1,8 @@
-import type { ExpenseRecord } from '@/services/gemini';
+import type { EditableExpense, ExpenseRecord } from '@/schemas';
 import type { TFunction } from 'i18next';
 import { View } from 'react-native';
 import { ReviewCard } from './ReviewCard';
 import { ReviewEditForm } from './ReviewEditForm';
-
-interface EditableExpense extends ExpenseRecord {
-  localId: number;
-}
 
 interface ReviewListProps {
   expenses: EditableExpense[];

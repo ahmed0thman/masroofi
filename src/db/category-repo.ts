@@ -1,23 +1,6 @@
 import { getDb } from './index';
-
-export interface CategoryRow {
-  id: number;
-  name: string;
-  name_en: string | null;
-  icon: string | null;
-  color: string | null;
-  default_priority: 'essential' | 'important' | 'normal' | 'luxury';
-  sort_order: number;
-  is_active: number;
-}
-
-export interface SubCategoryRow {
-  id: number;
-  name: string;
-  name_en: string | null;
-  category_id: number;
-  is_active: number;
-}
+import type { CategoryRow, SubCategoryRow } from '@/schemas';
+export type { CategoryRow, SubCategoryRow };
 
 export async function getAllCategories(): Promise<CategoryRow[]> {
   const db = await getDb();

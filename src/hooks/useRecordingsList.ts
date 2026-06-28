@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllRecordings, deleteRecording, type RecordingRow } from '@/db/recording-repo';
-import type { IRecording } from '@/types';
+import type { IRecording } from '@/schemas';
 import { Directory, Paths, File } from 'expo-file-system';
 
 const recordingDir = new Directory(Paths.document, 'recordings');

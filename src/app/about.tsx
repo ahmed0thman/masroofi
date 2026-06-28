@@ -31,8 +31,8 @@ export default function About() {
       updateProfile({ user_type: 'tester' });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
-        t('settings.about.testerMode' as any),
-        t('settings.about.testerEnabled' as any),
+        t('settings.about.testerMode'),
+        t('settings.about.testerEnabled'),
       );
     }
   }, [updateProfile, t]);
@@ -41,8 +41,8 @@ export default function About() {
     updateProfile({ user_type: 'user' });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert(
-      t('settings.about.testerMode' as any),
-      t('settings.about.testerDisabled' as any),
+      t('settings.about.testerMode'),
+      t('settings.about.testerDisabled'),
     );
   }, [updateProfile, t]);
 
@@ -79,13 +79,13 @@ export default function About() {
         {isTester && (
           <View className="bg-primary-container/20 rounded-[20px] p-4 mb-6 items-center gap-3">
             <Ionicons name="flask" size={24} color={colors.secondary} />
-            <Text className="text-on-surface font-cairo-bold text-base">{t('settings.about.testerMode' as any)}</Text>
+            <Text className="text-on-surface font-cairo-bold text-base">{t('settings.about.testerMode')}</Text>
             <Pressable
               className="bg-primary rounded-xl py-2.5 px-6"
               onPress={handleRevertToUser}
             >
               <Text className="text-on-primary font-cairo-semibold text-sm">
-                {t('settings.about.revertToUser' as any)}
+                {t('settings.about.revertToUser')}
               </Text>
             </Pressable>
           </View>

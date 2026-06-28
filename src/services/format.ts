@@ -1,4 +1,25 @@
-export function formatCurrency(amount: number, symbol: string = 'E£'): string {
+import type { CurrencyRow } from '@/db/currency-repo';
+
+/**
+ * Unified currency formatting function.
+ * Formats an amount using the locale-appropriate symbol from a CurrencyRow.
+ */
+export function formatCurrency(amount: number, currency: CurrencyRow, locale: string = 'ar'): string {
+  const symbol = locale === 'ar' ? currency.symbol : (currency.symbol_en || currency.symbol);
+  const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
+  const formattedNumber = new Intl.NumberFormat(numberLocale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
+  return `${formattedNumber} ${symbol}`;
+}
+
+/**
+ * Legacy-compatible short form: formats with compact notation and a symbol string.
+ * Prefer formatCurrency(amount, currencyRow, locale) for new code.
+ */
+export function formatCurrencyShort(amount: number, symbol: string = ''): string {
   if (amount >= 1_000_000) {
     return `${(amount / 1_000_000).toFixed(1)}M ${symbol}`;
   }
@@ -8,13 +29,12 @@ export function formatCurrency(amount: number, symbol: string = 'E£'): string {
   return `${amount.toFixed(2)} ${symbol}`;
 }
 
-export function formatFullCurrency(amount: number, locale: string = 'ar-EG', symbol: string = 'ج.م'): string {
-  const formattedNumber = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-
-  return `${formattedNumber} ${symbol}`;
+/**
+ * Formats a full amount with Intl.NumberFormat using a CurrencyRow.
+ * Alias for formatCurrency for semantic clarity.
+ */
+export function formatFullCurrency(amount: number, currency: CurrencyRow, locale: string = 'ar'): string {
+  return formatCurrency(amount, currency, locale);
 }
 
 export function formatNumber(n: number): string {

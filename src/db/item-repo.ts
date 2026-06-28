@@ -1,16 +1,6 @@
 import { getDb } from './index';
-
-export interface ItemRow {
-  id: number;
-  name: string;
-  name_variants: string | null;
-  canonical_item_id: number | null;
-  category_id: number | null;
-  sub_category_id: number | null;
-  merchant_id: number | null;
-  priority: string | null;
-  is_active: number;
-}
+import type { ItemRow } from '@/schemas';
+export type { ItemRow };
 
 export async function getAllItems(): Promise<ItemRow[]> {
   const db = await getDb();

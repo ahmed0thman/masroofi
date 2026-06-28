@@ -1,14 +1,6 @@
 import { getDb } from './index';
-
-export interface MerchantRow {
-  id: number;
-  name: string;
-  name_variants: string | null;
-  name_en: string | null;
-  icon: string | null;
-  color: string | null;
-  is_active: number;
-}
+import type { MerchantRow } from '@/schemas';
+export type { MerchantRow };
 
 export async function getAllMerchants(): Promise<MerchantRow[]> {
   const db = await getDb();

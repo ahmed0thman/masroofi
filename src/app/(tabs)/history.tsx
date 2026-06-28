@@ -69,7 +69,7 @@ function RecordingsSheet({ visible, onClose }: { visible: boolean; onClose: () =
 export default function Archive() {
   const colors = useThemeColors();
   const { t, i18n } = useTranslation();
-  const { profile, refresh: refreshProfile } = useProfile();
+  const { refresh: refreshProfile } = useProfile();
   const {
     expenses,
     totalCount,
@@ -119,7 +119,8 @@ export default function Archive() {
     (overrides?: { search?: string; category?: number | undefined }): ExpenseFilters => {
       const f: ExpenseFilters = {};
       const effectiveSearch = overrides?.search !== undefined ? overrides.search : searchText;
-      const effectiveCategory = overrides?.category !== undefined ? overrides.category : selectedCategory;
+      const effectiveCategory =
+        overrides?.category !== undefined ? overrides.category : selectedCategory;
       if (effectiveSearch) f.search = effectiveSearch;
       if (effectiveCategory !== undefined) f.category_id = effectiveCategory;
       if (dateFrom) f.dateFrom = dateFrom.toISOString();

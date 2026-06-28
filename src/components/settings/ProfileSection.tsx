@@ -113,7 +113,7 @@ export function ProfileSection() {
         <View className="flex-1 mx-4 ">
           <Text className="text-foreground font-cairo-bold text-lg">{profile?.name ?? ''}</Text>
           {/* <Text className="text-muted-foreground font-cairo text-sm">
-            {profile?.gender ? t(`profile.gender.${profile.gender}` as any) : ''}
+            {profile?.gender ? (profile.gender === 'male' ? t('profile.gender.male') : t('profile.gender.female')) : ''}
             {profile?.gender && profile?.location ? ' · ' : ''}
             {profile?.location ?? ''}
           </Text> */}

@@ -1,39 +1,11 @@
 import { getDb } from './index';
-
-export type UserType = 'user' | 'admin' | 'tester';
-
-export interface Profile {
-  id: number;
-  name: string;
-  avatar_uri: string | null;
-  language: string;
-  theme: string;
-  reminders_enabled: number;
-  user_type: UserType;
-  gender: string;
-  location: string;
-  age: number;
-  monthly_budget: number;
-  saving_goal: number;
-  analytics_day: number;
-  created_at: string;
-  updated_at: string;
-}
+import type { Profile, UserType, CreateProfileInput } from '@/schemas';
+export type { Profile, UserType, CreateProfileInput };
 
 export async function getProfile(): Promise<Profile | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<Profile>('SELECT * FROM profiles LIMIT 1');
   return row ?? null;
-}
-
-export interface CreateProfileInput {
-  name: string;
-  language?: string;
-  theme?: string;
-  reminders_enabled?: number;
-  gender?: string;
-  location?: string;
-  age?: number;
 }
 
 export async function createProfile(input: CreateProfileInput): Promise<Profile> {

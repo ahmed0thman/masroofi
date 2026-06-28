@@ -1,12 +1,6 @@
 import { getDb } from './index';
-
-export interface WordEquivalenceRow {
-  id: number;
-  canonical: string;
-  variant: string;
-  dialect: string | null;
-  source: string;
-}
+import type { WordEquivalenceRow } from '@/schemas';
+export type { WordEquivalenceRow };
 
 export async function getAllEquivalences(): Promise<WordEquivalenceRow[]> {
   const db = await getDb();

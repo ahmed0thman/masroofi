@@ -1,25 +1,6 @@
 import { getDb } from './index';
-
-export interface SavingsGoal {
-  id: number;
-  name: string;
-  target_amount: number;
-  current_amount: number;
-  deadline: string | null;
-  icon: string;
-  color: string | null;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateGoalInput {
-  name: string;
-  targetAmount: number;
-  deadline?: string;
-  icon?: string;
-  color?: string;
-}
+import type { SavingsGoal, CreateGoalInput } from '@/schemas';
+export type { SavingsGoal, CreateGoalInput };
 
 export async function createGoal(goal: CreateGoalInput): Promise<number> {
   const db = await getDb();

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { formatCurrency } from '@/services/format';
+import { formatCurrencyShort } from '@/services/format';
 import { cn } from '@/lib/utils';
 
 interface ItemData {
@@ -12,9 +12,10 @@ interface ItemData {
 interface TopBottomItemsProps {
   topItems: ItemData[];
   bottomItems: ItemData[];
+  currencySymbol?: string;
 }
 
-function ItemColumn({ title, items, isTop }: { title: string; items: ItemData[]; isTop: boolean }) {
+function ItemColumn({ title, items, isTop, currencySymbol }: { title: string; items: ItemData[]; isTop: boolean; currencySymbol?: string }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const visibleItems = expanded ? items : items.slice(0, 5);
@@ -28,7 +29,7 @@ function ItemColumn({ title, items, isTop }: { title: string; items: ItemData[];
           <View key={idx} className="flex-col gap-y-1">
             <View className="flex-row justify-between items-center">
               <Text className="text-xs font-cairo flex-1" numberOfLines={1}>{item.name}</Text>
-              <Text className="text-xs font-cairo-bold text-foreground">{formatCurrency(item.amount)}</Text>
+              <Text className="text-xs font-cairo-bold text-foreground">{formatCurrencyShort(item.amount, currencySymbol)}</Text>
             </View>
             <View className="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
               <View 
@@ -50,13 +51,13 @@ function ItemColumn({ title, items, isTop }: { title: string; items: ItemData[];
   );
 }
 
-export function TopBottomItems({ topItems, bottomItems }: TopBottomItemsProps) {
+export function TopBottomItems({ topItems, bottomItems, currencySymbol }: TopBottomItemsProps) {
   const { t } = useTranslation();
 
   return (
     <View className="flex-row mx-5 gap-3 mb-4">
-      <ItemColumn title={t('analytics.topItems')} items={topItems} isTop={true} />
-      <ItemColumn title={t('analytics.bottomItems')} items={bottomItems} isTop={false} />
+      <ItemColumn title={t('analytics.topItems')} items={topItems} isTop={true} currencySymbol={currencySymbol} />
+      <ItemColumn title={t('analytics.bottomItems')} items={bottomItems} isTop={false} currencySymbol={currencySymbol} />
     </View>
   );
 }

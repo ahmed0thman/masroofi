@@ -1,10 +1,11 @@
-export function formatAmount(price: number, _currency: string): { amount: string; suffix: string } {
-  const amount = new Intl.NumberFormat('ar-EG', {
+export function formatAmount(price: number, symbol: string, locale: string = 'ar'): { amount: string; suffix: string } {
+  const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
+  const amount = new Intl.NumberFormat(numberLocale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(price);
 
-  return { amount, suffix: 'ج.م' };
+  return { amount, suffix: symbol };
 }
 
 export function formatRelativeTime(dateString: string, locale: string = 'ar'): string {

@@ -13,13 +13,26 @@ import {
 import SafeAreaView from '@/components/layout/SafeAreaView';
 import { useAnalytics, type PeriodType } from '@/hooks/useAnalytics';
 import { getLatestAnalyticsSummary } from '@/services/analytics';
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { formatShortCurrency } from '@/services/format';
+import { getDefaultCurrency, type CurrencyRow } from '@/db/currency-repo';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function AnalyticsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [defaultCurrency, setDefaultCurrency] = useState<CurrencyRow | null>(null);
+
+  useEffect(() => {
+    getDefaultCurrency().then(setDefaultCurrency);
+  }, []);
+
+  const currencySymbol = defaultCurrency
+    ? i18n.language === 'ar'
+      ? defaultCurrency.symbol
+      : defaultCurrency.symbol_en || defaultCurrency.symbol
+    : '';
 
   const [periodType, setPeriodType] = useState<PeriodType>('month');
   const [customFrom, setCustomFrom] = useState<Date>(() => {
@@ -57,6 +70,9 @@ export default function AnalyticsScreen() {
     setCustomFrom(from);
     setCustomTo(to);
   }, []);
+  const handleRedirectToRecordExpense = () => {
+    router.push('/(tabs)/record');
+  };
 
   const totalSpent = data?.totalSpent ?? 0;
 
@@ -97,13 +113,28 @@ export default function AnalyticsScreen() {
 
   if (totalSpent === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center p-10">
-        <Text className="font-cairo text-muted-foreground text-center mb-6">
-          {t('analytics.noDataRecord')}
-        </Text>
-        <TouchableOpacity className="bg-primary px-6 py-3 rounded-full" onPress={() => {}}>
-          <Text className="font-cairo-bold text-on-primary">{t('analytics.recordExpense')}</Text>
-        </TouchableOpacity>
+      <SafeAreaView className="flex-1 px-0">
+        <PeriodSelector
+          periodType={periodType}
+          onPeriodChange={handlePeriodChange}
+          customFrom={customFrom}
+          customTo={customTo}
+          onCustomDateChange={handleCustomDateChange}
+          showComparisonToggleButton={false}
+          showComparison={showComparison}
+          onComparisonToggle={setShowComparison}
+        />
+        <View className="flex-1 items-center justify-center gap-6 px-4">
+          <Text className="font-cairo text-muted-foreground text-center mb-6">
+            {t('analytics.noDataRecord')}
+          </Text>
+          <TouchableOpacity
+            className="bg-primary px-6 py-3 rounded-full"
+            onPress={handleRedirectToRecordExpense}
+          >
+            <Text className="font-cairo-bold text-on-primary">{t('analytics.recordExpense')}</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -121,6 +152,7 @@ export default function AnalyticsScreen() {
           customFrom={customFrom}
           customTo={customTo}
           onCustomDateChange={handleCustomDateChange}
+          showComparisonToggleButton={true}
           showComparison={showComparison}
           onComparisonToggle={setShowComparison}
         />
@@ -129,19 +161,21 @@ export default function AnalyticsScreen() {
           totalSpent={totalSpent}
           changePercentage={changePercentage}
           showComparison={showComparison}
+          currency={defaultCurrency}
         />
 
         <BudgetSection
           percentage={budgetData.percentage}
           monthlyBudget={budgetData.monthlyBudget}
           spent={totalSpent}
+          currency={defaultCurrency}
         />
 
         <KpiRow>
           <KpiCard label={t('analytics.totalTransactions')} value={data?.totalTransactions ?? 0} />
           <KpiCard
             label={t('analytics.dailyAverage')}
-            value={`${data?.dailyAverage ?? 0} ${t('common.egp')}`}
+            value={`${formatShortCurrency(data?.dailyAverage ?? 0)} ${currencySymbol}`}
           />
         </KpiRow>
 

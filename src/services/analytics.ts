@@ -185,7 +185,7 @@ function tryExtractJson(text: string): string {
   return text;
 }
 
-export async function generateWeeklyAnalytics(): Promise<{ id: number; analytics: any } | null> {
+export async function generateWeeklyAnalytics(): Promise<{ id: number; analytics: Record<string, unknown> } | null> {
   try {
     const { start, end } = getCurrentWeekPeriod();
 

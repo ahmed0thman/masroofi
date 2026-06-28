@@ -90,7 +90,7 @@ export function ManualEntryCard({ colors, t }: ManualEntryCardProps) {
     })();
   }, []);
 
-  const handleItemSelect = (_value: number, item: ItemRow) => {
+  const handleItemSelect = (_value: ItemRow[keyof ItemRow], item: ItemRow) => {
     const category = categories.find((c) => c.id === item.category_id);
     const merchant = merchants.find((m) => m.id === item.merchant_id);
     setForm((prev) => ({
@@ -130,7 +130,7 @@ export function ManualEntryCard({ colors, t }: ManualEntryCardProps) {
     }
   };
 
-  const handleCategorySelect = (_value: number, item: CategoryRow) => {
+  const handleCategorySelect = (_value: CategoryRow[keyof CategoryRow], item: CategoryRow) => {
     setForm((prev) => ({ ...prev, categoryId: item.id, categoryName: item.name }));
   };
 
@@ -154,7 +154,7 @@ export function ManualEntryCard({ colors, t }: ManualEntryCardProps) {
     }
   };
 
-  const handleMerchantSelect = (_value: number, item: MerchantRow) => {
+  const handleMerchantSelect = (_value: MerchantRow[keyof MerchantRow], item: MerchantRow) => {
     setForm((prev) => ({ ...prev, merchantId: item.id, merchantName: item.name }));
   };
 
@@ -322,7 +322,7 @@ export function ManualEntryCard({ colors, t }: ManualEntryCardProps) {
                     placeholder={t('review.currency')}
                     selectedValue={form.currencyId}
                     selectedItem={selectedCurrency || null}
-                    onSelect={(value) => setForm((p) => ({ ...p, currencyId: value }))}
+                    onSelect={(value) => setForm((p) => ({ ...p, currencyId: value as number }))}
                     searchThreshold={0}
                     showCreateNew={false}
                     maxResults={10}

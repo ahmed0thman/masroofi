@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { MaterialIcons } from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 interface AiInsight {
   title: string;

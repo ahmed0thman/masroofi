@@ -1,17 +1,6 @@
 import { getDb } from './index';
-
-export interface RecordingRow {
-  id: string;
-  transcript: string;
-  duration_ms: number;
-  created_at: string;
-}
-
-export interface NewRecording {
-  id: string;
-  transcript: string;
-  duration_ms?: number;
-}
+import type { RecordingRow, NewRecording } from '@/schemas';
+export type { RecordingRow, NewRecording };
 
 export async function insertRecording(recording: NewRecording): Promise<void> {
   const db = await getDb();

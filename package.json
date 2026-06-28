@@ -9,6 +9,7 @@
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/datetimepicker": "9.1.0",
     "@react-native-picker/picker": "^2.11.4",
+    "@react-navigation/bottom-tabs": "^7.18.3",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

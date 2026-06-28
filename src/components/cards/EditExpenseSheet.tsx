@@ -5,7 +5,7 @@ import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/components/BottomSheet';
 import { Button } from '@/components/ui/button';
-import type { ExpenseRow } from '@/db/expense-repo';
+import type { ExpenseRow } from '@/schemas';
 import { getAllCategories, type CategoryRow } from '@/db/category-repo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,7 +13,7 @@ interface EditExpenseSheetProps {
   visible: boolean;
   expense: ExpenseRow | null;
   onClose: () => void;
-  onSave: (id: number, data: any) => void;
+  onSave: (id: number, data: Partial<ExpenseRow>) => void;
 }
 
 export function EditExpenseSheet({ visible, expense, onClose, onSave }: EditExpenseSheetProps) {

@@ -32,7 +32,10 @@ export default function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardPr
   const { t, i18n } = useTranslation();
   const categoryIcon = getCategoryIcon(expense.category_name);
   const showMerchant = Boolean(expense.merchant_name);
-  const formattedPrice = formatAmount(expense.price, expense.currency_symbol ?? expense.currency_code ?? '');
+  const symbol = i18n.language === 'ar'
+    ? (expense.currency_symbol ?? expense.currency_code ?? '')
+    : (expense.currency_symbol_en ?? expense.currency_symbol ?? expense.currency_code ?? '');
+  const formattedPrice = formatAmount(expense.price, symbol, i18n.language);
   const relativeTime = formatRelativeTime(expense.created_at, i18n.language);
 
   const handleDelete = () => {

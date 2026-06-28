@@ -6,12 +6,12 @@ interface PriorityBreakdownProps {
   data: Record<string, number>;
 }
 
-const PRIORITY_CONFIG: Record<string, { color: string; labelKey: string }> = {
-  Essential: { color: '#079455', labelKey: 'analytics.priority.essential' },
-  Important: { color: '#dc6803', labelKey: 'analytics.priority.important' },
-  Normal: { color: '#6c3124', labelKey: 'analytics.priority.normal' },
-  Luxury: { color: '#ba1a1a', labelKey: 'analytics.priority.luxury' },
-};
+const PRIORITY_CONFIG = {
+  Essential: { color: '#079455', labelKey: 'analytics.priority.essential' as const },
+  Important: { color: '#dc6803', labelKey: 'analytics.priority.important' as const },
+  Normal: { color: '#6c3124', labelKey: 'analytics.priority.normal' as const },
+  Luxury: { color: '#ba1a1a', labelKey: 'analytics.priority.luxury' as const },
+} as const;
 
 export function PriorityBreakdown({ data }: PriorityBreakdownProps) {
   const { t } = useTranslation();
