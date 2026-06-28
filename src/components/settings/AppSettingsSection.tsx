@@ -49,7 +49,7 @@ export function AppSettingsSection() {
         {/* Language Setting */}
         <View className="flex-col gap-3">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="language-outline" size={20} color={colors.primary} />
+            <Ionicons name="language-outline" size={20} color={colors.secondary} />
             <Text className="font-cairo-semibold text-on-surface">{t('settings.language')}</Text>
           </View>
           <Select
@@ -63,7 +63,7 @@ export function AppSettingsSection() {
         {/* Theme Setting */}
         <View className="flex-col gap-3">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="color-palette-outline" size={20} color={colors.primary} />
+            <Ionicons name="color-palette-outline" size={20} color={colors.secondary} />
             <Text className="font-cairo-semibold text-on-surface">{t('settings.theme')}</Text>
           </View>
           <View className="bg-surface-container-low rounded-full p-1 flex-row items-center">
@@ -94,7 +94,7 @@ export function AppSettingsSection() {
           className="flex-row items-center justify-between p-4 rounded-2xl bg-surface-container-low active:bg-surface-container-high"
         >
           <View className="flex-row items-center gap-2">
-            <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
+            <Ionicons name="information-circle-outline" size={20} color={colors.secondary} />
             <Text className="font-cairo-medium text-on-surface">{t('settings.about')}</Text>
           </View>
           <Ionicons name="chevron-forward-outline" size={20} color={colors.onSurfaceVariant} />

@@ -1,18 +1,20 @@
 import { DirectionProvider } from '@/components/ui/direction-provider';
 import '@/i18n';
+import { ProfileProvider } from '@/providers/ProfileProvider';
+import SplashScreen from '@/screens/splash/splash';
 import { useFonts } from 'expo-font';
-import Stack from 'expo-router/stack';
+import {
+  AndroidImportance,
+  setNotificationChannelAsync,
+  setNotificationHandler,
+} from 'expo-notifications';
 import { DarkTheme, ThemeProvider } from 'expo-router';
+import Stack from 'expo-router/stack';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-import {
-  setNotificationChannelAsync,
-  setNotificationHandler,
-  AndroidImportance,
-} from 'expo-notifications';
-import SplashScreen from '@/screens/splash';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import './global.css';
 
 setNotificationHandler({
@@ -67,19 +69,26 @@ export default function RootLayout() {
 
   return (
     <DirectionProvider defaultDirection="rtl">
-      <StatusBar style="light" />
-      <ThemeProvider value={DarkTheme}>
-        {!splashDone ? (
-          <SplashScreen onFinish={() => setSplashDone(true)} />
-        ) : (
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="about" options={{ headerShown: false }} />
-            <Stack.Screen name="review" options={{ headerShown: false, presentation: 'modal' }} />
-          </Stack>
-        )}
-      </ThemeProvider>
+      <ProfileProvider>
+        <StatusBar style="light" />
+        <ThemeProvider value={DarkTheme}>
+          {!splashDone ? (
+            <SplashScreen onFinish={() => setSplashDone(true)} />
+          ) : (
+            <KeyboardProvider>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="about" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="review"
+                  options={{ headerShown: false, presentation: 'modal' }}
+                />
+              </Stack>
+            </KeyboardProvider>
+          )}
+        </ThemeProvider>
+      </ProfileProvider>
     </DirectionProvider>
   );
 }

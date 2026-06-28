@@ -1,5 +1,5 @@
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '@/styles/global';
 import { useTranslation } from 'react-i18next';
@@ -13,14 +13,15 @@ import { ErrorState } from '@/components/ErrorState';
 import { formatAmount } from '@/lib/format';
 import { EditExpenseSheet } from '@/components/cards/EditExpenseSheet';
 import { getLatestAnalyticsSummary } from '@/services/analytics';
-import { getDefaultCurrency, type CurrencyRow } from '@/db/currency-repo';
+import { getCurrencyById } from '@/db/currency-repo';
+import type { CurrencyRow } from '@/schemas';
 import type { ExpenseRow } from '@/db/expense-repo';
 
 export default function Home() {
   const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { expenses, isLoading, error, refresh, deleteExpense, updateExpense } = useExpenses();
+  const { expenses, error, refresh, deleteExpense, updateExpense } = useExpenses();
   const [editingExpense, setEditingExpense] = useState<ExpenseRow | null>(null);
   const [analyticsSummary, setAnalyticsSummary] = useState<{
     totalSpent: number;
@@ -28,22 +29,32 @@ export default function Home() {
     topInsight: string;
     topRecommendation: string;
   } | null>(null);
-  const [defaultCurrency, setDefaultCurrency] = useState<CurrencyRow | null>(null);
+  const [profileCurrency, setProfileCurrency] = useState<CurrencyRow | null>(null);
   const { profile, refresh: refreshProfile } = useProfile();
 
   useFocusEffect(
     useCallback(() => {
       refresh();
       refreshProfile();
-      getDefaultCurrency().then(setDefaultCurrency);
-      getLatestAnalyticsSummary().then(setAnalyticsSummary).catch(() => {});
+      getLatestAnalyticsSummary()
+        .then(setAnalyticsSummary)
+        .catch(() => {});
     }, [refresh, refreshProfile]),
   );
 
+  // Fetch currency from profile's currency_id
+  useEffect(() => {
+    if (profile?.currency_id) {
+      getCurrencyById(profile.currency_id).then(setProfileCurrency);
+    }
+  }, [profile?.currency_id]);
+
   const defaultSymbol = useMemo(() => {
-    if (!defaultCurrency) return '';
-    return i18n.language === 'ar' ? defaultCurrency.symbol : (defaultCurrency.symbol_en || defaultCurrency.symbol);
-  }, [defaultCurrency, i18n.language]);
+    if (!profileCurrency) return '';
+    return i18n.language === 'ar'
+      ? profileCurrency.symbol
+      : profileCurrency.symbol_en || profileCurrency.symbol;
+  }, [profileCurrency, i18n.language]);
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -91,11 +102,8 @@ export default function Home() {
   const dayChange =
     yesterdayTotal > 0 ? ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100 : null;
 
-  const monthSymbol = defaultSymbol || (thisMonthExpenses.length > 0 ? (thisMonthExpenses[0].currency_symbol_en || thisMonthExpenses[0].currency_symbol || thisMonthExpenses[0].currency_code || '') : '');
-  const todaySymbol = defaultSymbol || (todayExpenses.length > 0 ? (todayExpenses[0].currency_symbol_en || todayExpenses[0].currency_symbol || todayExpenses[0].currency_code || '') : '');
-
-  const monthFormatted = formatAmount(monthTotal, monthSymbol, i18n.language);
-  const todayFormatted = formatAmount(todayTotal, todaySymbol, i18n.language);
+  const monthFormatted = formatAmount(monthTotal, defaultSymbol, i18n.language);
+  const todayFormatted = formatAmount(todayTotal, defaultSymbol, i18n.language);
 
   return (
     <SafeAreaView className="bg-background flex-1 w-full">
@@ -127,11 +135,11 @@ export default function Home() {
                     <Ionicons
                       name={monthChange >= 0 ? 'arrow-up' : 'arrow-down'}
                       size={14}
-                      color={monthChange >= 0 ? colors.success : colors.error}
+                      color={monthChange >= 0 ? colors.error : colors.success}
                     />
                     <Text
                       className="text-xs font-cairo-semibold ml-1"
-                      style={{ color: monthChange >= 0 ? colors.success : colors.error }}
+                      style={{ color: monthChange >= 0 ? colors.error : colors.success }}
                     >
                       {monthChange >= 0 ? '+' : ''}
                       {monthChange.toFixed(0)}% {t('home.vsLastMonth')}
@@ -167,11 +175,11 @@ export default function Home() {
                     <Ionicons
                       name={dayChange >= 0 ? 'arrow-up' : 'arrow-down'}
                       size={14}
-                      color={dayChange >= 0 ? colors.success : colors.error}
+                      color={dayChange >= 0 ? colors.error : colors.success}
                     />
                     <Text
                       className="text-xs font-cairo-semibold ml-1"
-                      style={{ color: dayChange >= 0 ? colors.success : colors.error }}
+                      style={{ color: dayChange >= 0 ? colors.error : colors.success }}
                     >
                       {dayChange >= 0 ? '+' : ''}
                       {dayChange.toFixed(0)}% {t('home.vsYesterday')}
@@ -191,7 +199,7 @@ export default function Home() {
             onPress={() => router.push('/(tabs)/analytics')}
           >
             <View className="bg-primary-container/20 rounded-xl p-2">
-              <Ionicons name="bulb-outline" size={20} color={colors.primary} />
+              <Ionicons name="bulb-outline" size={20} color={colors.secondary} />
             </View>
             <View className="flex-1">
               <Text className="text-sm font-cairo-semibold text-on-surface" numberOfLines={1}>
@@ -213,7 +221,14 @@ export default function Home() {
           data={todayExpenses}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
-            <ExpenseCard expense={item} onEdit={(id) => { const exp = expenses.find(e => e.id === id); if (exp) setEditingExpense(exp); }} onDelete={deleteExpense} />
+            <ExpenseCard
+              expense={item}
+              onEdit={(id) => {
+                const exp = expenses.find((e) => e.id === id);
+                if (exp) setEditingExpense(exp);
+              }}
+              onDelete={deleteExpense}
+            />
           )}
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center pt-20">

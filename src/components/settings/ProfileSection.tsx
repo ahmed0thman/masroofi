@@ -1,19 +1,25 @@
 import { BottomSheet } from '@/components/BottomSheet';
 import { Avatar } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import type { SelectOption } from '@/components/ui/select';
+import { Select } from '@/components/ui/select';
+import { getAllCurrencies, getDefaultCurrency } from '@/db/currency-repo';
 import { useProfileEditor } from '@/hooks/useProfileEditor';
+import type { CurrencyRow } from '@/schemas';
 import { useThemeColors } from '@/styles/global';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../ui/button';
 
 export function ProfileSection() {
   const colors = useThemeColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const {
     profile,
@@ -27,12 +33,28 @@ export function ProfileSection() {
     setLocation,
     setAge,
     setAvatarUri,
+    currencyId,
+    setCurrencyId,
+    monthlyBudget,
+    setMonthlyBudget,
     saveProfile,
+    createProfile,
     isSaving,
     updateProfile,
   } = useProfileEditor();
 
   const [showSheet, setShowSheet] = useState(false);
+  const [currencies, setCurrencies] = useState<CurrencyRow[]>([]);
+
+  useEffect(() => {
+    getAllCurrencies().then(setCurrencies);
+  }, []);
+
+  const isArabic = i18n.language.startsWith('ar');
+  const currencyOptions: SelectOption[] = currencies.map((c) => ({
+    label: `${c.symbol} (${c.code}) - ${isArabic ? c.name_ar : c.name_en}`,
+    value: String(c.id),
+  }));
 
   const openSheet = useCallback(() => {
     setShowSheet(true);
@@ -44,7 +66,21 @@ export function ProfileSection() {
 
   const handleSave = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await saveProfile();
+    if (!profile?.id) {
+      console.log('current', profile);
+      const egp = await getDefaultCurrency();
+      const p = await createProfile({
+        name,
+        gender,
+        location,
+        age: age ? parseInt(age, 10) : 0,
+        currency_id: egp?.id ?? 1,
+      });
+
+      console.log('profile created', p);
+    } else {
+      await saveProfile();
+    }
     setShowSheet(false);
   }, [saveProfile]);
 
@@ -103,7 +139,7 @@ export function ProfileSection() {
   return (
     <View className="flex-col gap-4 mb-8">
       <View>
-        <Text className="section-title">{t('settings.profile')}</Text>
+        <Text className="section-title">{t('settings.profile.title')}</Text>
       </View>
 
       <View className="bg-surface-bright rounded-[20px] p-4 flex-row items-center">
@@ -134,7 +170,7 @@ export function ProfileSection() {
       </View>
 
       <BottomSheet visible={showSheet} onClose={closeSheet} title={t('profile.edit')}>
-        <ScrollView
+        <KeyboardAwareScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         >
@@ -143,12 +179,11 @@ export function ProfileSection() {
               <Text className="text-muted-foreground font-cairo text-sm mb-1">
                 {t('profile.enterName')}
               </Text>
-              <TextInput
+              <Input
                 className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
                 value={name}
                 onChangeText={setName}
                 placeholder={t('profile.namePlaceholder')}
-                placeholderTextColor={colors.onSurfaceVariant}
               />
             </View>
             <View className="flex-1 gap-1">
@@ -186,25 +221,47 @@ export function ProfileSection() {
               <Text className="text-muted-foreground font-cairo text-sm mb-1">
                 {t('profile.location')}
               </Text>
-              <TextInput
+              <Input
                 className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
                 value={location}
                 onChangeText={setLocation}
                 placeholder={t('profile.location')}
-                placeholderTextColor={colors.onSurfaceVariant}
               />
             </View>
             <View className="flex-1 gap-1">
               <Text className="text-muted-foreground font-cairo text-sm mb-1">
                 {t('profile.age')}
               </Text>
-              <TextInput
+              <Input
                 className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
                 value={age}
                 onChangeText={(text) => setAge(text.replace(/[^0-9]/g, ''))}
                 placeholder={t('profile.age')}
-                placeholderTextColor={colors.onSurfaceVariant}
                 keyboardType="number-pad"
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground font-cairo text-sm mb-1">
+                {t('settings.monthlyBudget')}
+              </Text>
+              <Input
+                className="bg-surface-container-high rounded-xl px-4 py-3 text-on-surface font-cairo"
+                value={monthlyBudget}
+                onChangeText={(text) => setMonthlyBudget(text.replace(/[^0-9.]/g, ''))}
+                placeholder={t('settings.monthlyBudgetPlaceholder')}
+                keyboardType="decimal-pad"
+              />
+            </View>
+            <View className="flex-1 gap-1">
+              <Text className="text-muted-foreground font-cairo text-sm mb-1">
+                {t('settings.profile.currency')}
+              </Text>
+              <Select
+                options={currencyOptions}
+                value={String(currencyId)}
+                onValueChange={(val) => setCurrencyId(Number(val))}
+                searchable
+                searchPlaceholder={t('settings.profile.currency')}
               />
             </View>
           </View>
@@ -224,7 +281,7 @@ export function ProfileSection() {
               </Text>
             </Pressable>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </BottomSheet>
     </View>
   );

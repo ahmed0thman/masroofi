@@ -5,8 +5,11 @@ import ExpenseCard from '@/components/cards/ExpenseCard';
 import RecordingCard from '@/components/cards/RecordingCard';
 import SafeAreaView from '@/components/layout/SafeAreaView';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
-import type { ExpenseFilters } from '@/db/expense-repo';
+import type { ExpenseFilters, ExpenseRow } from '@/db/expense-repo';
+import { deleteExpense, updateExpense } from '@/db/expense-repo';
+import { isDateInCurrentWeek } from '@/services/analytics';
 import { useFilteredExpenses } from '@/hooks/useFilteredExpenses';
 import { useProfile } from '@/hooks/useProfile';
 import { useRecordingsList } from '@/hooks/useRecordingsList';
@@ -21,11 +24,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Platform,
   Pressable,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -93,6 +96,10 @@ export default function Archive() {
   const [priceMax, setPriceMax] = useState('');
   const [showDatePicker, setShowDatePicker] = useState<'from' | 'to' | null>(null);
   const [datePickerDate, setDatePickerDate] = useState(new Date());
+
+  const [editingExpense, setEditingExpense] = useState<ExpenseRow | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPrice, setEditPrice] = useState('');
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initialLoadDone = useRef(false);
@@ -187,21 +194,49 @@ export default function Archive() {
     });
   };
 
+  const handleDeleteExpense = useCallback(async (id: number) => {
+    try {
+      await deleteExpense(id);
+      refresh();
+    } catch (err) {
+      Alert.alert(t('common.error'), String(err));
+    }
+  }, [refresh, t]);
+
+  const handleEditExpense = useCallback((expense: ExpenseRow) => {
+    setEditingExpense(expense);
+    setEditName(expense.item_name);
+    setEditPrice(String(expense.price));
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingExpense) return;
+    const price = Number(editPrice);
+    if (!editName.trim() || isNaN(price) || price <= 0) {
+      Alert.alert(t('common.error'), t('recordings.recordFormErrors.inComplete'));
+      return;
+    }
+    try {
+      await updateExpense(editingExpense.id, { item_name: editName.trim(), price });
+      setEditingExpense(null);
+      refresh();
+    } catch (err) {
+      Alert.alert(t('common.error'), String(err));
+    }
+  }, [editingExpense, editName, editPrice, refresh, t]);
+
   return (
     <SafeAreaView className="bg-background flex-1 p-0">
       <View className="flex-1">
         <View className="flex-row items-center gap-2 px-5 py-2">
-          <View className="flex-1 flex-row justify-start items-center bg-surface-container-high rounded-xl px-3 py-2.5 gap-2">
-            <Ionicons name="search" size={18} color={colors.onSurfaceVariant} />
-            <TextInput
-              className="flex-1 font-cairo text-on-surface p-0"
-              placeholder={t('archive.search')}
-              placeholderTextColor={colors.onSurfaceVariant}
-              value={searchText}
-              onChangeText={handleSearchChange}
-              returnKeyType="search"
-            />
-          </View>
+          <Input
+            className="flex-1 "
+            placeholder={t('archive.search')}
+            value={searchText}
+            onChangeText={handleSearchChange}
+            returnKeyType="search"
+            trailingIcon={<Ionicons name="search" size={18} color={colors.onSurfaceVariant} />}
+          />
           <TouchableOpacity
             onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className={cn(
@@ -281,18 +316,16 @@ export default function Archive() {
               </Pressable>
             </View>
             <View className="flex-row gap-3">
-              <TextInput
+              <Input
                 className="flex-1 text-start bg-surface-container-high rounded-xl px-3 py-2.5 font-cairo text-on-surface"
                 placeholder={t('archive.priceMin')}
-                placeholderTextColor={colors.onSurfaceVariant}
                 value={priceMin}
                 onChangeText={(text) => setPriceMin(text.replace(/[^0-9]/g, ''))}
                 keyboardType="number-pad"
               />
-              <TextInput
+              <Input
                 className="flex-1 text-start bg-surface-container-high rounded-xl px-3 py-2.5 font-cairo text-on-surface"
                 placeholder={t('archive.priceMax')}
-                placeholderTextColor={colors.onSurfaceVariant}
                 value={priceMax}
                 onChangeText={(text) => setPriceMax(text.replace(/[^0-9]/g, ''))}
                 keyboardType="number-pad"
@@ -365,7 +398,13 @@ export default function Archive() {
                 )
               ) : null
             }
-            renderItem={({ item }) => <ExpenseCard expense={item} />}
+            renderItem={({ item }) => (
+              <ExpenseCard
+                expense={item}
+                onEdit={isDateInCurrentWeek(item.created_at) ? () => handleEditExpense(item) : undefined}
+                onDelete={isDateInCurrentWeek(item.created_at) ? handleDeleteExpense : undefined}
+              />
+            )}
           />
         )}
       </View>
@@ -394,6 +433,41 @@ export default function Archive() {
 
       {showRecordings && (
         <RecordingsSheet visible={showRecordings} onClose={() => setShowRecordings(false)} />
+      )}
+
+      {editingExpense && (
+        <View className="absolute inset-0 z-50 items-center justify-center bg-black/50">
+          <View className="bg-surface rounded-2xl p-6 mx-8 w-80 shadow-lg">
+            <Text variant="h4" className="text-on-surface mb-4">{t('common.edit')}</Text>
+            <Input
+              className="bg-surface-container-high rounded-xl px-3 py-2.5 font-cairo text-on-surface mb-3"
+              value={editName}
+              onChangeText={setEditName}
+              placeholder={t('review.item')}
+            />
+            <Input
+              className="bg-surface-container-high rounded-xl px-3 py-2.5 font-cairo text-on-surface mb-4"
+              value={editPrice}
+              onChangeText={(text) => setEditPrice(text.replace(/[^0-9]/g, ''))}
+              keyboardType="number-pad"
+              placeholder={t('review.price')}
+            />
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => setEditingExpense(null)}
+                className="flex-1 bg-surface-container-high rounded-xl py-2.5 items-center"
+              >
+                <Text className="text-on-surface font-cairo-semibold">{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSaveEdit}
+                className="flex-1 bg-primary rounded-xl py-2.5 items-center"
+              >
+                <Text className="text-on-primary font-cairo-semibold">{t('common.save')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       )}
     </SafeAreaView>
   );

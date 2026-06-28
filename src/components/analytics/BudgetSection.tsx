@@ -76,12 +76,12 @@ export function BudgetSection({
       <View className="mt-6 flex-row items-center gap-4">
         <View className="items-center">
           <Text className="text-xs text-on-surface-variant font-cairo">{t('analytics.budget')}</Text>
-          <Text className="font-cairo-semibold text-on-surface">{formatShortCurrency(monthlyBudget)} {symbol}</Text>
+          <Text className="font-cairo-semibold text-on-surface">{formatShortCurrency(monthlyBudget, i18n.language)} {symbol}</Text>
         </View>
         <View className="w-px h-8 bg-outline-variant" />
         <View className="items-center">
           <Text className="text-xs text-on-surface-variant font-cairo">{t('analytics.spent')}</Text>
-          <Text className="font-cairo-semibold text-on-surface">{formatShortCurrency(spent)} {symbol}</Text>
+          <Text className="font-cairo-semibold text-on-surface">{formatShortCurrency(spent, i18n.language)} {symbol}</Text>
         </View>
       </View>
     </View>

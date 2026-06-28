@@ -28,6 +28,9 @@ export type { BudgetOverview, BudgetProgressItem } from './budget';
 export { savingsGoalSchema, createGoalInputSchema } from './savings-goal';
 export type { SavingsGoal, CreateGoalInput } from './savings-goal';
 
+export { savingWalletEntrySchema } from './saving-wallet-entry';
+export type { SavingWalletEntry } from './saving-wallet-entry';
+
 export { analyticsRowSchema, aggregatedDataSchema, geminiAnalyticsResponseSchema } from './analytics';
 export type { AnalyticsRow, AggregatedData, GeminiAnalyticsResponse } from './analytics';
 

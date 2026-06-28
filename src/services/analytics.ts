@@ -87,6 +87,12 @@ export function getCurrentWeekPeriod(): { start: string; end: string } {
   };
 }
 
+export function isDateInCurrentWeek(dateStr: string): boolean {
+  const { start, end } = getCurrentWeekPeriod();
+  const date = new Date(dateStr);
+  return date >= new Date(start) && date <= new Date(end);
+}
+
 export async function hasCurrentWeekAnalytics(): Promise<boolean> {
   const { start, end } = getCurrentWeekPeriod();
   return hasAnalyticsForPeriod(start, end);
@@ -96,12 +102,18 @@ export async function aggregateCurrentWeek(): Promise<AnalyticsInput['aggregated
   const { start, end } = getCurrentWeekPeriod();
   const base = await aggregateExpensesForPeriod(start, end);
 
-  const diffMs = new Date(end).getTime() - new Date(start).getTime();
-  const daysInPeriod = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+  const { getDb } = await import('@/db/index');
+  const db = await getDb();
+  const dayCount = await db.getFirstAsync<{ days: number }>(
+    `SELECT COUNT(DISTINCT date(created_at)) as days FROM expenses WHERE created_at >= ? AND created_at <= ?`,
+    start,
+    end,
+  );
+  const daysWithExpenses = dayCount?.days ?? 0;
 
   return {
     ...base,
-    dailyAverage: base.totalTransactions > 0 ? Math.round(base.totalSpent / daysInPeriod) : 0,
+    dailyAverage: daysWithExpenses > 0 ? Math.round(base.totalSpent / daysWithExpenses) : 0,
   };
 }
 

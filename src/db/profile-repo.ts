@@ -17,9 +17,10 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
   const gender = input.gender ?? '';
   const location = input.location ?? '';
   const age = input.age ?? 0;
+  const currency_id = input.currency_id ?? 1;
 
   const result = await db.runAsync(
-    'INSERT INTO profiles (id, name, language, theme, reminders_enabled, gender, location, age, user_type, monthly_budget, saving_goal, analytics_day, created_at, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 5, ?, ?)',
+    'INSERT INTO profiles (id, name, language, theme, reminders_enabled, gender, location, age, user_type, monthly_budget, saving_goal, analytics_day, currency_id, created_at, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 5, ?, ?, ?)',
     input.name,
     language,
     theme,
@@ -28,6 +29,7 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
     location,
     age,
     'user',
+    currency_id,
     now,
     now,
   );
@@ -45,6 +47,7 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
     monthly_budget: 0,
     saving_goal: 0,
     analytics_day: 5,
+    currency_id,
     created_at: now,
     updated_at: now,
   };
@@ -53,7 +56,7 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
 export async function updateProfile(updates: Partial<Profile>): Promise<void> {
   const db = await getDb();
   const now = new Date().toISOString();
-  const allowed = ['name', 'avatar_uri', 'language', 'theme', 'reminders_enabled', 'gender', 'location', 'age', 'user_type', 'monthly_budget', 'saving_goal', 'analytics_day'] as const;
+  const allowed = ['name', 'avatar_uri', 'language', 'theme', 'reminders_enabled', 'gender', 'location', 'age', 'user_type', 'monthly_budget', 'saving_goal', 'analytics_day', 'currency_id'] as const;
   const setClauses: string[] = [];
   const values: (string | number | null)[] = [];
 

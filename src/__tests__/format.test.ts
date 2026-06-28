@@ -102,6 +102,63 @@ const mockEUR: CurrencyRow = {
   is_default: 0,
 };
 
+const mockDZD: CurrencyRow = {
+  id: 10, code: 'DZD', name_ar: 'دينار جزائري', name_en: 'Algerian Dinar',
+  symbol: 'د.ج', symbol_en: 'DZD', is_default: 0,
+};
+const mockDJF: CurrencyRow = {
+  id: 11, code: 'DJF', name_ar: 'فرنك جيبوتي', name_en: 'Djiboutian Franc',
+  symbol: 'ف.ج', symbol_en: 'DJF', is_default: 0,
+};
+const mockIQD: CurrencyRow = {
+  id: 12, code: 'IQD', name_ar: 'دينار عراقي', name_en: 'Iraqi Dinar',
+  symbol: 'د.ع', symbol_en: 'IQD', is_default: 0,
+};
+const mockJOD: CurrencyRow = {
+  id: 13, code: 'JOD', name_ar: 'دينار أردني', name_en: 'Jordanian Dinar',
+  symbol: 'د.أ', symbol_en: 'JOD', is_default: 0,
+};
+const mockKMF: CurrencyRow = {
+  id: 14, code: 'KMF', name_ar: 'فرنك قمري', name_en: 'Comorian Franc',
+  symbol: 'ف.ق', symbol_en: 'KMF', is_default: 0,
+};
+const mockLBP: CurrencyRow = {
+  id: 15, code: 'LBP', name_ar: 'ليرة لبنانية', name_en: 'Lebanese Pound',
+  symbol: 'ل.ل', symbol_en: 'LBP', is_default: 0,
+};
+const mockLYD: CurrencyRow = {
+  id: 16, code: 'LYD', name_ar: 'دينار ليبي', name_en: 'Libyan Dinar',
+  symbol: 'د.ل', symbol_en: 'LYD', is_default: 0,
+};
+const mockMAD: CurrencyRow = {
+  id: 17, code: 'MAD', name_ar: 'درهم مغربي', name_en: 'Moroccan Dirham',
+  symbol: 'د.م', symbol_en: 'MAD', is_default: 0,
+};
+const mockMRU: CurrencyRow = {
+  id: 18, code: 'MRU', name_ar: 'أوقية موريتانية', name_en: 'Mauritanian Ouguiya',
+  symbol: 'أ.م', symbol_en: 'MRU', is_default: 0,
+};
+const mockSDG: CurrencyRow = {
+  id: 19, code: 'SDG', name_ar: 'جنيه سوداني', name_en: 'Sudanese Pound',
+  symbol: 'ج.س', symbol_en: 'SDG', is_default: 0,
+};
+const mockSOS: CurrencyRow = {
+  id: 20, code: 'SOS', name_ar: 'شلن صومالي', name_en: 'Somali Shilling',
+  symbol: 'ش.ص', symbol_en: 'SOS', is_default: 0,
+};
+const mockSYP: CurrencyRow = {
+  id: 21, code: 'SYP', name_ar: 'ليرة سورية', name_en: 'Syrian Pound',
+  symbol: 'ل.س', symbol_en: 'SYP', is_default: 0,
+};
+const mockTND: CurrencyRow = {
+  id: 22, code: 'TND', name_ar: 'دينار تونسي', name_en: 'Tunisian Dinar',
+  symbol: 'د.ت', symbol_en: 'TND', is_default: 0,
+};
+const mockYER: CurrencyRow = {
+  id: 23, code: 'YER', name_ar: 'ريال يمني', name_en: 'Yemeni Rial',
+  symbol: 'ر.ي', symbol_en: 'YER', is_default: 0,
+};
+
 describe('formatAmount', () => {
   it('formats amount with Arabic locale and symbol', () => {
     const result = formatAmount(500, 'ج.م', 'ar');
@@ -162,21 +219,35 @@ describe('formatCurrency (unified)', () => {
   it('formats USD correctly', () => {
     const result = formatCurrency(50.5, mockUSD, 'en');
     expect(result).toContain('$');
-    expect(result).toContain('50.50');
+    expect(result).toContain('51');
   });
 
   // ── All 9 currencies in both locales ──
-  describe('all 9 currencies in Arabic locale', () => {
+  describe('all 23 currencies in Arabic locale', () => {
     const testCases: { currency: CurrencyRow; symbol: string }[] = [
-      { currency: mockEGP, symbol: 'ج.م' },
-      { currency: mockSAR, symbol: 'ر.س' },
       { currency: mockAED, symbol: 'د.إ' },
-      { currency: mockQAR, symbol: 'ر.ق' },
-      { currency: mockKWD, symbol: 'د.ك' },
       { currency: mockBHD, symbol: 'د.ب' },
-      { currency: mockOMR, symbol: 'ر.ع' },
-      { currency: mockUSD, symbol: '$' },
+      { currency: mockDJF, symbol: 'ف.ج' },
+      { currency: mockDZD, symbol: 'د.ج' },
+      { currency: mockEGP, symbol: 'ج.م' },
       { currency: mockEUR, symbol: '€' },
+      { currency: mockIQD, symbol: 'د.ع' },
+      { currency: mockJOD, symbol: 'د.أ' },
+      { currency: mockKMF, symbol: 'ف.ق' },
+      { currency: mockKWD, symbol: 'د.ك' },
+      { currency: mockLBP, symbol: 'ل.ل' },
+      { currency: mockLYD, symbol: 'د.ل' },
+      { currency: mockMAD, symbol: 'د.م' },
+      { currency: mockMRU, symbol: 'أ.م' },
+      { currency: mockOMR, symbol: 'ر.ع' },
+      { currency: mockQAR, symbol: 'ر.ق' },
+      { currency: mockSAR, symbol: 'ر.س' },
+      { currency: mockSDG, symbol: 'ج.س' },
+      { currency: mockSOS, symbol: 'ش.ص' },
+      { currency: mockSYP, symbol: 'ل.س' },
+      { currency: mockTND, symbol: 'د.ت' },
+      { currency: mockUSD, symbol: '$' },
+      { currency: mockYER, symbol: 'ر.ي' },
     ];
 
     testCases.forEach(({ currency, symbol }) => {
@@ -188,17 +259,31 @@ describe('formatCurrency (unified)', () => {
     });
   });
 
-  describe('all 9 currencies in English locale', () => {
+  describe('all 23 currencies in English locale', () => {
     const testCases: { currency: CurrencyRow; symbolEn: string }[] = [
-      { currency: mockEGP, symbolEn: 'EGP' },
-      { currency: mockSAR, symbolEn: 'SAR' },
       { currency: mockAED, symbolEn: 'AED' },
-      { currency: mockQAR, symbolEn: 'QAR' },
-      { currency: mockKWD, symbolEn: 'KWD' },
       { currency: mockBHD, symbolEn: 'BHD' },
-      { currency: mockOMR, symbolEn: 'OMR' },
-      { currency: mockUSD, symbolEn: '$' },
+      { currency: mockDJF, symbolEn: 'DJF' },
+      { currency: mockDZD, symbolEn: 'DZD' },
+      { currency: mockEGP, symbolEn: 'EGP' },
       { currency: mockEUR, symbolEn: '€' },
+      { currency: mockIQD, symbolEn: 'IQD' },
+      { currency: mockJOD, symbolEn: 'JOD' },
+      { currency: mockKMF, symbolEn: 'KMF' },
+      { currency: mockKWD, symbolEn: 'KWD' },
+      { currency: mockLBP, symbolEn: 'LBP' },
+      { currency: mockLYD, symbolEn: 'LYD' },
+      { currency: mockMAD, symbolEn: 'MAD' },
+      { currency: mockMRU, symbolEn: 'MRU' },
+      { currency: mockOMR, symbolEn: 'OMR' },
+      { currency: mockQAR, symbolEn: 'QAR' },
+      { currency: mockSAR, symbolEn: 'SAR' },
+      { currency: mockSDG, symbolEn: 'SDG' },
+      { currency: mockSOS, symbolEn: 'SOS' },
+      { currency: mockSYP, symbolEn: 'SYP' },
+      { currency: mockTND, symbolEn: 'TND' },
+      { currency: mockUSD, symbolEn: '$' },
+      { currency: mockYER, symbolEn: 'YER' },
     ];
 
     testCases.forEach(({ currency, symbolEn }) => {
@@ -206,7 +291,7 @@ describe('formatCurrency (unified)', () => {
         const result = formatCurrency(100, currency, 'en');
         expect(result).toContain(symbolEn);
         expect(result).toContain('100');
-        expect(result).toContain('.00');
+        expect(result).not.toContain('.');
       });
     });
   });
@@ -215,23 +300,21 @@ describe('formatCurrency (unified)', () => {
   it('formats zero', () => {
     const result = formatCurrency(0, mockEGP, 'ar');
     expect(result).toContain('٠');
-    // Arabic uses U+066B (٫) as decimal separator, not U+002E (.)
-    expect(result).toContain('٠٫٠٠');
   });
 
   it('formats zero in English', () => {
     const result = formatCurrency(0, mockEGP, 'en');
-    expect(result).toContain('0.00');
+    expect(result).toContain('0');
   });
 
   it('formats negative numbers', () => {
     const result = formatCurrency(-50, mockEGP, 'en');
-    expect(result).toContain('-50.00');
+    expect(result).toContain('-50');
   });
 
   it('formats very large numbers', () => {
     const result = formatCurrency(1_000_000, mockUSD, 'en');
-    expect(result).toContain('1,000,000.00');
+    expect(result).toContain('1,000,000');
   });
 
   it('formats large numbers in Arabic', () => {
@@ -241,19 +324,19 @@ describe('formatCurrency (unified)', () => {
     expect(result).toContain('٥٠٠٬٠٠٠');
   });
 
-  it('formats with many decimal places (rounds to 2)', () => {
+  it('formats with many decimal places (rounds to 0)', () => {
     const result = formatCurrency(99.999, mockUSD, 'en');
-    expect(result).toContain('100.00');
+    expect(result).toContain('100');
   });
 
   it('formats with one decimal place', () => {
     const result = formatCurrency(49.5, mockUSD, 'en');
-    expect(result).toContain('49.50');
+    expect(result).toContain('50');
   });
 
-  it('formats fractional amounts', () => {
+  it('formats fractional amounts (rounded to 0)', () => {
     const result = formatCurrency(0.01, mockUSD, 'en');
-    expect(result).toContain('0.01');
+    expect(result).toContain('0');
   });
 });
 
@@ -267,20 +350,34 @@ describe('formatCurrencyShort', () => {
   });
 
   it('formats small amounts', () => {
-    expect(formatCurrencyShort(99.5, 'ر.س')).toBe('99.50 ر.س');
+    expect(formatCurrencyShort(99.5, 'ر.س')).toBe('100 ر.س');
   });
 
-  describe('all 9 currencies in formatCurrencyShort', () => {
+  describe('all 23 currencies in formatCurrencyShort', () => {
     const testCases: { symbol: string; code: string }[] = [
-      { symbol: 'ج.م', code: 'EGP' },
-      { symbol: 'ر.س', code: 'SAR' },
       { symbol: 'د.إ', code: 'AED' },
-      { symbol: 'ر.ق', code: 'QAR' },
-      { symbol: 'د.ك', code: 'KWD' },
       { symbol: 'د.ب', code: 'BHD' },
-      { symbol: 'ر.ع', code: 'OMR' },
-      { symbol: '$', code: 'USD' },
+      { symbol: 'ف.ج', code: 'DJF' },
+      { symbol: 'د.ج', code: 'DZD' },
+      { symbol: 'ج.م', code: 'EGP' },
       { symbol: '€', code: 'EUR' },
+      { symbol: 'د.ع', code: 'IQD' },
+      { symbol: 'د.أ', code: 'JOD' },
+      { symbol: 'ف.ق', code: 'KMF' },
+      { symbol: 'د.ك', code: 'KWD' },
+      { symbol: 'ل.ل', code: 'LBP' },
+      { symbol: 'د.ل', code: 'LYD' },
+      { symbol: 'د.م', code: 'MAD' },
+      { symbol: 'أ.م', code: 'MRU' },
+      { symbol: 'ر.ع', code: 'OMR' },
+      { symbol: 'ر.ق', code: 'QAR' },
+      { symbol: 'ر.س', code: 'SAR' },
+      { symbol: 'ج.س', code: 'SDG' },
+      { symbol: 'ش.ص', code: 'SOS' },
+      { symbol: 'ل.س', code: 'SYP' },
+      { symbol: 'د.ت', code: 'TND' },
+      { symbol: '$', code: 'USD' },
+      { symbol: 'ر.ي', code: 'YER' },
     ];
 
     testCases.forEach(({ symbol, code }) => {
@@ -298,18 +395,18 @@ describe('formatCurrencyShort', () => {
 
   // ── Edge cases ──
   it('formats zero with compact notation', () => {
-    expect(formatCurrencyShort(0, 'EGP')).toBe('0.00 EGP');
+    expect(formatCurrencyShort(0, 'EGP')).toBe('0 EGP');
   });
 
   it('formats negative small number', () => {
-    expect(formatCurrencyShort(-50, '$')).toBe('-50.00 $');
+    expect(formatCurrencyShort(-50, '$')).toBe('-50 $');
   });
 
   it('formats negative large number', () => {
     // formatCurrencyShort uses simple comparisons (>= 1_000_000), so negative
-    // -2000000 < 1000000 → falls through to toFixed(2)
+    // -2000000 < 1000000 → falls through to toFixed(0)
     const result = formatCurrencyShort(-2_000_000, '€');
-    expect(result).toBe('-2000000.00 €');
+    expect(result).toBe('-2000000 €');
   });
 
   it('formats with empty symbol', () => {
@@ -317,7 +414,7 @@ describe('formatCurrencyShort', () => {
   });
 
   it('formats exactly 999 (below K threshold)', () => {
-    expect(formatCurrencyShort(999, 'ج.م')).toBe('999.00 ج.م');
+    expect(formatCurrencyShort(999, 'ج.م')).toBe('999 ج.م');
   });
 
   it('formats exactly 1000 (boundary to K)', () => {

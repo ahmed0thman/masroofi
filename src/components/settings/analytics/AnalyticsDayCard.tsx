@@ -45,7 +45,7 @@ export function AnalyticsDayCard() {
   return (
     <View className="bg-surface-container rounded-3xl p-5 gap-4">
       <View className="flex-row items-center gap-2">
-        <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+        <Ionicons name="calendar-outline" size={20} color={colors.secondary} />
         <Text className="font-cairo-semibold text-on-surface">{t('settings.analyticsScheduler')}</Text>
       </View>
       <View className="flex-row flex-wrap gap-2">

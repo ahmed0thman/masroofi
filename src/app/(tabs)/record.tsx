@@ -16,7 +16,6 @@ export default function Record() {
 
   const {
     startRecording,
-    finishRecording,
     stopRecordingOnly,
     processTranscription,
     cancelRecording,

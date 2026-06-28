@@ -7,21 +7,23 @@ interface PriorityBreakdownProps {
 }
 
 const PRIORITY_CONFIG = {
-  Essential: { color: '#079455', labelKey: 'analytics.priority.essential' as const },
-  Important: { color: '#dc6803', labelKey: 'analytics.priority.important' as const },
-  Normal: { color: '#6c3124', labelKey: 'analytics.priority.normal' as const },
-  Luxury: { color: '#ba1a1a', labelKey: 'analytics.priority.luxury' as const },
+  essential: { color: '#009e4c', labelKey: 'analytics.priority.essential' as const },
+  important: { color: '#dc6803', labelKey: 'analytics.priority.important' as const },
+  normal: { color: '#618cc5', labelKey: 'analytics.priority.normal' as const },
+  luxury: { color: '#ba1a1a', labelKey: 'analytics.priority.luxury' as const },
 } as const;
 
 export function PriorityBreakdown({ data }: PriorityBreakdownProps) {
   const { t } = useTranslation();
-  
+
   const total = Object.values(data).reduce((sum, val) => sum + val, 0);
-  
+
   if (total === 0) {
     return (
       <View className="bg-surface-container rounded-3xl p-6 shadow-sm mb-6 items-center justify-center min-h-[180px]">
-        <Text className="text-sm font-cairo text-on-surface-variant">{t('analytics.noPriorityData')}</Text>
+        <Text className="text-sm font-cairo text-on-surface-variant">
+          {t('analytics.noPriorityData')}
+        </Text>
       </View>
     );
   }
@@ -32,9 +34,9 @@ export function PriorityBreakdown({ data }: PriorityBreakdownProps) {
         <Text className="text-lg font-cairo-semibold text-on-surface">
           {t('analytics.priorityDistribution')}
         </Text>
-        <Text className="text-xs font-cairo-medium text-primary">
+        {/* <Text className="text-xs font-cairo-medium text-primary">
           {t('analytics.cutBackInsight')}
-        </Text>
+        </Text> */}
       </View>
 
       <View className="w-full bg-surface-container-high rounded-full overflow-hidden h-4 flex-row">
@@ -42,10 +44,10 @@ export function PriorityBreakdown({ data }: PriorityBreakdownProps) {
           const amount = data[priority] || 0;
           const percentage = (amount / total) * 100;
           return (
-            <View 
-              key={priority} 
-              className="h-full" 
-              style={{ width: `${percentage}%`, backgroundColor: config.color }} 
+            <View
+              key={priority}
+              className="h-full"
+              style={{ width: `${percentage}%`, backgroundColor: config.color }}
             />
           );
         })}
@@ -63,9 +65,7 @@ export function PriorityBreakdown({ data }: PriorityBreakdownProps) {
                   {t(config.labelKey)}
                 </Text>
               </View>
-              <Text className="font-cairo-bold text-xs text-on-surface-variant">
-                {percentage}%
-              </Text>
+              <Text className="font-cairo-bold text-xs text-on-surface-variant">{percentage}%</Text>
             </View>
           );
         })}

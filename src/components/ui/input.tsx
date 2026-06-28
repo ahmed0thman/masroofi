@@ -4,16 +4,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const inputVariants = cva(
-  "rounded-md border py-2 text-foreground placeholder:text-muted-foreground",
+  "rounded-xl border py-3 font-cairo placeholder:text-muted-foreground",
   {
     variants: {
       variant: {
-        default: "border-input bg-background p-2",
-        ghost: "border-transparent bg-transparent p-2",
+        default: "border-input bg-surface-bright text-on-surface",
+        ghost: "border-transparent bg-transparent",
       },
       size: {
         sm: "min-h-9 px-3 text-sm",
-        md: "min-h-12 px-4 text-base",
+        md: "min-h-12 px-3.5 text-base",
         lg: "min-h-14 px-5 text-lg",
       },
     },

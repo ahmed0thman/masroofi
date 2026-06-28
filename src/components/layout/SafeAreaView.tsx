@@ -7,12 +7,7 @@ interface StyledSafeAreaViewProps extends SafeAreaViewProps {
   theme?: 'light' | 'dark';
 }
 
-const SafeAreaView = ({
-  children,
-  className,
-  theme = 'light',
-  ...rest
-}: StyledSafeAreaViewProps) => {
+const SafeAreaView = ({ children, className, ...rest }: StyledSafeAreaViewProps) => {
   //   TODO: read the status bar style from the global state manager and set it here
   return (
     <StyledSafeAreaView

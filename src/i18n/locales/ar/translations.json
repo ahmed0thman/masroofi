@@ -10,7 +10,8 @@
     "delete": "حذف",
     "edit": "تعديل المصروف",
     "recordYourExpenses": "سجل مصروفاتك بصوتك",
-    "noData": "لا توجد بيانات"
+    "noData": "لا توجد بيانات",
+    "addNew": "إضافة جديد"
   },
   "home": {
     "title": "مرحباً بعودتك, {{name}}!",
@@ -71,6 +72,12 @@
     "category": "الفئة",
     "send": "إرسال",
     "manualSaveAll": "حفظ الكل ({{count}})",
+    "other": "أخرى",
+    "customItemPlaceholder": "اسم المنتج",
+    "customItemRequired": "يرجى إدخال اسم المنتج ",
+    "customCategoryPlaceholder": "اسم الفئة",
+    "customMerchantPlaceholder": "اسم المتجر",
+    "customMerchantRequired": "يرجى إدخال اسم المتجر",
     "tips": {
       "title": "نصائح للتسجيل الصوتي",
       "itemAndPrice": "قل اسم الصنف وسعره واسم المحل بوضوح",
@@ -103,7 +110,10 @@
     "about.testerEnabled": "تهانينا! تم تفعيل وضع المختبر",
     "about.testerDisabled": "تم إلغاء وضع المختبر",
     "about.revertToUser": "العودة إلى وضع المستخدم",
-    "profile": "الملف الشخصي",
+    "profile": {
+      "title": "الملف الشخصي",
+      "currency": "العملة"
+    },
     "reminders": "التذكيرات",
     "reminders.add": "إضافة تذكير",
     "reminders.time": "الوقت",
@@ -147,7 +157,18 @@
     "budgetRemoveConfirm": "إلغاء الميزانية؟",
     "savingGoalEmptyTitle": "لسه مفيش أهداف ادخار",
     "savingGoalEmptyDesc": "حدد هدف وتابع تقدمك كل يوم!",
-    "savingGoalCreateFirst": "إنشاء أول هدف"
+    "savingGoalCreateFirst": "إنشاء أول هدف",
+    "savingWallet": "محفظة التوفير",
+    "monthlyBudget": "الميزانية الشهرية",
+    "monthlyBudgetPlaceholder": "أدخل قيمة الميزانية الشهرية",
+    "extraSavings": "مدخرات إضافية",
+    "extraSavingsTotal": "إجمالي المدخرات الإضافية",
+    "addExtraSaving": "إضافة مدخر",
+    "extraSavingNote": "ملاحظة (اختياري)",
+    "extraSavingAmount": "المبلغ",
+    "extraSavingAdded": "تمت إضافة المدخر",
+    "extraSavingDeleted": "تم حذف المدخر",
+    "walletBalance": "رصيد المحفظة"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -257,7 +278,6 @@
     "title": "مراجعة المصروفات",
     "item": "الصنف",
     "price": "السعر",
-    "currency": "العملة",
     "category": "الفئة",
     "subCategory": "فئة فرعية",
     "merchant": "المتجر",
@@ -273,7 +293,28 @@
     "confidence.high": "عالية",
     "confidence.medium": "متوسطة",
     "confidence.low": "منخفضة",
-    "deleteConfirm": "هل أنت متأكد من حذف هذا المصروف؟"
+    "deleteConfirm": "هل أنت متأكد من حذف هذا المصروف؟",
+    "priority": {
+      "essential": "أساسي",
+      "important": "مهم",
+      "normal": "عادي",
+      "luxury": "رفاهية"
+    },
+    "matchStatus": {
+      "matched": "✓ مطابق",
+      "new": "جديد"
+    }
+  },
+  "categories": {
+    "foodAndDrinks": "أكل ومشروبات",
+    "transport": "مواصلات",
+    "bills": "فواتير",
+    "shopping": "تسوق",
+    "health": "صحة",
+    "entertainment": "ترفيه",
+    "education": "تعليم",
+    "rent": "إيجار",
+    "other": "أخرى"
   },
   "analytics": {
     "title": "التحليلات",

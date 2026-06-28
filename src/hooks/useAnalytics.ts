@@ -79,12 +79,9 @@ export function useAnalytics(periodType: PeriodType, from?: string, to?: string)
         getProfile(),
       ]);
 
-      const diffMs = new Date(end).getTime() - new Date(start).getTime();
-      const daysInPeriod = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
-      
       setData({
         ...aggregated,
-        dailyAverage: aggregated.totalTransactions > 0 ? Math.round(aggregated.totalSpent / daysInPeriod) : 0,
+        dailyAverage: dailySums.length > 0 ? Math.round(aggregated.totalSpent / dailySums.length) : 0,
       });
 
       setDailySpendingSum(dailySums);

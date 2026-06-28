@@ -28,7 +28,7 @@ const ReminderSection: React.FC<ReminderSectionProps> = ({
     <View className="w-full">
       {/* Section Header */}
       <View className="flex-row items-center gap-2 mb-1">
-        <Ionicons name="notifications-outline" size={20} color={colors.primary} />
+        <Ionicons name="notifications-outline" size={20} color={colors.secondary} />
         <Text className="font-cairo-semibold text-base text-foreground">
           {t('onboarding.reminder.title')}
         </Text>
@@ -46,7 +46,7 @@ const ReminderSection: React.FC<ReminderSectionProps> = ({
               key={index}
               className="flex-row items-center gap-1.5 bg-surface-container-low rounded-full pl-3 pr-1.5 py-1.5 border border-outline"
             >
-              <Ionicons name="time-outline" size={14} color={colors.primary} />
+              <Ionicons name="time-outline" size={14} color={colors.secondary} />
               <Text className="font-cairo-medium text-sm text-foreground">{time}</Text>
               <Pressable
                 onPress={() => onRemoveReminder(time)}
@@ -70,7 +70,7 @@ const ReminderSection: React.FC<ReminderSectionProps> = ({
           accessibilityRole="button"
           accessibilityLabel={t('onboarding.reminder.add')}
         >
-          <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+          <Ionicons name="add-circle-outline" size={20} color={colors.secondary} />
           <Text className="font-cairo-medium text-sm text-primary">
             {t('onboarding.reminder.add')}
           </Text>

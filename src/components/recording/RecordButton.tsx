@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, I18nManager } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { cn } from '@/lib/utils';
 import type { TFunction } from 'i18next';
+import { formatNumber } from '@/services/format';
 
 interface RecordButtonProps {
   onRecordStart: () => void;
@@ -34,6 +34,7 @@ export function RecordButton({
   colors,
   t,
 }: RecordButtonProps) {
+  const lang = I18nManager.isRTL ? 'ar' : 'en';
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -100,8 +101,10 @@ export function RecordButton({
         {t('home.tapToRecord')}
       </Text>
       {!isRecording && !atDailyLimit && !isUnlimited && (
-        <Text className="text-sm text-muted-foreground text-center mt-1 font-cairo">
-          {t('recordings.remaining', { count: MAX_DAILY_RECORDINGS - todayCount })}
+        <Text className="text-sm text-muted-foreground text-center mt-1 font-cairo-medium">
+          {t('recordings.remaining', {
+            count: formatNumber(MAX_DAILY_RECORDINGS - todayCount, lang),
+          })}
         </Text>
       )}
     </View>

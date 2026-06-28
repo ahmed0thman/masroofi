@@ -16,7 +16,7 @@ interface TopBottomItemsProps {
 }
 
 function ItemColumn({ title, items, isTop, currencySymbol }: { title: string; items: ItemData[]; isTop: boolean; currencySymbol?: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const visibleItems = expanded ? items : items.slice(0, 5);
   const maxAmount = items.length > 0 ? Math.max(...items.map(i => i.amount)) : 0;
@@ -29,7 +29,7 @@ function ItemColumn({ title, items, isTop, currencySymbol }: { title: string; it
           <View key={idx} className="flex-col gap-y-1">
             <View className="flex-row justify-between items-center">
               <Text className="text-xs font-cairo flex-1" numberOfLines={1}>{item.name}</Text>
-              <Text className="text-xs font-cairo-bold text-foreground">{formatCurrencyShort(item.amount, currencySymbol)}</Text>
+              <Text className="text-xs font-cairo-bold text-foreground">{formatCurrencyShort(item.amount, currencySymbol, i18n.language)}</Text>
             </View>
             <View className="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
               <View 

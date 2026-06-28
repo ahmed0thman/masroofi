@@ -1,20 +1,19 @@
 import { getDb } from './index';
 import type { ExpenseRow, NewExpense, ExpenseFilters } from '@/schemas';
 export type { ExpenseRow, NewExpense, ExpenseFilters };
+import { recalculateMonthlySavings } from './saving-wallet-repo';
 
 const expenseSelectColumns = `
   e.id, e.item_name, e.price, e.currency_id,
-  c.code AS currency_code, c.symbol AS currency_symbol, c.symbol_en AS currency_symbol_en,
   e.description, e.merchant_id, m.name AS merchant_name,
   e.item_id, i.name_variants AS item_name_variants,
   e.category_id, cat.name AS category_name, cat.default_priority AS category_default_priority,
   e.sub_category_id, sc.name AS sub_category_name,
-  e.confidence, e.transcript_id, e.source, e.created_at, e.updated_at
+  e.confidence, e.transcript_id, e.source, e.priority, e.created_at, e.updated_at
 `;
 
 const expenseJoinClause = `
   FROM expenses e
-  LEFT JOIN currencies c ON c.id = e.currency_id
   LEFT JOIN merchants m ON m.id = e.merchant_id
   LEFT JOIN items i ON i.id = e.item_id
   LEFT JOIN categories cat ON cat.id = e.category_id
@@ -112,12 +111,15 @@ export async function getExpenseById(id: number): Promise<ExpenseRow | null> {
 export async function insertExpense(expense: NewExpense): Promise<number> {
   const db = await getDb();
   const now = new Date().toISOString();
+  // Resolve currency_id from profile (global setting)
+  const profile = await db.getFirstAsync<{ currency_id: number; monthly_budget: number }>('SELECT currency_id, monthly_budget FROM profiles LIMIT 1');
+  const currencyId = profile?.currency_id ?? 1;
   const result = await db.runAsync(
-    `INSERT INTO expenses (item_name, price, currency_id, description, merchant_id, item_id, category_id, sub_category_id, confidence, transcript_id, source, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO expenses (item_name, price, currency_id, description, merchant_id, item_id, category_id, sub_category_id, confidence, transcript_id, source, priority, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     expense.item_name,
     expense.price,
-    expense.currency_id,
+    currencyId,
     expense.description ?? '',
     expense.merchant_id ?? null,
     expense.item_id ?? null,
@@ -126,9 +128,13 @@ export async function insertExpense(expense: NewExpense): Promise<number> {
     expense.confidence ?? 0,
     expense.transcript_id ?? null,
     expense.source ?? 'voice',
+    expense.priority ?? null,
     now,
     now,
   );
+  if (profile?.monthly_budget && profile.monthly_budget > 0) {
+    await recalculateMonthlySavings(profile.monthly_budget);
+  }
   return result.lastInsertRowId as number;
 }
 
@@ -136,10 +142,13 @@ export async function insertExpenses(expenses: NewExpense[]): Promise<number[]> 
   const db = await getDb();
   const now = new Date().toISOString();
   const ids: number[] = [];
+  // Resolve currency_id from profile (global setting)
+  const profile = await db.getFirstAsync<{ currency_id: number; monthly_budget: number }>('SELECT currency_id, monthly_budget FROM profiles LIMIT 1');
+  const currencyId = profile?.currency_id ?? 1;
 
   const statement = await db.prepareAsync(
-    `INSERT INTO expenses (item_name, price, currency_id, description, merchant_id, item_id, category_id, sub_category_id, confidence, transcript_id, source, created_at, updated_at)
-     VALUES ($item_name, $price, $currency_id, $description, $merchant_id, $item_id, $category_id, $sub_category_id, $confidence, $transcript_id, $source, $created_at, $updated_at)`,
+    `INSERT INTO expenses (item_name, price, currency_id, description, merchant_id, item_id, category_id, sub_category_id, confidence, transcript_id, source, priority, created_at, updated_at)
+     VALUES ($item_name, $price, $currency_id, $description, $merchant_id, $item_id, $category_id, $sub_category_id, $confidence, $transcript_id, $source, $priority, $created_at, $updated_at)`,
   );
 
   try {
@@ -147,7 +156,7 @@ export async function insertExpenses(expenses: NewExpense[]): Promise<number[]> 
       const result = await statement.executeAsync({
         $item_name: expense.item_name,
         $price: expense.price,
-        $currency_id: expense.currency_id,
+        $currency_id: currencyId,
         $description: expense.description ?? '',
         $merchant_id: expense.merchant_id ?? null,
         $item_id: expense.item_id ?? null,
@@ -156,6 +165,7 @@ export async function insertExpenses(expenses: NewExpense[]): Promise<number[]> 
         $confidence: expense.confidence ?? 0,
         $transcript_id: expense.transcript_id ?? null,
         $source: expense.source ?? 'voice',
+        $priority: expense.priority ?? null,
         $created_at: now,
         $updated_at: now,
       });
@@ -165,16 +175,20 @@ export async function insertExpenses(expenses: NewExpense[]): Promise<number[]> 
     await statement.finalizeAsync();
   }
 
+  if (profile?.monthly_budget && profile.monthly_budget > 0) {
+    await recalculateMonthlySavings(profile.monthly_budget);
+  }
+
   return ids;
 }
 
-export async function updateExpense(id: number, data: Partial<Omit<ExpenseRow, 'id' | 'created_at' | 'updated_at' | 'currency_code' | 'currency_symbol' | 'merchant_name' | 'item_name_variants' | 'category_name' | 'category_default_priority' | 'sub_category_name'>>): Promise<void> {
+export async function updateExpense(id: number, data: Partial<Omit<ExpenseRow, 'id' | 'created_at' | 'updated_at' | 'currency_id' | 'merchant_name' | 'item_name_variants' | 'category_name' | 'category_default_priority' | 'sub_category_name'>>): Promise<void> {
   const db = await getDb();
   const now = new Date().toISOString();
   const setClauses: string[] = [];
   const params: (string | number | null)[] = [];
 
-  const fields: (keyof typeof data)[] = ['item_name', 'price', 'currency_id', 'description', 'merchant_id', 'item_id', 'category_id', 'sub_category_id', 'confidence', 'transcript_id', 'source'];
+  const fields: (keyof typeof data)[] = ['item_name', 'price', 'description', 'merchant_id', 'item_id', 'category_id', 'sub_category_id', 'confidence', 'transcript_id', 'source', 'priority'];
   for (const field of fields) {
     if (data[field] !== undefined) {
       setClauses.push(`${field} = ?`);
@@ -188,11 +202,21 @@ export async function updateExpense(id: number, data: Partial<Omit<ExpenseRow, '
   params.push(id);
 
   await db.runAsync(`UPDATE expenses SET ${setClauses.join(', ')} WHERE id = ?`, ...params);
+
+  const profile = await db.getFirstAsync<{ monthly_budget: number }>('SELECT monthly_budget FROM profiles LIMIT 1');
+  if (profile?.monthly_budget && profile.monthly_budget > 0) {
+    await recalculateMonthlySavings(profile.monthly_budget);
+  }
 }
 
 export async function deleteExpense(id: number): Promise<void> {
   const db = await getDb();
   await db.runAsync('DELETE FROM expenses WHERE id = ?', id);
+
+  const profile = await db.getFirstAsync<{ monthly_budget: number }>('SELECT monthly_budget FROM profiles LIMIT 1');
+  if (profile?.monthly_budget && profile.monthly_budget > 0) {
+    await recalculateMonthlySavings(profile.monthly_budget);
+  }
 }
 
 export async function aggregateExpensesForPeriod(
@@ -228,11 +252,11 @@ export async function aggregateExpensesForPeriod(
   );
 
   const byPriorityRows = await db.getAllAsync<{ priority: string; amount: number }>(
-    `SELECT COALESCE(cat.default_priority, 'normal') AS priority, COALESCE(SUM(e.price), 0) AS amount
+    `SELECT COALESCE(e.priority, cat.default_priority, 'normal') AS priority, COALESCE(SUM(e.price), 0) AS amount
      FROM expenses e
      LEFT JOIN categories cat ON cat.id = e.category_id
      WHERE e.created_at >= ? AND e.created_at <= ?
-     GROUP BY cat.default_priority
+     GROUP BY COALESCE(e.priority, cat.default_priority, 'normal')
      ORDER BY amount DESC`,
     start,
     end,

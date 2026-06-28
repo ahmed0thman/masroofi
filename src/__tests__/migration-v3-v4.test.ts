@@ -2,9 +2,9 @@
  * Integration test for V3 and V4 DB migration flow.
  *
  * Tests the observable effects of migrateToV3(), migrateToV4(),
- * reseedCurrencies(), and the runMigrations() chain.
+ * migrateToV7(), reseedCurrencies(), and the runMigrations() chain.
  *
- * Since migrateToV3() and migrateToV4() are module-private (not exported),
+ * Since these migrations are module-private (not exported),
  * we test their behavior by calling runMigrations() (which IS exported)
  * from specific starting versions, and verifying the resulting mock DB calls.
  *
@@ -161,8 +161,8 @@ describe('V4 migration', () => {
       c.toString().includes('INSERT INTO currencies'),
     );
 
-    // Should have 9 UPDATEs (one per currency) and 0 INSERTs
-    expect(updateCalls.length).toBe(9);
+    // Should have 46 UPDATEs (23 per reseed × 2 migrations) and 0 INSERTs
+    expect(updateCalls.length).toBe(46);
     expect(insertCalls.length).toBe(0);
   });
 
@@ -224,7 +224,7 @@ describe('V4 migration', () => {
     expect(v4Idx).toBeGreaterThan(v3Idx);
   });
 
-  it('reseedCurrencies processes all 9 currencies', async () => {
+  it('reseedCurrencies processes all 23 currencies', async () => {
     const db = await getMockDb();
 
     db.execAsync.mockClear();
@@ -240,7 +240,7 @@ describe('V4 migration', () => {
     const updateCalls = runCalls.filter((c: string) =>
       c.toString().includes('UPDATE currencies'),
     );
-    expect(updateCalls).toHaveLength(9);
+    expect(updateCalls).toHaveLength(46);
   });
 });
 
@@ -248,7 +248,7 @@ describe('V4 migration', () => {
 // runMigrations chain tests
 // ============================================================
 describe('runMigrations chain', () => {
-  it('chains V2→V3→V4 when starting from version 0', async () => {
+  it('chains V2→V3→V4→V5→V6→V7 when starting from version 0', async () => {
     const db = await getMockDb();
 
     db.execAsync.mockClear();
@@ -264,14 +264,20 @@ describe('runMigrations chain', () => {
     const v2Idx = execCalls.indexOf('PRAGMA user_version = 2');
     const v3Idx = execCalls.indexOf('PRAGMA user_version = 3');
     const v4Idx = execCalls.indexOf('PRAGMA user_version = 4');
+    const v5Idx = execCalls.indexOf('PRAGMA user_version = 5');
+    const v6Idx = execCalls.indexOf('PRAGMA user_version = 6');
+    const v7Idx = execCalls.indexOf('PRAGMA user_version = 7');
 
     expect(v2Idx).toBeGreaterThanOrEqual(0);
     expect(v3Idx).toBeGreaterThan(v2Idx);
     expect(v4Idx).toBeGreaterThan(v3Idx);
+    expect(v5Idx).toBeGreaterThan(v4Idx);
+    expect(v6Idx).toBeGreaterThan(v5Idx);
+    expect(v7Idx).toBeGreaterThan(v6Idx);
   });
 
-  it('SCHEMA_VERSION is 4 (all migrations defined)', () => {
-    expect(SCHEMA_VERSION).toBe(4);
+  it('SCHEMA_VERSION is 7 (all migrations defined)', () => {
+    expect(SCHEMA_VERSION).toBe(7);
   });
 
   it('skips all migrations when version is current (SCHEMA_VERSION)', async () => {
@@ -289,7 +295,7 @@ describe('runMigrations chain', () => {
     expect(execCalls.filter((c: string) => c.includes('PRAGMA user_version'))).toHaveLength(0);
   });
 
-  it('resumes from version 2 (runs only V3 and V4)', async () => {
+  it('resumes from version 2 (runs V3, V4, V5, V6, and V7)', async () => {
     const db = await getMockDb();
 
     db.execAsync.mockClear();
@@ -305,9 +311,12 @@ describe('runMigrations chain', () => {
     expect(execCalls).not.toContain('PRAGMA user_version = 2');
     expect(execCalls).toContain('PRAGMA user_version = 3');
     expect(execCalls).toContain('PRAGMA user_version = 4');
+    expect(execCalls).toContain('PRAGMA user_version = 5');
+    expect(execCalls).toContain('PRAGMA user_version = 6');
+    expect(execCalls).toContain('PRAGMA user_version = 7');
   });
 
-  it('resumes from version 3 (runs only V4)', async () => {
+  it('resumes from version 3 (runs V4, V5, V6, and V7)', async () => {
     const db = await getMockDb();
 
     db.execAsync.mockClear();
@@ -323,6 +332,72 @@ describe('runMigrations chain', () => {
     expect(execCalls).not.toContain('PRAGMA user_version = 2');
     expect(execCalls).not.toContain('PRAGMA user_version = 3');
     expect(execCalls).toContain('PRAGMA user_version = 4');
+    expect(execCalls).toContain('PRAGMA user_version = 5');
+    expect(execCalls).toContain('PRAGMA user_version = 6');
+    expect(execCalls).toContain('PRAGMA user_version = 7');
+  });
+
+  it('resumes from version 4 (runs V5, V6, and V7)', async () => {
+    const db = await getMockDb();
+
+    db.execAsync.mockClear();
+    db.runAsync.mockClear();
+    db.getFirstAsync
+      .mockReset()
+      .mockResolvedValueOnce({ user_version: 4 })
+      .mockResolvedValue({ id: 1 });
+
+    await runMigrations();
+
+    const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
+    expect(execCalls).not.toContain('PRAGMA user_version = 2');
+    expect(execCalls).not.toContain('PRAGMA user_version = 3');
+    expect(execCalls).not.toContain('PRAGMA user_version = 4');
+    expect(execCalls).toContain('PRAGMA user_version = 5');
+    expect(execCalls).toContain('PRAGMA user_version = 6');
+    expect(execCalls).toContain('PRAGMA user_version = 7');
+  });
+
+  it('resumes from version 5 (runs V6 and V7)', async () => {
+    const db = await getMockDb();
+
+    db.execAsync.mockClear();
+    db.runAsync.mockClear();
+    db.getFirstAsync
+      .mockReset()
+      .mockResolvedValueOnce({ user_version: 5 })
+      .mockResolvedValue({ id: 1 });
+
+    await runMigrations();
+
+    const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
+    expect(execCalls).not.toContain('PRAGMA user_version = 2');
+    expect(execCalls).not.toContain('PRAGMA user_version = 3');
+    expect(execCalls).not.toContain('PRAGMA user_version = 4');
+    expect(execCalls).not.toContain('PRAGMA user_version = 5');
+    expect(execCalls).toContain('PRAGMA user_version = 6');
+    expect(execCalls).toContain('PRAGMA user_version = 7');
+  });
+
+  it('resumes from version 6 (runs only V7)', async () => {
+    const db = await getMockDb();
+
+    db.execAsync.mockClear();
+    db.runAsync.mockClear();
+    db.getFirstAsync
+      .mockReset()
+      .mockResolvedValueOnce({ user_version: 6 })
+      .mockResolvedValue({ id: 1 });
+
+    await runMigrations();
+
+    const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
+    expect(execCalls).not.toContain('PRAGMA user_version = 2');
+    expect(execCalls).not.toContain('PRAGMA user_version = 3');
+    expect(execCalls).not.toContain('PRAGMA user_version = 4');
+    expect(execCalls).not.toContain('PRAGMA user_version = 5');
+    expect(execCalls).not.toContain('PRAGMA user_version = 6');
+    expect(execCalls).toContain('PRAGMA user_version = 7');
   });
 });
 
@@ -349,7 +424,7 @@ describe('reseedCurrencies', () => {
       (c[0] as string)?.toString().includes('INSERT INTO currencies'),
     );
 
-    expect(updateCalls).toHaveLength(9);
+    expect(updateCalls).toHaveLength(46);
     expect(insertCalls).toHaveLength(0);
   });
 
@@ -373,11 +448,11 @@ describe('reseedCurrencies', () => {
     );
     // At least one INSERT (for the first currency that didn't exist)
     expect(insertCalls.length).toBeGreaterThanOrEqual(1);
-    // Total UPDATE + INSERT should still be 9 total currency operations
+    // Total UPDATE + INSERT should be 46 (23 per reseed × 2 migrations)
     const updateCalls = db.runAsync.mock.calls.filter((c: unknown[]) =>
       (c[0] as string)?.toString().includes('UPDATE currencies'),
     );
-    expect(updateCalls.length + insertCalls.length).toBe(9);
+    expect(updateCalls.length + insertCalls.length).toBe(46);
   });
 });
 
@@ -425,5 +500,64 @@ describe('V4 with already-seeded data', () => {
     // V4 should still complete (PRAGMA user_version = 4 should be set)
     const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
     expect(execCalls).toContain('PRAGMA user_version = 4');
+  });
+});
+
+// ============================================================
+// V7 migration tests
+// ============================================================
+describe('V7 migration', () => {
+  it('creates saving_wallet_entries table', async () => {
+    const db = await getMockDb();
+
+    db.execAsync.mockClear();
+    db.runAsync.mockClear();
+    db.getFirstAsync
+      .mockReset()
+      .mockResolvedValueOnce({ user_version: 6 })
+      .mockResolvedValue({ id: 1 });
+
+    await runMigrations();
+
+    const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
+    const createCall = execCalls.find((c: string) =>
+      c.includes('CREATE TABLE IF NOT EXISTS saving_wallet_entries'),
+    );
+    expect(createCall).toBeDefined();
+  });
+
+  it('adds monthly_budget column to profiles via addColumnIfNotExists', async () => {
+    const db = await getMockDb();
+
+    db.execAsync.mockClear();
+    db.runAsync.mockClear();
+    db.getFirstAsync
+      .mockReset()
+      .mockResolvedValueOnce({ user_version: 6 })
+      .mockResolvedValue({ id: 1 });
+
+    await runMigrations();
+
+    const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
+    const alterCall = execCalls.find((c: string) =>
+      c.includes('ALTER TABLE') && c.includes('profiles') && c.includes('monthly_budget'),
+    );
+    expect(alterCall).toBeDefined();
+  });
+
+  it('sets PRAGMA user_version = 7', async () => {
+    const db = await getMockDb();
+
+    db.execAsync.mockClear();
+    db.runAsync.mockClear();
+    db.getFirstAsync
+      .mockReset()
+      .mockResolvedValueOnce({ user_version: 6 })
+      .mockResolvedValue({ id: 1 });
+
+    await runMigrations();
+
+    const execCalls = db.execAsync.mock.calls.map((c: string[]) => c[0]);
+    expect(execCalls).toContain('PRAGMA user_version = 7');
   });
 });

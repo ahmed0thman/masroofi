@@ -6,19 +6,26 @@ import { useThemeColors } from '@/styles/global';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { formatFullCurrency } from '@/services/format';
 import { Input } from '@/components/ui/input';
-import { getDefaultCurrency, type CurrencyRow } from '@/db/currency-repo';
+import { getCurrencyById } from '@/db/currency-repo';
+import { useProfile } from '@/hooks/useProfile';
+import type { CurrencyRow } from '@/schemas';
 
 export function BudgetCard() {
   const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const { budget, setBudgetAmount } = useBudget();
+  const { profile } = useProfile();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState('');
   const [currency, setCurrency] = useState<CurrencyRow | null>(null);
 
   useEffect(() => {
-    getDefaultCurrency().then(setCurrency);
-  }, []);
+    (async () => {
+      const currencyId = profile?.currency_id ?? 1;
+      const cur = await getCurrencyById(currencyId);
+      setCurrency(cur);
+    })();
+  }, [profile]);
 
   const locale = i18n.language;
 
@@ -39,7 +46,7 @@ export function BudgetCard() {
     <View className="bg-surface-container rounded-3xl p-5">
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-2">
-          <Ionicons name="wallet-outline" size={20} color={colors.primary} />
+          <Ionicons name="wallet-outline" size={20} color={colors.secondary} />
           <Text className="font-cairo-semibold text-on-surface">{t('settings.budget')}</Text>
         </View>
         {!editing && (

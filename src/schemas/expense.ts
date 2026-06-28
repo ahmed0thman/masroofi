@@ -5,9 +5,6 @@ export const expenseRowSchema = z.object({
   item_name: z.string(),
   price: z.number(),
   currency_id: z.number(),
-  currency_code: z.string().optional(),
-  currency_symbol: z.string().optional(),
-  currency_symbol_en: z.string().optional(),
   description: z.string(),
   merchant_id: z.number().nullable(),
   merchant_name: z.string().nullable().optional(),
@@ -22,6 +19,7 @@ export const expenseRowSchema = z.object({
   transcript_id: z.string().nullable(),
   source: z.string(),
   created_at: z.string(),
+  priority: z.string().optional(),
   updated_at: z.string(),
 });
 
@@ -30,7 +28,6 @@ export type ExpenseRow = z.infer<typeof expenseRowSchema>;
 export const newExpenseSchema = z.object({
   item_name: z.string(),
   price: z.number(),
-  currency_id: z.number(),
   description: z.string().optional(),
   merchant_id: z.number().nullable().optional(),
   item_id: z.number().nullable().optional(),
@@ -39,6 +36,7 @@ export const newExpenseSchema = z.object({
   confidence: z.number().optional(),
   transcript_id: z.string().nullable().optional(),
   source: z.string().optional(),
+  priority: z.string().optional(),
 });
 
 export type NewExpense = z.infer<typeof newExpenseSchema>;

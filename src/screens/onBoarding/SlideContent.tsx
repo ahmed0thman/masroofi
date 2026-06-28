@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Pressable, TextInput, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
+import { Input } from '@/components/ui/input';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
@@ -58,7 +59,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
             {avatarUri ? (
               <Image source={{ uri: avatarUri }} className="w-full h-full" resizeMode="cover" />
             ) : (
-              <Ionicons name="person-outline" size={48} color={colors.primary} />
+              <Ionicons name="person-outline" size={48} color={colors.secondary} />
             )}
           </View>
           <View className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary items-center justify-center border-2 border-background">
@@ -71,7 +72,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
           accessibilityLabel={t(slide.iconLabelKey)}
           accessibilityRole="image"
         >
-          <Ionicons name={slide.icon} size={48} color={colors.primary} />
+          <Ionicons name={slide.icon} size={48} color={colors.secondary} />
         </View>
       )}
 
@@ -99,7 +100,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
 
       {slideIndex === 1 && (
         <View className="w-full mt-8 gap-6">
-          <TextInput
+          <Input
             className={cn(
               'font-cairo p-4 rounded-xl text-foreground',
               showNameError
@@ -107,7 +108,6 @@ const SlideContent: React.FC<SlideContentProps> = ({
                 : 'bg-surface-container-low',
             )}
             placeholder={t('profile.namePlaceholder')}
-            placeholderTextColor={colors.muted}
             value={name}
             onChangeText={(text) => {
               onNameChange?.(text);

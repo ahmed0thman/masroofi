@@ -8,8 +8,8 @@ export function formatCurrency(amount: number, currency: CurrencyRow, locale: st
   const symbol = locale === 'ar' ? currency.symbol : (currency.symbol_en || currency.symbol);
   const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
   const formattedNumber = new Intl.NumberFormat(numberLocale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 
   return `${formattedNumber} ${symbol}`;
@@ -19,14 +19,30 @@ export function formatCurrency(amount: number, currency: CurrencyRow, locale: st
  * Legacy-compatible short form: formats with compact notation and a symbol string.
  * Prefer formatCurrency(amount, currencyRow, locale) for new code.
  */
-export function formatCurrencyShort(amount: number, symbol: string = ''): string {
+function formatArabicIndic(n: number, decimals: number = 0): string {
+  return new Intl.NumberFormat('ar-EG', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(n);
+}
+
+export function formatCurrencyShort(amount: number, symbol: string = '', locale: string = 'ar'): string {
+  if (locale === 'ar') {
+    if (amount >= 1_000_000) {
+      return `${formatArabicIndic(amount / 1_000_000, 1)} مليون ${symbol}`;
+    }
+    if (amount >= 1_000) {
+      return `${formatArabicIndic(amount / 1_000, 1)} الف ${symbol}`;
+    }
+    return `${formatArabicIndic(amount, 0)} ${symbol}`;
+  }
   if (amount >= 1_000_000) {
     return `${(amount / 1_000_000).toFixed(1)}M ${symbol}`;
   }
   if (amount >= 1_000) {
     return `${(amount / 1_000).toFixed(1)}K ${symbol}`;
   }
-  return `${amount.toFixed(2)} ${symbol}`;
+  return `${amount.toFixed(0)} ${symbol}`;
 }
 
 /**
@@ -37,13 +53,23 @@ export function formatFullCurrency(amount: number, currency: CurrencyRow, locale
   return formatCurrency(amount, currency, locale);
 }
 
-export function formatNumber(n: number): string {
+export function formatNumber(n: number, locale: string = 'ar'): string {
+  if (locale === 'ar') {
+    if (n >= 1_000_000) return `${formatArabicIndic(n / 1_000_000, 1)} مليون`;
+    if (n >= 1_000) return `${formatArabicIndic(n / 1_000, 1)} الف`;
+    return formatArabicIndic(n, 0);
+  }
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
 }
 
-export function formatShortCurrency(amount: number): string {
+export function formatShortCurrency(amount: number, locale: string = 'ar'): string {
+  if (locale === 'ar') {
+    if (amount >= 1_000_000) return `${formatArabicIndic(amount / 1_000_000, 1)} مليون`;
+    if (amount >= 1_000) return `${formatArabicIndic(amount / 1_000, 1)} الف`;
+    return formatArabicIndic(amount, 0);
+  }
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M`;
   if (amount >= 1_000) return `${(amount / 1_000).toFixed(1)}K`;
   return amount.toFixed(0);

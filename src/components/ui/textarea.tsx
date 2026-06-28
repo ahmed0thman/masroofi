@@ -4,11 +4,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const textareaVariants = cva(
-  "rounded-md border text-foreground placeholder:text-muted-foreground align-top",
+  "rounded-xl border py-3 font-cairo placeholder:text-muted-foreground align-top",
   {
     variants: {
       variant: {
-        default: "border-input bg-background",
+        default: "border-input bg-surface-bright text-on-surface",
         ghost: "border-transparent bg-transparent",
       },
     },
@@ -33,7 +33,7 @@ export const Textarea = React.forwardRef<
   return (
     <TextInput
       ref={ref}
-      className={cn(textareaVariants({ variant }), "min-h-24 px-4 py-3 text-base", className)}
+      className={cn(textareaVariants({ variant }), "min-h-24 px-3.5 text-base", className)}
       placeholderTextColor={dark ? "#a1a1aa" : "#71717a"}
       keyboardAppearance={dark ? "dark" : "light"}
       selectionColor={caret}

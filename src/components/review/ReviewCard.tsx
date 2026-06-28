@@ -13,16 +13,16 @@ interface ReviewCardProps {
   t: TFunction;
 }
 
-function getPriorityLabel(priority: string): string {
+function getPriorityLabel(priority: string, t: TFunction): string {
   switch (priority) {
     case 'essential':
-      return 'أساسي';
+      return t('review.priority.essential');
     case 'important':
-      return 'مهم';
+      return t('review.priority.important');
     case 'normal':
-      return 'عادي';
+      return t('review.priority.normal');
     case 'luxury':
-      return 'رفاهية';
+      return t('review.priority.luxury');
     default:
       return priority;
   }
@@ -55,13 +55,7 @@ function getConfidenceColor(confidence: number): string {
   return 'text-destructive';
 }
 
-export function ReviewCard({
-  expense,
-  onEdit,
-  onDelete,
-  colors,
-  t,
-}: ReviewCardProps) {
+export function ReviewCard({ expense, onEdit, onDelete, colors, t }: ReviewCardProps) {
   const handleDelete = () => {
     Alert.alert(t('review.delete'), t('review.deleteConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -74,7 +68,12 @@ export function ReviewCard({
   };
 
   return (
-    <View className="bg-card rounded-2xl p-4 gap-1.5">
+    <View
+      className={cn(
+        'bg-card rounded-2xl p-4 gap-1.5',
+        !expense.price && 'border-2 border-destructive',
+      )}
+    >
       {/* Row 1: Item name + Price */}
       <View className="flex-row justify-between items-start">
         <Text className="flex-1 font-cairo-bold text-base text-foreground" numberOfLines={2}>
@@ -84,7 +83,7 @@ export function ReviewCard({
           className="font-cairo-bold text-lg"
           style={{ direction: 'ltr', color: colors.foreground }}
         >
-          {expense.price} {expense.currency}
+          {expense.price}
         </Text>
       </View>
 
@@ -95,10 +94,8 @@ export function ReviewCard({
             {expense.mainCategory}
           </Text>
         </View>
-        <Text
-          className={cn('text-xs font-cairo', getPriorityColor(expense.priority))}
-        >
-          ● {getPriorityLabel(expense.priority)}
+        <Text className={cn('text-xs font-cairo', getPriorityColor(expense.priority))}>
+          ● {getPriorityLabel(expense.priority, t)}
         </Text>
         <Text
           className={cn(
@@ -106,14 +103,9 @@ export function ReviewCard({
             expense.matchedItemId ? 'text-success' : 'text-warning',
           )}
         >
-          {expense.matchedItemId ? '✓ مطابق' : 'جديد'}
+          {expense.matchedItemId ? t('review.matchStatus.matched') : t('review.matchStatus.new')}
         </Text>
-        <Text
-          className={cn(
-            'text-xs font-cairo',
-            getConfidenceColor(expense.confidence),
-          )}
-        >
+        <Text className={cn('text-xs font-cairo', getConfidenceColor(expense.confidence))}>
           {t('review.confidence')}: {getConfidenceLabel(expense.confidence, t)}
         </Text>
       </View>

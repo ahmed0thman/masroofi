@@ -101,9 +101,6 @@ describe('expenseRowSchema', () => {
     item_name: 'خبز',
     price: 50,
     currency_id: 1,
-    currency_code: 'EGP',
-    currency_symbol: 'ج.م',
-    currency_symbol_en: 'EGP',
     description: 'شراء خبز',
     merchant_id: null,
     merchant_name: null,
@@ -139,9 +136,8 @@ describe('expenseRowSchema', () => {
   });
 
   it('allows optional fields to be undefined', () => {
-    const { currency_code: _1, currency_symbol: _2, currency_symbol_en: _3,
-            merchant_name: _4, item_name_variants: _5, category_name: _6,
-            category_default_priority: _7, sub_category_name: _8, ...minimal } = { ...validExpense };
+    const { merchant_name: _1, item_name_variants: _2, category_name: _3,
+            category_default_priority: _4, sub_category_name: _5, ...minimal } = { ...validExpense };
     // These are all optional — .parse() should still work
     expect(() => expenseRowSchema.parse(validExpense)).not.toThrow();
   });
@@ -170,7 +166,6 @@ describe('newExpenseSchema', () => {
   const validNewExpense = {
     item_name: 'خبز',
     price: 50,
-    currency_id: 1,
     description: 'شراء خبز',
     merchant_id: null,
     item_id: null,
@@ -196,7 +191,7 @@ describe('newExpenseSchema', () => {
   });
 
   it('allows optional fields to be omitted', () => {
-    const minimal = { item_name: 'خبز', price: 50, currency_id: 1 };
+    const minimal = { item_name: 'خبز', price: 50 };
     expect(() => newExpenseSchema.parse(minimal)).not.toThrow();
   });
 
@@ -259,12 +254,13 @@ describe('profileSchema', () => {
     monthly_budget: 5000,
     saving_goal: 10000,
     analytics_day: 5,
+    currency_id: 1,
     created_at: '2025-01-01T00:00:00.000Z',
     updated_at: '2025-01-01T00:00:00.000Z',
   };
 
   it('parses valid profile', () => {
-    expect(() => profileSchema.parse(validProfile)).not.toThrow();
+    expect(() => profileSchema.parse({ ...validProfile, currency_id: 1 })).not.toThrow();
   });
 
   it('rejects missing name', () => {
@@ -1200,7 +1196,8 @@ describe('type inference (smoke)', () => {
     const result = profileSchema.parse({
       id: 1, name: 'x', avatar_uri: null, language: 'ar', theme: 'system',
       reminders_enabled: 1, user_type: 'admin', gender: '', location: '', age: 0,
-      monthly_budget: 0, saving_goal: 0, analytics_day: 5, created_at: '', updated_at: '',
+      monthly_budget: 0, saving_goal: 0, analytics_day: 5, currency_id: 1,
+      created_at: '', updated_at: '',
     });
     expect(result.user_type).toBe('admin');
   });

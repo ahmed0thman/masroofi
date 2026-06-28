@@ -14,7 +14,8 @@ import SafeAreaView from '@/components/layout/SafeAreaView';
 import { useAnalytics, type PeriodType } from '@/hooks/useAnalytics';
 import { getLatestAnalyticsSummary } from '@/services/analytics';
 import { formatShortCurrency } from '@/services/format';
-import { getDefaultCurrency, type CurrencyRow } from '@/db/currency-repo';
+import { getCurrencyById, type CurrencyRow } from '@/db/currency-repo';
+import { getProfile } from '@/db/profile-repo';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,16 +23,21 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function AnalyticsScreen() {
   const { t, i18n } = useTranslation();
-  const [defaultCurrency, setDefaultCurrency] = useState<CurrencyRow | null>(null);
+  const [profileCurrency, setProfileCurrency] = useState<CurrencyRow | null>(null);
 
   useEffect(() => {
-    getDefaultCurrency().then(setDefaultCurrency);
+    (async () => {
+      const profile = await getProfile();
+      const currencyId = profile?.currency_id ?? 1;
+      const currency = await getCurrencyById(currencyId);
+      setProfileCurrency(currency);
+    })();
   }, []);
 
-  const currencySymbol = defaultCurrency
+  const currencySymbol = profileCurrency
     ? i18n.language === 'ar'
-      ? defaultCurrency.symbol
-      : defaultCurrency.symbol_en || defaultCurrency.symbol
+      ? profileCurrency.symbol
+      : profileCurrency.symbol_en || profileCurrency.symbol
     : '';
 
   const [periodType, setPeriodType] = useState<PeriodType>('month');
@@ -75,6 +81,8 @@ export default function AnalyticsScreen() {
   };
 
   const totalSpent = data?.totalSpent ?? 0;
+
+  console.log(data?.byPriority);
 
   if (isLoading) {
     return (
@@ -161,21 +169,21 @@ export default function AnalyticsScreen() {
           totalSpent={totalSpent}
           changePercentage={changePercentage}
           showComparison={showComparison}
-          currency={defaultCurrency}
+          currency={profileCurrency}
         />
 
         <BudgetSection
           percentage={budgetData.percentage}
           monthlyBudget={budgetData.monthlyBudget}
           spent={totalSpent}
-          currency={defaultCurrency}
+          currency={profileCurrency}
         />
 
         <KpiRow>
           <KpiCard label={t('analytics.totalTransactions')} value={data?.totalTransactions ?? 0} />
           <KpiCard
             label={t('analytics.dailyAverage')}
-            value={`${formatShortCurrency(data?.dailyAverage ?? 0)} ${currencySymbol}`}
+            value={`${formatShortCurrency(data?.dailyAverage ?? 0, i18n.language)} ${currencySymbol}`}
           />
         </KpiRow>
 

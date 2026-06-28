@@ -10,7 +10,8 @@
     "delete": "Delete",
     "edit": "Edit Expense",
     "recordYourExpenses": "Record Your Expenses with Your Voice",
-    "noData": "No data available"
+    "noData": "No data available",
+    "addNew": "Add new"
   },
   "home": {
     "title": "Welcome back, {{name}}!",
@@ -63,6 +64,12 @@
     "category": "Category",
     "send": "Send",
     "manualSaveAll": "Save All ({{count}})",
+    "other": "Other",
+    "customItemPlaceholder": "Item name",
+    "customItemRequired": "Please enter a custom item name",
+    "customCategoryPlaceholder": "Category name",
+    "customMerchantPlaceholder": "Store name",
+    "customMerchantRequired": "Please enter a custom store name",
     "tips": {
       "title": "Voice Recording Tips",
       "itemAndPrice": "Say the item, price, and store name clearly",
@@ -103,7 +110,10 @@
     "about.testerEnabled": "Congratulations! Tester mode enabled",
     "about.testerDisabled": "Tester mode disabled",
     "about.revertToUser": "Revert to User",
-    "profile": "Profile",
+    "profile": {
+      "title": "Profile",
+      "currency": "Currency"
+    },
     "reminders": "Reminders",
     "reminders.add": "Add Reminder",
     "reminders.time": "Time",
@@ -147,7 +157,18 @@
     "budgetRemoveConfirm": "Remove budget?",
     "savingGoalEmptyTitle": "No savings goals yet",
     "savingGoalEmptyDesc": "Set a goal and track your progress every day!",
-    "savingGoalCreateFirst": "Create Your First Goal"
+    "savingGoalCreateFirst": "Create Your First Goal",
+    "savingWallet": "Savings Wallet",
+    "monthlyBudget": "Monthly Budget",
+    "monthlyBudgetPlaceholder": "Enter monthly budget amount",
+    "extraSavings": "Extra Savings",
+    "extraSavingsTotal": "Total Extra Savings",
+    "addExtraSaving": "Add Saving",
+    "extraSavingNote": "Note (optional)",
+    "extraSavingAmount": "Amount",
+    "extraSavingAdded": "Extra saving added",
+    "extraSavingDeleted": "Extra saving deleted",
+    "walletBalance": "Wallet Balance"
   },
   "profile": {
     "title": "Profile",
@@ -257,7 +278,6 @@
     "title": "Review Expenses",
     "item": "Item",
     "price": "Price",
-    "currency": "Currency",
     "category": "Category",
     "subCategory": "Sub-category",
     "merchant": "Merchant",
@@ -273,7 +293,28 @@
     "confidence.high": "High",
     "confidence.medium": "Medium",
     "confidence.low": "Low",
-    "deleteConfirm": "Are you sure you want to delete this expense?"
+    "deleteConfirm": "Are you sure you want to delete this expense?",
+    "priority": {
+      "essential": "Essential",
+      "important": "Important",
+      "normal": "Normal",
+      "luxury": "Luxury"
+    },
+    "matchStatus": {
+      "matched": "✓ Matched",
+      "new": "New"
+    }
+  },
+  "categories": {
+    "foodAndDrinks": "Food & Drinks",
+    "transport": "Transport",
+    "bills": "Bills",
+    "shopping": "Shopping",
+    "health": "Health",
+    "entertainment": "Entertainment",
+    "education": "Education",
+    "rent": "Rent",
+    "other": "Other"
   },
   "analytics": {
     "title": "Analytics",

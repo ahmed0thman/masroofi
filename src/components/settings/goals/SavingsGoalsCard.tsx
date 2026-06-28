@@ -9,17 +9,24 @@ import { ProgressBar } from '@/components/charts/ProgressBar';
 import { Button } from '@/components/ui/button';
 import { formatFullCurrency } from '@/services/format';
 import { Input } from '@/components/ui/input';
-import { getDefaultCurrency, type CurrencyRow } from '@/db/currency-repo';
+import { getCurrencyById } from '@/db/currency-repo';
+import { useProfile } from '@/hooks/useProfile';
+import type { CurrencyRow } from '@/schemas';
 
 export function SavingsGoalsCard() {
   const colors = useThemeColors();
   const { t, i18n } = useTranslation();
-  const { goals, createGoal, updateGoal, deleteGoal } = useSavingsGoals();
+  const { goals, walletBalance, createGoal, updateGoal, deleteGoal } = useSavingsGoals();
+  const { profile } = useProfile();
   const [currency, setCurrency] = useState<CurrencyRow | null>(null);
 
   useEffect(() => {
-    getDefaultCurrency().then(setCurrency);
-  }, []);
+    (async () => {
+      const currencyId = profile?.currency_id ?? 1;
+      const cur = await getCurrencyById(currencyId);
+      setCurrency(cur);
+    })();
+  }, [profile]);
 
   const locale = i18n.language;
 
@@ -73,18 +80,27 @@ export function SavingsGoalsCard() {
     <View className="bg-surface-container rounded-3xl p-5 gap-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <Ionicons name="flag-outline" size={20} color={colors.primary} />
-          <Text className="font-cairo-semibold text-on-surface">{t('settings.savingGoal')}</Text>
+          <Ionicons name="wallet-outline" size={20} color={colors.secondary} />
+          <Text className="font-cairo-semibold text-on-surface">{t('settings.savingWallet')}</Text>
         </View>
         {!creating && (
           <Button
             variant="ghost"
             size="sm"
             onPress={startCreating}
-            icon={<Ionicons name="add-circle-outline" size={20} color={colors.primary} />}
+            icon={<Ionicons name="add-circle-outline" size={20} color={colors.secondary} />}
           />
         )}
       </View>
+
+      {currency && (
+        <View className="bg-surface-container-low rounded-2xl p-4 items-center">
+          <Text className="font-cairo text-sm text-secondary">{t('settings.walletBalance')}</Text>
+          <Text className="font-cairo-bold text-2xl text-on-surface mt-1">
+            {formatFullCurrency(walletBalance, currency, locale)}
+          </Text>
+        </View>
+      )}
 
       {creating && (
         <View className="gap-3 bg-surface-container-low rounded-2xl p-4">
@@ -140,7 +156,7 @@ export function SavingsGoalsCard() {
             const isEditing = editingId === goal.id;
             const pct =
               goal.target_amount > 0
-                ? Math.min(100, Math.round((goal.current_amount / goal.target_amount) * 100))
+                ? Math.min(100, Math.round((walletBalance / goal.target_amount) * 100))
                 : 0;
 
             return (
@@ -168,7 +184,7 @@ export function SavingsGoalsCard() {
                           />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={saveEdit} className="p-2">
-                          <Ionicons name="checkmark-outline" size={18} color={colors.primary} />
+                          <Ionicons name="checkmark-outline" size={18} color={colors.secondary} />
                         </TouchableOpacity>
                       </>
                     ) : (
@@ -193,7 +209,7 @@ export function SavingsGoalsCard() {
 
                 <View>
                   <ProgressBar
-                    value={goal.current_amount}
+                    value={walletBalance}
                     max={goal.target_amount}
                     height={8}
                     color={colors.secondary}
@@ -203,7 +219,7 @@ export function SavingsGoalsCard() {
                 </View>
 
                 <Text className="font-cairo text-lg text-on-surface-variant">
-                  {currency ? formatFullCurrency(goal.current_amount, currency, locale) : goal.current_amount} /{' '}
+                  {currency ? formatFullCurrency(walletBalance, currency, locale) : walletBalance} /{' '}
                   {currency ? formatFullCurrency(goal.target_amount, currency, locale) : goal.target_amount}
                 </Text>
               </View>

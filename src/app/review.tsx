@@ -3,7 +3,7 @@ import SafeAreaView from '@/components/layout/SafeAreaView';
 import { ReviewList } from '@/components/review/ReviewList';
 import { insertExpense } from '@/db/expense-repo';
 import { getAllCategories, type CategoryRow } from '@/db/category-repo';
-import { getCurrencyByCode, getDefaultCurrency } from '@/db/currency-repo';
+import { getProfile } from '@/db/profile-repo';
 import {
   clearPendingExpenses,
   getPendingExpenses,
@@ -110,21 +110,13 @@ export default function ReviewScreen() {
     if (expenses.length === 0) return;
     setIsSaving(true);
     try {
+      // Fetch profile's global currency_id
+      const profile = await getProfile();
+      const profileCurrencyId = profile?.currency_id ?? 1;
       for (const exp of expenses) {
-        // Resolve currency_id from the expense's currency code, or fall back to default
-        let currencyId: number | null = null;
-        if (exp.currency) {
-          const currencyRow = await getCurrencyByCode(exp.currency);
-          if (currencyRow) currencyId = currencyRow.id;
-        }
-        if (!currencyId) {
-          const defaultCurrency = await getDefaultCurrency();
-          currencyId = defaultCurrency?.id ?? 1;
-        }
         await insertExpense({
           item_name: exp.item,
           price: exp.price,
-          currency_id: currencyId,
           description: exp.description,
           merchant_id: exp.matchedMerchantId,
           item_id: exp.matchedItemId,
@@ -133,6 +125,7 @@ export default function ReviewScreen() {
           confidence: exp.confidence,
           transcript_id: null,
           source: 'voice',
+          priority: exp.priority,
         });
       }
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

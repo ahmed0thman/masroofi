@@ -17,6 +17,7 @@ export const profileSchema = z.object({
   monthly_budget: z.number(),
   saving_goal: z.number(),
   analytics_day: z.number(),
+  currency_id: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -31,6 +32,7 @@ export const createProfileInputSchema = z.object({
   gender: z.string().optional(),
   location: z.string().optional(),
   age: z.number().optional(),
+  currency_id: z.number().optional(),
 });
 
 export type CreateProfileInput = z.infer<typeof createProfileInputSchema>;

@@ -3,9 +3,14 @@ import * as SQLite from 'expo-sqlite';
 let db: SQLite.SQLiteDatabase | null = null;
 let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 9;
 
-async function addColumnIfNotExists(database: SQLite.SQLiteDatabase, table: string, column: string, def: string) {
+async function addColumnIfNotExists(
+  database: SQLite.SQLiteDatabase,
+  table: string,
+  column: string,
+  def: string,
+) {
   try {
     await database.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
   } catch {}
@@ -13,23 +18,29 @@ async function addColumnIfNotExists(database: SQLite.SQLiteDatabase, table: stri
 
 export async function getSchemaVersion(): Promise<number> {
   const d = await getDb();
-  const row = await d.getFirstAsync<{ 'user_version': number }>('PRAGMA user_version');
+  const row = await d.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   return row?.user_version ?? 0;
 }
 
 export async function runMigrations(): Promise<void> {
   const d = await getDb();
-  const row = await d.getFirstAsync<{ 'user_version': number }>('PRAGMA user_version');
+  const row = await d.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const currentVersion = row?.user_version ?? 0;
   if (currentVersion >= SCHEMA_VERSION) return;
   if (currentVersion < 2) await migrateToV2();
   if (currentVersion < 3) await migrateToV3();
   if (currentVersion < 4) await migrateToV4();
+  if (currentVersion < 5) await migrateToV5();
+  if (currentVersion < 6) await migrateToV6();
+  if (currentVersion < 7) await migrateToV7();
+  if (currentVersion < 8) await migrateToV8();
+  if (currentVersion < 9) await migrateToV9();
 }
 
 export async function migrateToV2() {
   const expensesColumns = await db!.getAllAsync<{ name: string }>("PRAGMA table_info('expenses')");
-  const hasOldExpenses = expensesColumns.length > 0 && !expensesColumns.some(c => c.name === 'item_name');
+  const hasOldExpenses =
+    expensesColumns.length > 0 && !expensesColumns.some((c) => c.name === 'item_name');
 
   if (hasOldExpenses) {
     const oldTableStillExists = await db!.getFirstAsync<{ name: string }>(
@@ -78,6 +89,91 @@ async function migrateToV4() {
   await reseedCurrencies();
 
   await db!.execAsync('PRAGMA user_version = 4');
+}
+
+async function migrateToV5() {
+  // Add currency_id to profiles table (default 1 = EGP)
+  await addColumnIfNotExists(db!, 'profiles', 'currency_id', 'INTEGER NOT NULL DEFAULT 1');
+  await db!.execAsync('PRAGMA user_version = 5');
+}
+
+async function migrateToV6() {
+  // Re-seed currencies with the expanded list (23 currencies)
+  await reseedCurrencies();
+  await db!.execAsync('PRAGMA user_version = 6');
+}
+
+async function migrateToV7() {
+  // Create saving_wallet_entries table for the savings wallet feature
+  await db!.execAsync(`
+    CREATE TABLE IF NOT EXISTS saving_wallet_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL CHECK(type IN ('monthly', 'extra')),
+      amount REAL NOT NULL,
+      month TEXT,
+      note TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Ensure monthly_budget column exists on profiles (might already exist from getDb())
+  await addColumnIfNotExists(db!, 'profiles', 'monthly_budget', 'REAL DEFAULT 0');
+
+  await db!.execAsync('PRAGMA user_version = 7');
+}
+
+async function migrateToV8() {
+  await addColumnIfNotExists(
+    db!,
+    'expenses',
+    'priority',
+    "TEXT CHECK(priority IN ('essential', 'important', 'normal', 'luxury'))",
+  );
+  await db!.execAsync(`
+    UPDATE expenses SET priority = (
+      SELECT COALESCE(c.default_priority, 'normal') FROM categories c WHERE c.id = expenses.category_id
+    ) WHERE priority IS NULL
+  `);
+  await db!.execAsync('PRAGMA user_version = 8');
+}
+
+async function migrateToV9() {
+  await db!.runAsync(`
+    INSERT OR IGNORE INTO categories (name, default_priority, sort_order, created_at, updated_at)
+    VALUES ('أخرى', 'normal', 99, datetime('now'), datetime('now'))
+  `);
+  await db!.runAsync(`
+    INSERT OR IGNORE INTO merchants (name, created_at, updated_at)
+    VALUES ('أخرى', datetime('now'), datetime('now'))
+  `);
+
+  const cat = await db!.getFirstAsync<{ id: number }>(
+    'SELECT id FROM categories WHERE name = ?',
+    'أخرى',
+  );
+  const mer = await db!.getFirstAsync<{ id: number }>(
+    'SELECT id FROM merchants WHERE name = ?',
+    'أخرى',
+  );
+
+  const itemExists = await db!.getFirstAsync<{ id: number }>(
+    'SELECT id FROM items WHERE name = ? LIMIT 1',
+    'أخرى',
+  );
+  if (!itemExists) {
+    await db!.runAsync(
+      `
+      INSERT INTO items (name, category_id, merchant_id, created_at, updated_at)
+      VALUES (?, ?, ?, datetime('now'), datetime('now'))
+    `,
+      'أخرى',
+      cat?.id,
+      mer?.id,
+    );
+  }
+
+  await db!.execAsync('PRAGMA user_version = 9');
 }
 
 async function createV2Tables() {
@@ -256,44 +352,236 @@ async function seedCurrencies() {
   await db!.execAsync(`
     INSERT INTO currencies (code, name_ar, name_en, symbol, symbol_en, is_default) VALUES
       ('AED', 'درهم إماراتي', 'UAE Dirham', 'د.إ', 'AED', 0),
-      ('SAR', 'ريال سعودي', 'Saudi Riyal', 'ر.س', 'SAR', 0),
-      ('EGP', 'جنيه مصري', 'Egyptian Pound', 'ج.م', 'EGP', 1),
-      ('QAR', 'ريال قطري', 'Qatari Riyal', 'ر.ق', 'QAR', 0),
-      ('KWD', 'دينار كويتي', 'Kuwaiti Dinar', 'د.ك', 'KWD', 0),
       ('BHD', 'دينار بحريني', 'Bahraini Dinar', 'د.ب', 'BHD', 0),
+      ('DJF', 'فرنك جيبوتي', 'Djiboutian Franc', 'ف.ج', 'DJF', 0),
+      ('DZD', 'دينار جزائري', 'Algerian Dinar', 'د.ج', 'DZD', 0),
+      ('EGP', 'جنيه مصري', 'Egyptian Pound', 'ج.م', 'EGP', 1),
+      ('EUR', 'يورو', 'Euro', '€', '€', 0),
+      ('IQD', 'دينار عراقي', 'Iraqi Dinar', 'د.ع', 'IQD', 0),
+      ('JOD', 'دينار أردني', 'Jordanian Dinar', 'د.أ', 'JOD', 0),
+      ('KMF', 'فرنك قمري', 'Comorian Franc', 'ف.ق', 'KMF', 0),
+      ('KWD', 'دينار كويتي', 'Kuwaiti Dinar', 'د.ك', 'KWD', 0),
+      ('LBP', 'ليرة لبنانية', 'Lebanese Pound', 'ل.ل', 'LBP', 0),
+      ('LYD', 'دينار ليبي', 'Libyan Dinar', 'د.ل', 'LYD', 0),
+      ('MAD', 'درهم مغربي', 'Moroccan Dirham', 'د.م', 'MAD', 0),
+      ('MRU', 'أوقية موريتانية', 'Mauritanian Ouguiya', 'أ.م', 'MRU', 0),
       ('OMR', 'ريال عماني', 'Omani Rial', 'ر.ع', 'OMR', 0),
+      ('QAR', 'ريال قطري', 'Qatari Riyal', 'ر.ق', 'QAR', 0),
+      ('SAR', 'ريال سعودي', 'Saudi Riyal', 'ر.س', 'SAR', 0),
+      ('SDG', 'جنيه سوداني', 'Sudanese Pound', 'ج.س', 'SDG', 0),
+      ('SOS', 'شلن صومالي', 'Somali Shilling', 'ش.ص', 'SOS', 0),
+      ('SYP', 'ليرة سورية', 'Syrian Pound', 'ل.س', 'SYP', 0),
+      ('TND', 'دينار تونسي', 'Tunisian Dinar', 'د.ت', 'TND', 0),
       ('USD', 'دولار أمريكي', 'US Dollar', '$', '$', 0),
-      ('EUR', 'يورو', 'Euro', '€', '€', 0)
+      ('YER', 'ريال يمني', 'Yemeni Rial', 'ر.ي', 'YER', 0)
   `);
 }
 
 async function reseedCurrencies() {
   // Upsert all currencies: insert if missing, update symbol_en if exists
   const currencies = [
-    { code: 'AED', name_ar: 'درهم إماراتي', name_en: 'UAE Dirham', symbol: 'د.إ', symbol_en: 'AED', is_default: 0 },
-    { code: 'SAR', name_ar: 'ريال سعودي', name_en: 'Saudi Riyal', symbol: 'ر.س', symbol_en: 'SAR', is_default: 0 },
-    { code: 'EGP', name_ar: 'جنيه مصري', name_en: 'Egyptian Pound', symbol: 'ج.م', symbol_en: 'EGP', is_default: 1 },
-    { code: 'QAR', name_ar: 'ريال قطري', name_en: 'Qatari Riyal', symbol: 'ر.ق', symbol_en: 'QAR', is_default: 0 },
-    { code: 'KWD', name_ar: 'دينار كويتي', name_en: 'Kuwaiti Dinar', symbol: 'د.ك', symbol_en: 'KWD', is_default: 0 },
-    { code: 'BHD', name_ar: 'دينار بحريني', name_en: 'Bahraini Dinar', symbol: 'د.ب', symbol_en: 'BHD', is_default: 0 },
-    { code: 'OMR', name_ar: 'ريال عماني', name_en: 'Omani Rial', symbol: 'ر.ع', symbol_en: 'OMR', is_default: 0 },
-    { code: 'USD', name_ar: 'دولار أمريكي', name_en: 'US Dollar', symbol: '$', symbol_en: '$', is_default: 0 },
+    {
+      code: 'AED',
+      name_ar: 'درهم إماراتي',
+      name_en: 'UAE Dirham',
+      symbol: 'د.إ',
+      symbol_en: 'AED',
+      is_default: 0,
+    },
+    {
+      code: 'BHD',
+      name_ar: 'دينار بحريني',
+      name_en: 'Bahraini Dinar',
+      symbol: 'د.ب',
+      symbol_en: 'BHD',
+      is_default: 0,
+    },
+    {
+      code: 'DJF',
+      name_ar: 'فرنك جيبوتي',
+      name_en: 'Djiboutian Franc',
+      symbol: 'ف.ج',
+      symbol_en: 'DJF',
+      is_default: 0,
+    },
+    {
+      code: 'DZD',
+      name_ar: 'دينار جزائري',
+      name_en: 'Algerian Dinar',
+      symbol: 'د.ج',
+      symbol_en: 'DZD',
+      is_default: 0,
+    },
+    {
+      code: 'EGP',
+      name_ar: 'جنيه مصري',
+      name_en: 'Egyptian Pound',
+      symbol: 'ج.م',
+      symbol_en: 'EGP',
+      is_default: 1,
+    },
     { code: 'EUR', name_ar: 'يورو', name_en: 'Euro', symbol: '€', symbol_en: '€', is_default: 0 },
+    {
+      code: 'IQD',
+      name_ar: 'دينار عراقي',
+      name_en: 'Iraqi Dinar',
+      symbol: 'د.ع',
+      symbol_en: 'IQD',
+      is_default: 0,
+    },
+    {
+      code: 'JOD',
+      name_ar: 'دينار أردني',
+      name_en: 'Jordanian Dinar',
+      symbol: 'د.أ',
+      symbol_en: 'JOD',
+      is_default: 0,
+    },
+    {
+      code: 'KMF',
+      name_ar: 'فرنك قمري',
+      name_en: 'Comorian Franc',
+      symbol: 'ف.ق',
+      symbol_en: 'KMF',
+      is_default: 0,
+    },
+    {
+      code: 'KWD',
+      name_ar: 'دينار كويتي',
+      name_en: 'Kuwaiti Dinar',
+      symbol: 'د.ك',
+      symbol_en: 'KWD',
+      is_default: 0,
+    },
+    {
+      code: 'LBP',
+      name_ar: 'ليرة لبنانية',
+      name_en: 'Lebanese Pound',
+      symbol: 'ل.ل',
+      symbol_en: 'LBP',
+      is_default: 0,
+    },
+    {
+      code: 'LYD',
+      name_ar: 'دينار ليبي',
+      name_en: 'Libyan Dinar',
+      symbol: 'د.ل',
+      symbol_en: 'LYD',
+      is_default: 0,
+    },
+    {
+      code: 'MAD',
+      name_ar: 'درهم مغربي',
+      name_en: 'Moroccan Dirham',
+      symbol: 'د.م',
+      symbol_en: 'MAD',
+      is_default: 0,
+    },
+    {
+      code: 'MRU',
+      name_ar: 'أوقية موريتانية',
+      name_en: 'Mauritanian Ouguiya',
+      symbol: 'أ.م',
+      symbol_en: 'MRU',
+      is_default: 0,
+    },
+    {
+      code: 'OMR',
+      name_ar: 'ريال عماني',
+      name_en: 'Omani Rial',
+      symbol: 'ر.ع',
+      symbol_en: 'OMR',
+      is_default: 0,
+    },
+    {
+      code: 'QAR',
+      name_ar: 'ريال قطري',
+      name_en: 'Qatari Riyal',
+      symbol: 'ر.ق',
+      symbol_en: 'QAR',
+      is_default: 0,
+    },
+    {
+      code: 'SAR',
+      name_ar: 'ريال سعودي',
+      name_en: 'Saudi Riyal',
+      symbol: 'ر.س',
+      symbol_en: 'SAR',
+      is_default: 0,
+    },
+    {
+      code: 'SDG',
+      name_ar: 'جنيه سوداني',
+      name_en: 'Sudanese Pound',
+      symbol: 'ج.س',
+      symbol_en: 'SDG',
+      is_default: 0,
+    },
+    {
+      code: 'SOS',
+      name_ar: 'شلن صومالي',
+      name_en: 'Somali Shilling',
+      symbol: 'ش.ص',
+      symbol_en: 'SOS',
+      is_default: 0,
+    },
+    {
+      code: 'SYP',
+      name_ar: 'ليرة سورية',
+      name_en: 'Syrian Pound',
+      symbol: 'ل.س',
+      symbol_en: 'SYP',
+      is_default: 0,
+    },
+    {
+      code: 'TND',
+      name_ar: 'دينار تونسي',
+      name_en: 'Tunisian Dinar',
+      symbol: 'د.ت',
+      symbol_en: 'TND',
+      is_default: 0,
+    },
+    {
+      code: 'USD',
+      name_ar: 'دولار أمريكي',
+      name_en: 'US Dollar',
+      symbol: '$',
+      symbol_en: '$',
+      is_default: 0,
+    },
+    {
+      code: 'YER',
+      name_ar: 'ريال يمني',
+      name_en: 'Yemeni Rial',
+      symbol: 'ر.ي',
+      symbol_en: 'YER',
+      is_default: 0,
+    },
   ];
 
   for (const c of currencies) {
     const existing = await db!.getFirstAsync<{ id: number }>(
-      'SELECT id FROM currencies WHERE code = ?', c.code,
+      'SELECT id FROM currencies WHERE code = ?',
+      c.code,
     );
     if (existing) {
       await db!.runAsync(
         `UPDATE currencies SET symbol_en = ?, name_ar = ?, name_en = ?, symbol = ? WHERE code = ?`,
-        c.symbol_en, c.name_ar, c.name_en, c.symbol, c.code,
+        c.symbol_en,
+        c.name_ar,
+        c.name_en,
+        c.symbol,
+        c.code,
       );
     } else {
       await db!.runAsync(
         `INSERT INTO currencies (code, name_ar, name_en, symbol, symbol_en, is_default) VALUES (?, ?, ?, ?, ?, ?)`,
-        c.code, c.name_ar, c.name_en, c.symbol, c.symbol_en, c.is_default,
+        c.code,
+        c.name_ar,
+        c.name_en,
+        c.symbol,
+        c.symbol_en,
+        c.is_default,
       );
     }
   }
@@ -318,7 +606,9 @@ async function seedCategories() {
 }
 
 async function seedWordEquivalences() {
-  const count = await db!.getFirstAsync<{ c: number }>('SELECT COUNT(*) as c FROM word_equivalences');
+  const count = await db!.getFirstAsync<{ c: number }>(
+    'SELECT COUNT(*) as c FROM word_equivalences',
+  );
   if (count!.c > 0) return;
 
   const equivalences = [
@@ -466,9 +756,7 @@ async function migrateExpensesData() {
     const subCategoryId = categoryId
       ? await resolveSubCategoryId(row.sub_category, categoryId, subCategoryCache)
       : null;
-    const merchantId = row.merchant
-      ? await resolveMerchantId(row.merchant, merchantCache)
-      : null;
+    const merchantId = row.merchant ? await resolveMerchantId(row.merchant, merchantCache) : null;
     const itemId = row.item
       ? await resolveItemId(row.item, categoryId, subCategoryId, merchantId, itemCache)
       : null;
@@ -494,22 +782,42 @@ async function migrateExpensesData() {
 
 function normalizeCurrency(currency: string): string {
   const c = currency?.trim().toLowerCase() || '';
-  if (c === 'egp' || c === 'جنيه' || c === 'جنيه مصري' || c === 'ج.م' || c === '') return 'جنيه مصري';
+  if (c === 'egp' || c === 'جنيه' || c === 'جنيه مصري' || c === 'ج.م' || c === '')
+    return 'جنيه مصري';
   if (c === 'usd' || c === 'دولار' || c === 'دولار أمريكي' || c === '$') return 'دولار أمريكي';
   if (c === 'sar' || c === 'ريال' || c === 'ريال سعودي' || c === 'ر.س') return 'ريال سعودي';
   if (c === 'eur' || c === 'يورو' || c === '€') return 'يورو';
   if (c === 'aed' || c === 'درهم' || c === 'درهم إماراتي' || c === 'د.إ') return 'درهم إماراتي';
-  if (c === 'qar' || c === 'ريال قطري' || c === 'ر.ق') return 'ريال قطري';
-  if (c === 'kwd' || c === 'دينار' || c === 'دينار كويتي' || c === 'د.ك') return 'دينار كويتي';
   if (c === 'bhd' || c === 'دينار بحريني' || c === 'د.ب') return 'دينار بحريني';
+  if (c === 'djf' || c === 'فرنك جيبوتي' || c === 'ف.ج') return 'فرنك جيبوتي';
+  if (c === 'dzd' || c === 'دينار جزائري' || c === 'د.ج') return 'دينار جزائري';
+  if (c === 'iqd' || c === 'دينار عراقي' || c === 'د.ع') return 'دينار عراقي';
+  if (c === 'jod' || c === 'دينار أردني' || c === 'د.أ') return 'دينار أردني';
+  if (c === 'kmf' || c === 'فرنك قمري' || c === 'ف.ق') return 'فرنك قمري';
+  if (c === 'kwd' || c === 'دينار' || c === 'دينار كويتي' || c === 'د.ك') return 'دينار كويتي';
+  if (c === 'lbp' || c === 'ليرة' || c === 'ليرة لبنانية' || c === 'ل.ل') return 'ليرة لبنانية';
+  if (c === 'lyd' || c === 'دينار ليبي' || c === 'د.ل') return 'دينار ليبي';
+  if (c === 'mad' || c === 'درهم مغربي' || c === 'د.م') return 'درهم مغربي';
+  if (c === 'mru' || c === 'أوقية' || c === 'أوقية موريتانية' || c === 'أ.م')
+    return 'أوقية موريتانية';
   if (c === 'omr' || c === 'ريال عماني' || c === 'ر.ع') return 'ريال عماني';
+  if (c === 'qar' || c === 'ريال قطري' || c === 'ر.ق') return 'ريال قطري';
+  if (c === 'sdg' || c === 'جنيه سوداني' || c === 'ج.س') return 'جنيه سوداني';
+  if (c === 'sos' || c === 'شلن' || c === 'شلن صومالي' || c === 'ش.ص') return 'شلن صومالي';
+  if (c === 'syp' || c === 'ليرة سورية' || c === 'ل.س') return 'ليرة سورية';
+  if (c === 'tnd' || c === 'دينار تونسي' || c === 'د.ت') return 'دينار تونسي';
+  if (c === 'yer' || c === 'ريال يمني' || c === 'ر.ي') return 'ريال يمني';
   return c;
 }
 
 async function buildCurrencyMap(): Promise<Map<string, number>> {
-  const currencies = await db!.getAllAsync<{ id: number; name_ar: string; name_en: string; code: string; symbol_en: string }>(
-    'SELECT id, name_ar, name_en, code, symbol_en FROM currencies',
-  );
+  const currencies = await db!.getAllAsync<{
+    id: number;
+    name_ar: string;
+    name_en: string;
+    code: string;
+    symbol_en: string;
+  }>('SELECT id, name_ar, name_en, code, symbol_en FROM currencies');
   const map = new Map<string, number>();
   for (const c of currencies) {
     map.set(c.name_ar, c.id);
@@ -524,7 +832,10 @@ async function buildCurrencyMap(): Promise<Map<string, number>> {
   return map;
 }
 
-async function resolveCategoryId(name: string | null, cache: Map<string, number>): Promise<number | null> {
+async function resolveCategoryId(
+  name: string | null,
+  cache: Map<string, number>,
+): Promise<number | null> {
   if (!name || !name.trim()) return null;
   const key = name.trim();
   if (cache.has(key)) return cache.get(key)!;
@@ -545,7 +856,11 @@ async function resolveCategoryId(name: string | null, cache: Map<string, number>
   return null;
 }
 
-async function resolveSubCategoryId(name: string | null, categoryId: number, cache: Map<string, number>): Promise<number | null> {
+async function resolveSubCategoryId(
+  name: string | null,
+  categoryId: number,
+  cache: Map<string, number>,
+): Promise<number | null> {
   if (!name || !name.trim()) return null;
   const key = `${name.trim()}:${categoryId}`;
   if (cache.has(key)) return cache.get(key)!;
@@ -636,7 +951,9 @@ export async function seedIfEmpty(): Promise<void> {
   if (catCount!.c === 0) {
     await seedCategories();
   }
-  const weCount = await d.getFirstAsync<{ c: number }>('SELECT COUNT(*) as c FROM word_equivalences');
+  const weCount = await d.getFirstAsync<{ c: number }>(
+    'SELECT COUNT(*) as c FROM word_equivalences',
+  );
   if (weCount!.c === 0) {
     await seedWordEquivalences();
   }
@@ -669,6 +986,7 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
       )
     `);
 
+    await addColumnIfNotExists(database, 'profiles', 'user_type', "TEXT NOT NULL DEFAULT 'user'");
     await addColumnIfNotExists(database, 'profiles', 'gender', "TEXT DEFAULT ''");
     await addColumnIfNotExists(database, 'profiles', 'location', "TEXT DEFAULT ''");
     await addColumnIfNotExists(database, 'profiles', 'age', 'INTEGER DEFAULT 0');
